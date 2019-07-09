@@ -59,7 +59,7 @@ func (client *Client) NewRequestWithBody(method string, path string, data interf
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", "text/xml;charset=UTF-8")
+	req.Header.Add("Content-Type", "application/xml;charset=UTF-8")
 	return req, nil
 }
 

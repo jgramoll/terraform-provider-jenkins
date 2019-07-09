@@ -1,7 +1,10 @@
 package client
 
+import "encoding/xml"
+
 // JobConfig
 type JobConfig struct {
+	XMLName xml.Name `xml:"flow-definition"`
 	// actions
 	Description string `xml:"description"`
 	// keepDependencies

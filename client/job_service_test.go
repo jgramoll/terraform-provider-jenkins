@@ -6,6 +6,8 @@ import (
 
 var jobService *JobService
 
+const folder string = "job/Bridge%20Career"
+
 func init() {
 	// rand.Seed(time.Now().UTC().UnixNano())
 	jobService = &JobService{newTestClient()}
@@ -23,7 +25,7 @@ func TestGetJobs(t *testing.T) {
 }
 
 func TestGetJob(t *testing.T) {
-	jobConfig, err := jobService.GetJob("Bridge%20Career/job/migrations")
+	jobConfig, err := jobService.GetJob(folder, "migrations")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,8 +35,28 @@ func TestGetJob(t *testing.T) {
 	}
 }
 
+func TestCreateJob(t *testing.T) {
+	name := "my_test_job"
+	config := JobConfig{}
+	err := jobService.CreateJob("job/Bridge%20Career/", name, &config)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	config.Description = "my new desc 3"
+	err = jobService.UpdateJob(folder, name, &config)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = jobService.DeleteJob("job/Bridge%20Career/", name)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestGetJobConfig(t *testing.T) {
-	jobConfig, err := jobService.GetJobConfig("Bridge%20Career/job/migrations")
+	jobConfig, err := jobService.GetJobConfig(folder, "migrations")
 	if err != nil {
 		t.Fatal(err)
 	}
