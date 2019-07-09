@@ -2,8 +2,7 @@ package client
 
 import "encoding/xml"
 
-// JobConfig
-type JobConfig struct {
+type jobConfig struct {
 	XMLName xml.Name `xml:"flow-definition"`
 	// actions
 	Description string `xml:"description"`
@@ -14,7 +13,6 @@ type JobConfig struct {
 	Disabled   bool           `xml:"disabled"`
 }
 
-// NewJobConfig return JobConfig object with default values
-func NewJobConfig() *JobConfig {
-	return &JobConfig{}
+func JobConfigFromJob(job *Job) *jobConfig {
+	return &jobConfig{}
 }
