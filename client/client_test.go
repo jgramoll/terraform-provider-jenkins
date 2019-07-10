@@ -1,11 +1,9 @@
 package client
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/user"
 	"testing"
 )
 
@@ -51,14 +49,13 @@ func TestClientNewRequestWithBody(t *testing.T) {
 }
 
 func newTestClient() *Client {
-	usr, err := user.Current()
-	if err != nil {
-		log.Println("[Error] unable to get current user: ", err)
-	}
-
 	address := os.Getenv("JENKINS_ADDRESS")
 	if address == "" {
 		log.Println("[Error] JENKINS_ADDRESS not defined")
+	}
+	username := os.Getenv("JENKINS_USERNAME")
+	if username == "" {
+		log.Println("[Error] JENKINS_USERNAME not defined")
 	}
 	token := os.Getenv("JENKINS_TOKEN")
 	if token == "" {
@@ -67,7 +64,7 @@ func newTestClient() *Client {
 
 	c := Config{
 		Address:  address,
-		Username: fmt.Sprintf("%s", usr.Username),
+		Username: username,
 		Token:    token,
 	}
 	return NewClient(c)

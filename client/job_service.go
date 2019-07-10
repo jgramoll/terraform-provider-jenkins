@@ -11,7 +11,7 @@ type JobService struct {
 }
 
 type JobsResponse struct {
-	Jobs *[]*Job `xml:"job"`
+	Jobs *[]*jobDetails `xml:"job"`
 }
 
 func jobNameToUrl(jobName string) string {
@@ -20,8 +20,8 @@ func jobNameToUrl(jobName string) string {
 }
 
 // GetJobs get all jobs
-func (service *JobService) GetJobs() (*[]*Job, error) {
-	path := "/api/xml?tree=jobs[name]"
+func (service *JobService) GetJobs(folder string) (*[]*Job, error) {
+	path := fmt.Sprintf("/%s/api/xml?tree=jobs[name,fullName,description]", jobNameToUrl(folder))
 	req, err := service.NewRequest("GET", path)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,12 @@ func (service *JobService) GetJobs() (*[]*Job, error) {
 		return nil, respErr
 	}
 
-	return response.Jobs, nil
+	var jobs []*Job
+	for _, job := range *response.Jobs {
+		jobs = append(jobs, newJobFromConfigAndDetails(nil, job))
+	}
+
+	return &jobs, nil
 }
 
 func (service *JobService) GetJob(jobFullName string) (*Job, error) {

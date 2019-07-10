@@ -12,10 +12,10 @@ func TestJobDetailNameOnly(t *testing.T) {
 	}
 }
 
-func TestJobDetailFolder(t *testing.T) {
-	job := Job{Name: "fee fi/fo/fum"}
-	expected := "fee fi/fo"
-	if job.Folder() != expected {
-		t.Fatalf("job folder should be %v, was %v", expected, job.Folder())
-	}
-}
+// func TestJobDetailFolder(t *testing.T) {
+// 	job := Job{Name: "fee fi/fo/fum"}
+// 	expected := "fee fi/fo"
+// 	if job.Folder() != expected {
+// 		t.Fatalf("job folder should be %v, was %v", expected, job.Folder())
+// 	}
+// }

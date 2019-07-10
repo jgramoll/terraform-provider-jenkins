@@ -112,7 +112,7 @@ func decodeResponse(r *http.Response, v interface{}) error {
 
 	bodyBytes, _ := ioutil.ReadAll(r.Body)
 	bodyString := string(bodyBytes)
-	// log.Println("[DEBUG] Got response body", bodyString)
+	log.Println("[DEBUG] Got response body", bodyString)
 
 	// TODO hack around xml1.1 and xm1l.0
 	// https://github.com/golang/go/issues/25755

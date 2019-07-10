@@ -12,8 +12,7 @@ import (
 
 func TestAccJobBasic(t *testing.T) {
 	var jobRef client.Job
-	folder := "job/Bridge%20Career"
-	name := fmt.Sprintf("tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	name := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	newName := name + "-changed"
 	resourceName := "jenkins_job.test"
 
@@ -23,31 +22,28 @@ func TestAccJobBasic(t *testing.T) {
 		CheckDestroy: testAccCheckJobDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccJobConfigBasic(folder, name),
+				Config: testAccJobConfigBasic(name),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(resourceName, &jobRef),
 					resource.TestCheckResourceAttr(resourceName, "name", name),
-					resource.TestCheckResourceAttr(resourceName, "folder", folder),
 				),
 			},
 			{
-				Config: testAccJobConfigBasic(folder, newName),
+				Config: testAccJobConfigBasic(newName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(resourceName, &jobRef),
 					resource.TestCheckResourceAttr(resourceName, "name", newName),
-					resource.TestCheckResourceAttr(resourceName, "folder", folder),
 				),
 			},
 		},
 	})
 }
 
-func testAccJobConfigBasic(folder string, name string) string {
+func testAccJobConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "jenkins_job" "test" {
-  folder = "%s"
   name   = "%s"
-}`, folder, name)
+}`, name)
 }
 
 func testAccCheckJobExists(resourceName string, j *client.Job) resource.TestCheckFunc {

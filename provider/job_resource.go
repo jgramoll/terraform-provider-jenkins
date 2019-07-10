@@ -27,6 +27,7 @@ func jobResource() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Name of the job, including folder heirarchy. E.g. Foo/Bar/Baz",
 				Required:    true,
+				ForceNew:    true,
 			},
 			"disabled": &schema.Schema{
 				Type:        schema.TypeBool,
@@ -52,6 +53,7 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	d.SetId(j.Name)
 	return resourceJobRead(d, m)
 }
 

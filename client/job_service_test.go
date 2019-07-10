@@ -1,6 +1,7 @@
 package client
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -11,7 +12,7 @@ func init() {
 }
 
 func TestGetJobs(t *testing.T) {
-	jobs, err := jobService.GetJobs()
+	jobs, err := jobService.GetJobs("Bridge Career")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,5 +69,18 @@ func TestCreateJob(t *testing.T) {
 	err = jobService.DeleteJob(jobName)
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestCleanup(t *testing.T) {
+	jobs, err := jobService.GetJobs("Bridge Career")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, job := range *jobs {
+		if strings.Contains(job.Name, "tf-acc") {
+			jobService.DeleteJob(job.Name)
+		}
 	}
 }

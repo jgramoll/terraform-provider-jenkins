@@ -27,9 +27,16 @@ func (job *Job) NameOnly() string {
 }
 
 func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
-	return &Job{
-		Name:        details.FullName,
-		Disabled:    config.Disabled,
-		Description: details.Description,
+	job := Job{}
+
+	if details != nil {
+		job.Name = details.FullName
+		job.Description = details.Description
 	}
+
+	if config != nil {
+		job.Disabled = config.Disabled
+	}
+
+	return &job
 }

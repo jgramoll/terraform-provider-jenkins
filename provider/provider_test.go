@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform/config"
@@ -30,8 +29,8 @@ func TestProvider(t *testing.T) {
 func TestProviderConfigure(t *testing.T) {
 	raw := map[string]interface{}{
 		"address":   "#address",
-		"username":  os.Getenv("JENKINS_USERNAME"),
-		"token":  os.Getenv("JENKINS_TOKEN"),
+		"username":  "#username",
+		"token": "#token",
 	}
 	rawConfig, configErr := config.NewRawConfig(raw)
 	if configErr != nil {
