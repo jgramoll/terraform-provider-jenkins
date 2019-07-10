@@ -39,7 +39,7 @@ if [ -z ${url} ]; then
   exit 1
 fi
 
-dest_file="$name_$version"
+dest_file="${name}_$version"
 curl $url -L -o $dest_file
 chmod +x $dest_file
 
