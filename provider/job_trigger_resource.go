@@ -24,8 +24,10 @@ func resourceJobTriggerImporter(d *schema.ResourceData, meta interface{}) ([]*sc
 }
 
 func resourceJobTriggerCreate(d *schema.ResourceData, m interface{}, createJobTrigger func() jobTrigger) error {
-	jobLock.Lock()
-	defer jobLock.Unlock()
+
+	// jobName := d.Get("job").(string)
+	// jobLock.Lock(jobName)
+	// defer jobLock.Unlock(jobName)
 
 	s := createJobTrigger()
 	configRaw := d.Get("").(map[string]interface{})
@@ -63,6 +65,10 @@ func resourceJobTriggerCreate(d *schema.ResourceData, m interface{}, createJobTr
 }
 
 func resourceJobTriggerRead(d *schema.ResourceData, m interface{}, createJobTrigger func() jobTrigger) error {
+	// jobName := d.Get("job").(string)
+	// jobLock.RLock(jobName)
+	// defer jobLock.RUnlock(jobName)
+
 	// pipelineID := d.Get(PipelineKey).(string)
 	// pipelineService := m.(*Services).PipelineService
 	// pipeline, err := pipelineService.GetPipelineByID(pipelineID)
@@ -89,8 +95,10 @@ func resourceJobTriggerRead(d *schema.ResourceData, m interface{}, createJobTrig
 }
 
 func resourceJobTriggerUpdate(d *schema.ResourceData, m interface{}, createJobTrigger func() jobTrigger) error {
-	jobLock.Lock()
-	defer jobLock.Unlock()
+
+	// jobName := d.Get("job").(string)
+	// jobLock.Lock(jobName)
+	// defer jobLock.Unlock(jobName)
 
 	// s := createStage()
 	// configRaw := d.Get("").(map[string]interface{})
@@ -125,8 +133,10 @@ func resourceJobTriggerUpdate(d *schema.ResourceData, m interface{}, createJobTr
 }
 
 func resourceJobTriggerDelete(d *schema.ResourceData, m interface{}, createJobTrigger func() jobTrigger) error {
-	jobLock.Lock()
-	defer jobLock.Unlock()
+
+	// jobName := d.Get("job").(string)
+	// jobLock.Lock(jobName)
+	// defer jobLock.Unlock(jobName)
 
 	// TODO duplicated code from resourcePipelineStageUpdate
 	// s := createStage()

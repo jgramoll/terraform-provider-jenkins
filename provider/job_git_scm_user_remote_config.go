@@ -1,13 +1,11 @@
 package provider
 
 import (
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
 type jobGitScmUserRemoteConfig struct {
-	RefId         string `mapstructure:"ref_id"`
 	Job           string `mapstructure:"job"`
 	Refspec       string `mapstructure:"refspec"`
 	Url           string `mapstructure:"url"`
@@ -19,9 +17,9 @@ func newJobGitScmUserRemoteConfig() *jobGitScmUserRemoteConfig {
 }
 
 func (config *jobGitScmUserRemoteConfig) toClientConfig() *client.GitUserRemoteConfig {
-	return &client.GitUserRemoteConfig {
-		Refspec: config.Refspec,
-		Url: config.Url,
+	return &client.GitUserRemoteConfig{
+		Refspec:       config.Refspec,
+		Url:           config.Url,
 		CredentialsId: config.CredentialsId,
 	}
 }

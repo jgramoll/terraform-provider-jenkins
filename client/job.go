@@ -10,18 +10,20 @@ var ErrJobPropertyNotFound = errors.New("Could not find job property")
 
 // Job
 type Job struct {
-	Id          string
-	Name        string
-	Disabled    bool
-	Description string
-	Properties  *JobProperties
-	Definition  JobDefinition
+	Id               string
+	Name             string
+	Disabled         bool
+	Description      string
+	KeepDependencies bool
+	Properties       *JobProperties
+	Definition       JobDefinition
 }
 
 // NewJob return Job object with default values
 func NewJob() *Job {
 	return &Job{
-		Properties: NewJobProperties(),
+		KeepDependencies: false,
+		Properties:       NewJobProperties(),
 	}
 }
 

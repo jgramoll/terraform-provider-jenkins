@@ -1,50 +1,33 @@
 package provider
 
-// type Comparable struct {
-// 	CompareType string `mapstructure:"compare_type"`
-// 	Pattern     string `mapstructure:"pattern"`
-// }
+type skipVote struct {
+	OnSuccessful bool `xml:"on_successful"`
+	OnFailed bool `xml:"on_failed"`
+	OnUnstable bool `xml:"on_unstable"`
+	OnNotBuilt bool `xml:"on_not_built"`
+}
 
-// // Job in jenkins
-// type jobGerritTrigger struct {
-// 	Project *Comparable `mapstructure:"project"`
-// 	Branch  *Comparable `mapstructure:"branch"`
-// 	// Disabled bool   `mapstructure:"disabled"`
-// }
+func newSkipVote() *skipVote {
+	return &skipVote{}
+}
 
-// func newJobGerritTrigger() *jobGerritTrigger {
-// 	return &jobGerritTrigger{}
-// }
+type jobGerritTrigger struct {
+	Property string `xml:"property"`
+	ServerName string `xml:"server_name"`
+	SilentMode bool `xml:"silent_mode"`
+	SilentStartMode bool `xml:"silent_start_mode"`
+	EscapeQuotes bool `xml:"escape_quotes"`
+	NameAndEmailParameterMode string `xml:"name_and_email_parameter_mode"`
+	CommitMessageParameterMode string `xml:"commit_message_parameter_mode"`
+	ChangeSubjectParameterMode string `xml:"change_subject_parameter_mode"`
+	CommentTextParameterMode string `xml:"comment_text_parameter_mode"`
 
-// // func (j *job) toClientJob() *client.Job {
-// // 	return &client.Job{
-// // 		Name:     j.Name,
-// // 		Disabled: j.Disabled,
-// // 	}
-// // }
+	SkipVote *skipVote `xml:"skip_vote"`
+}
 
-// // func JobfromClientJob(j *client.Job) *job {
-// // 	return &job{
-// // 		Name:     j.Name,
-// // 		Disabled: j.Disabled,
-// // 	}
-// // }
-
-// // func (j *job) setResourceData(d *schema.ResourceData) error {
-// // 	d.SetId(j.Name)
-// // 	err := d.Set("name", j.Name)
-// // 	if err != nil {
-// // 		return err
-// // 	}
-// // 	err = d.Set("disabled", j.Disabled)
-// // 	if err != nil {
-// // 		return err
-// // 	}
-// // 	return nil
-// // }
-
-// // // JobFromResourceData get job from resource data
-// // func JobFromResourceData(job *client.Job, d *schema.ResourceData) {
-// // 	job.Name = d.Get("name").(string)
-// // 	job.Disabled = d.Get("disabled").(bool)
-// // }
+func newJobGerritTrigger() *jobGerritTrigger {
+	return &jobGerritTrigger{
+		EscapeQuotes: true,
+		SkipVote: newSkipVote(),
+	}
+}

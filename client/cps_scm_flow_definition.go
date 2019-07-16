@@ -14,9 +14,3 @@ func NewCpsScmFlowDefinition() *CpsScmFlowDefinition {
 		Class: "org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition",
 	}
 }
-
-// func (definition *CpsScmFlowDefinition) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-// 	start.Name.Local = "asdf"
-// 	e.
-// 	return nil
-// }

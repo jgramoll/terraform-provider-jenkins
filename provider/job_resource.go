@@ -3,14 +3,14 @@ package provider
 import (
 	"errors"
 	"log"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/jgramoll/terraform-provider-jenkins/multilock"
 	"github.com/mitchellh/mapstructure"
 )
 
-var jobLock sync.Mutex
+var jobLock = multilock.NewBasicMultiLock()
 
 // ErrMissingJobName missing job name
 var ErrMissingJobName = errors.New("job name must be provided")
@@ -53,7 +53,7 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	j.RefId = id.String()
+	// j.RefId = id.String()
 
 	log.Println("[DEBUG] Creating job:", j.Name)
 	jobService := m.(*Services).JobService
@@ -62,13 +62,17 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.SetId(j.RefId)
+	d.SetId(id.String())
 	return resourceJobRead(d, m)
 }
 
 func resourceJobRead(d *schema.ResourceData, m interface{}) error {
+	jobName := d.Get("name").(string)
+
 	jobService := m.(*Services).JobService
-	j, err := jobService.GetJob(d.Get("name").(string))
+	jobLock.RLock(jobName)
+	j, err := jobService.GetJob(jobName)
+	jobLock.RUnlock(jobName)
 	if err != nil {
 		log.Println("[WARN] No Job found:", d.Id())
 		d.SetId("")
@@ -80,17 +84,20 @@ func resourceJobRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
-	jobLock.Lock()
-	defer jobLock.Unlock()
+
+	jobName := d.Get("name").(string)
 
 	jobService := m.(*Services).JobService
-	j, err := jobService.GetJob(d.Get("name").(string))
+	jobLock.Lock(jobName)
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
+		jobLock.Unlock(jobName)
 		return err
 	}
 	JobFromResourceData(j, d)
 
 	err = jobService.UpdateJob(j)
+	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
@@ -100,12 +107,13 @@ func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobDelete(d *schema.ResourceData, m interface{}) error {
-	jobLock.Lock()
-	defer jobLock.Unlock()
-
-	name := d.Id()
 	log.Println("[DEBUG] Deleting job:", d.Id())
 	d.SetId("")
 	jobService := m.(*Services).JobService
-	return jobService.DeleteJob(name)
+
+	jobName := d.Get("name").(string)
+	jobLock.Lock(jobName)
+	defer jobLock.Unlock(jobName)
+
+	return jobService.DeleteJob(jobName)
 }

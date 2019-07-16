@@ -23,8 +23,8 @@ type jobDetails struct {
 	// lastSuccessfulBuild
 	// lastUnstableBuild
 	// lastUnsuccessfulBuild
-	NextBuildNumber int64                 `xml:"nextBuildNumber"`
-	Property        *[]*JobConfigProperty `xml:"property"`
+	NextBuildNumber int64 `xml:"nextBuildNumber"`
+	// property
 	// queueItem
 	ConcurrentBuild bool `xml:"concurrentBuild"`
 	ResumeBlocked   bool `xml:"resumeBlocked"`

@@ -6,7 +6,6 @@ import (
 )
 
 type jobGitScm struct {
-	RefId         string `mapstructure:"ref_id"`
 	Job           string `mapstructure:"job"`
 	ConfigVersion string `mapstructure:"config_version"`
 	ScriptPath    string `mapstructure:"script_path"`
@@ -37,17 +36,18 @@ func (scm *jobGitScm) setResourceData(*schema.ResourceData) error {
 }
 
 func (scm *jobGitScm) setRefID(refId string) {
-	scm.RefId = refId
+	// scm.RefId = refId
 }
 
 func (scm *jobGitScm) getRefID() string {
-	return scm.RefId
+	return ""
+	// return scm.RefId
 }
 
 func (scm *jobGitScm) toClientDefinition() client.JobDefinition {
 	// TODO do we need to merge data?
 	definition := client.NewCpsScmFlowDefinition()
-	definition.Id = scm.RefId
+	// definition.Id = scm.RefId
 	definition.SCM = scm.toClientSCM()
 	definition.ScriptPath = scm.ScriptPath
 	definition.Lightweight = scm.Lightweight

@@ -14,7 +14,7 @@ func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 	var jobRef client.Job
 	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	refspec := "my-refspec"
-	// newRefspec := "new-my-refspec"
+	newRefspec := "new-my-refspec"
 	jobResourceName := "jenkins_job.test"
 	definition := "jenkins_job_git_scm_user_remote_config.test"
 
@@ -32,15 +32,15 @@ func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 				),
 			},
-			// {
-			// 	Config: testAccJobGitScmUserRemoteConfigConfigBasic(jobName, newRefspec),
-			// 	Check: resource.ComposeAggregateTestCheckFunc(
-			// 		resource.TestCheckResourceAttr(definition, "script_path", newRefspec),
-			// 		resource.TestCheckResourceAttr(definition, "url", "my-test-url"),
-			// 		resource.TestCheckResourceAttr(definition, "credentials_id", "my-test-creds"),
-			// 		testAccCheckJobExists(jobResourceName, &jobRef),
-			// 	),
-			// },
+			{
+				Config: testAccJobGitScmUserRemoteConfigConfigBasic(jobName, newRefspec),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(definition, "refspec", newRefspec),
+					resource.TestCheckResourceAttr(definition, "url", "my-test-url"),
+					resource.TestCheckResourceAttr(definition, "credentials_id", "my-test-creds"),
+					testAccCheckJobExists(jobResourceName, &jobRef),
+				),
+			},
 		},
 	})
 }
@@ -52,11 +52,11 @@ resource "jenkins_job" "test" {
 }
 
 resource "jenkins_job_git_scm" "test" {
-	job = "${jenkins_job.test.name}"
+	job = "${jenkins_job.test.id}"
 }
 
 resource "jenkins_job_git_scm_user_remote_config" "test" {
-	job = "${jenkins_job.test.name}"
+	job = "${jenkins_job.test.id}"
 	scm = "${jenkins_job_git_scm.test.id}"
 
   refspec        = "%s"

@@ -1,13 +1,18 @@
 package client
 
-type JobGerritTriggerProjects struct {
-	Items *[]*JobGerritTriggerProject `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritProject"`
-}
+import "encoding/xml"
 
 type JobGerritTriggerProject struct {
-	CompareType string                    `xml:"compareType"`
+	XMLName     xml.Name                  `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritProject"`
+	CompareType CompareType                    `xml:"compareType"`
 	Pattern     string                    `xml:"pattern"`
 	Branches    *JobGerritTriggerBranches `xml:"branches"`
 
 	DisableStrictForbiddenFileVerification bool `xml:"disableStrictForbiddenFileVerification"`
+}
+
+func NewJobGerritTriggerProject() *JobGerritTriggerProject {
+	return &JobGerritTriggerProject{
+		Branches: NewJobGerritTriggerBranches(),
+	}
 }

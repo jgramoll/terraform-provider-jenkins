@@ -12,7 +12,6 @@ import (
 
 // Job property
 type jobPipelineTriggersProperty struct {
-	RefId string `mapstructure:"ref_id"`
 }
 
 func newJobPipelineTriggersProperty() *jobPipelineTriggersProperty {
@@ -20,24 +19,24 @@ func newJobPipelineTriggersProperty() *jobPipelineTriggersProperty {
 }
 
 func (p *jobPipelineTriggersProperty) setRefID(id string) {
-	p.RefId = id
+	// p.RefId = id
 }
 
 func (p *jobPipelineTriggersProperty) getRefID() string {
-	return p.RefId
+	return ""
 }
 
 func (p *jobPipelineTriggersProperty) toClientProperty() client.JobProperty {
 	return &client.JobPipelineTriggersProperty{
-		Id: p.RefId,
+		// Id: p.RefId,
 	}
 }
 
 func (p *jobPipelineTriggersProperty) fromClientJobProperty(cs client.JobProperty) jobProperty {
-	clientProperty := cs.(*client.JobPipelineTriggersProperty)
+	// clientProperty := cs.(*client.JobPipelineTriggersProperty)
 	newProperty := newJobPipelineTriggersProperty()
 
-	newProperty.RefId = clientProperty.Id
+	// newProperty.RefId = clientProperty.Id
 
 	return newProperty
 }

@@ -9,9 +9,6 @@ import (
 )
 
 func resourceJobDefinitionCreate(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	jobLock.Lock()
-	defer jobLock.Unlock()
-
 	s := createJobDefinition()
 	configRaw := d.Get("").(map[string]interface{})
 	if err := mapstructure.Decode(configRaw, &s); err != nil {
@@ -25,14 +22,19 @@ func resourceJobDefinitionCreate(d *schema.ResourceData, m interface{}, createJo
 	}
 	definition.setRefID(id.String())
 
+	jobName := d.Get("job").(string)
+
 	jobService := m.(*Services).JobService
-	j, err := jobService.GetJob(d.Get("job").(string))
+	jobLock.Lock(jobName)
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
+		jobLock.Unlock(jobName)
 		return err
 	}
 
 	j.Definition = definition.toClientDefinition()
 	err = jobService.UpdateJob(j)
+	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
@@ -43,8 +45,7 @@ func resourceJobDefinitionCreate(d *schema.ResourceData, m interface{}, createJo
 }
 
 func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	jobLock.Lock()
-	defer jobLock.Unlock()
+	jobName := d.Get("job").(string)
 
 	s := createJobDefinition()
 	configRaw := d.Get("").(map[string]interface{})
@@ -55,13 +56,16 @@ func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJo
 	definition.setRefID(d.Id())
 
 	jobService := m.(*Services).JobService
+	jobLock.Lock(jobName)
 	j, err := jobService.GetJob(d.Get("job").(string))
 	if err != nil {
+		jobLock.Unlock(jobName)
 		return err
 	}
 
 	j.Definition = definition.toClientDefinition()
 	err = jobService.UpdateJob(j)
+	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
@@ -71,9 +75,12 @@ func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJo
 }
 
 func resourceJobDefinitionRead(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	jobId := d.Get("job").(string)
+	jobName := d.Get("job").(string)
+
 	jobService := m.(*Services).JobService
-	j, err := jobService.GetJob(jobId)
+	jobLock.RLock(jobName)
+	j, err := jobService.GetJob(jobName)
+	jobLock.RUnlock(jobName)
 	if err != nil {
 		log.Println("[WARN] No Job found:", err)
 		d.SetId("")
@@ -91,17 +98,20 @@ func resourceJobDefinitionRead(d *schema.ResourceData, m interface{}, createJobD
 }
 
 func resourceJobDefinitionDelete(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	jobLock.Lock()
-	defer jobLock.Unlock()
+
+	jobName := d.Get("job").(string)
 
 	jobService := m.(*Services).JobService
+	jobLock.Lock(jobName)
 	j, err := jobService.GetJob(d.Get("job").(string))
 	if err != nil {
+		jobLock.Unlock(jobName)
 		return err
 	}
 
 	j.Definition = nil
 	err = jobService.UpdateJob(j)
+	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}

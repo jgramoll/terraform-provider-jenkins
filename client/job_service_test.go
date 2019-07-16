@@ -41,12 +41,12 @@ func TestGetJob(t *testing.T) {
 	}
 	var pipelineProperties = *properties[0].(*JobPipelineTriggersProperty)
 	var triggers = *pipelineProperties.Triggers
-	if len(triggers) != 1 {
-		t.Fatalf("Job should have %v triggers, was %v", 1, len(triggers))
+	if len(*triggers.Items) != 1 {
+		t.Fatalf("Job should have %v triggers, was %v", 1, len(*triggers.Items))
 	}
-	gerritTrigger, ok := triggers[0].(*JobGerritTrigger)
+	gerritTrigger, ok := (*triggers.Items)[0].(*JobGerritTrigger)
 	if !ok {
-		t.Fatalf("Job should have %v, was %v", "client.JobGerritTrigger", reflect.TypeOf(triggers[0]))
+		t.Fatalf("Job should have %v, was %v", "client.JobGerritTrigger", reflect.TypeOf((*triggers.Items)[0]))
 	}
 	if gerritTrigger.ServerName != "gerrit.instructure.com" {
 		t.Fatalf("Job Trigger ServerName should be %v, was %v", "gerrit.instructure.com", gerritTrigger.ServerName)
@@ -56,8 +56,8 @@ func TestGetJob(t *testing.T) {
 		t.Fatalf("Job should have %v trigger gerrit projects, was %v", 1, len(projects))
 	}
 	gerritProject := projects[0]
-	if gerritProject.CompareType != "PLAIN" {
-		t.Fatalf("Job should have gerrit project compare type %v, was %v", "PLAIN", gerritProject.CompareType)
+	if gerritProject.CompareType != CompareTypePlain {
+		t.Fatalf("Job should have gerrit project compare type %v, was %v", CompareTypePlain, gerritProject.CompareType)
 	}
 	if gerritProject.Pattern != "bridge-career-infrastructure" {
 		t.Fatalf("Job should have gerrit project pattern %v, was %v", "bridge-career-infrastructure", gerritProject.Pattern)
@@ -67,8 +67,8 @@ func TestGetJob(t *testing.T) {
 		t.Fatalf("Job should have %v trigger gerrit branches, was %v", 1, len(branches))
 	}
 	branch := branches[0]
-	if branch.CompareType != "REG_EXP" {
-		t.Fatalf("Job should have gerrit branch compare type %v, was %v", "REG_EXP", branch.CompareType)
+	if branch.CompareType != CompareTypeRegExp {
+		t.Fatalf("Job should have gerrit branch compare type %v, was %v", CompareTypeRegExp, branch.CompareType)
 	}
 	if branch.Pattern != "^(?!refs/meta/config).*$" {
 		t.Fatalf("Job should have gerrit branch pattern %v, was %v", "^(?!refs/meta/config).*$", branch.Pattern)

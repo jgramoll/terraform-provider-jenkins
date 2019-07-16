@@ -11,3 +11,13 @@ type JobGerritTriggerPluginPatchsetCreatedEvent struct {
 	ExcludePrivateState  bool `xml:"excludePrivateState"`
 	ExcludeWipState      bool `xml:"excludeWipState"`
 }
+
+func NewJobGerritTriggerPluginPatchsetCreatedEvent() *JobGerritTriggerPluginPatchsetCreatedEvent {
+	return &JobGerritTriggerPluginPatchsetCreatedEvent{
+		ExcludeDrafts:        false,
+		ExcludeTrivialRebase: false,
+		ExcludeNoCodeChange:  false,
+		ExcludePrivateState:  false,
+		ExcludeWipState:      false,
+	}
+}

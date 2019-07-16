@@ -6,3 +6,12 @@ type JobGerritTriggerSkipVote struct {
 	OnUnstable   bool `xml:"onUnstable"`
 	OnNotBuilt   bool `xml:"onNotBuilt"`
 }
+
+func NewJobGerritTriggerSkipVote() *JobGerritTriggerSkipVote {
+	return &JobGerritTriggerSkipVote{
+		OnSuccessful: false,
+		OnFailed: false,
+		OnUnstable: false,
+		OnNotBuilt: false,
+	}
+}

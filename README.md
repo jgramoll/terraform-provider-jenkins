@@ -54,13 +54,13 @@ resource "jenkins_job_git_scm_user_remote_config" "premerge" {
 }
 
 resource "jenkins_job_git_scm_branch" "premerge" {
-  job = "${jenkins_job.premerge.id}"
+  scm = "${jenkins_job_git_scm.premerge.id}"
 
   name = "FETCH_HEAD"
 }
 
-resource "jenkins_job_git_scm_clean_before_checkout_extention" "premerge" {
-  job = "${jenkins_job.premerge.id}"
+resource "jenkins_job_git_scm_clean_before_checkout_extension" "premerge" {
+  scm = "${jenkins_job_git_scm.premerge.id}"
 }
 
 resource "jenkins_job_build_discard_property" "main" {
@@ -127,3 +127,10 @@ resource "jenkins_job_gerrit_branch" "main" {
 }
 
 ```
+
+## TODO
+
+1. rename job
+1. import resources
+1. use job name as part of id + guid
+1. fix reads to set state from remote

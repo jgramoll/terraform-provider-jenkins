@@ -1,10 +1,10 @@
 package client
 
-type JobGerritTriggerBranches struct {
-	Items *[]*JobGerritTriggerBranch `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.Branch"`
+type JobGerritTriggerBranch struct {
+	CompareType CompareType `xml:"compareType"`
+	Pattern     string `xml:"pattern"`
 }
 
-type JobGerritTriggerBranch struct {
-	CompareType string `xml:"compareType"`
-	Pattern     string `xml:"pattern"`
+func NewJobGerritTriggerBranch() *JobGerritTriggerBranch {
+	return &JobGerritTriggerBranch{}
 }

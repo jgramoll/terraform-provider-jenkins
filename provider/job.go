@@ -7,14 +7,14 @@ import (
 
 // Job in jenkins
 type job struct {
-	RefId    string `mapstructure:"ref_id"`
 	Name     string `mapstructure:"name"`
 	Disabled bool   `mapstructure:"disabled"`
 }
 
 func (j *job) toClientJob() *client.Job {
 	job := client.NewJob()
-	job.Id = j.RefId
+	// Todo pass in id / data
+	// job.Id = j.RefId
 	job.Name = j.Name
 	job.Disabled = j.Disabled
 	return job

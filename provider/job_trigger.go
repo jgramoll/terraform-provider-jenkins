@@ -13,6 +13,5 @@ type jobTrigger interface {
 // TODO why does this not like mapstructure
 // type baseStage struct {
 // 	Name  string           `mapstructure:"name"`
-// 	RefID string           `mapstructure:"ref_id"`
 // 	Type  client.StageType `mapstructure:"type"`
 // }
