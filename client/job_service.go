@@ -86,11 +86,15 @@ func (service *JobService) getJobConfig(jobFullName string) (*jobConfig, error) 
 }
 
 func (service *JobService) CreateJob(job *Job) error {
-	path := fmt.Sprintf("/%s/createItem?name=%s", jobNameToUrl(job.Folder()), job.NameOnly())
+	path := fmt.Sprintf("/%s/createItem", jobNameToUrl(job.Folder()))
 	req, err := service.NewRequestWithBody("POST", path, JobConfigFromJob(job))
 	if err != nil {
 		return err
 	}
+
+	q := req.URL.Query()
+	q.Add("name", job.NameOnly())
+	req.URL.RawQuery = q.Encode()
 
 	_, respErr := service.Do(req)
 	if respErr != nil {

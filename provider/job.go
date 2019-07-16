@@ -7,15 +7,17 @@ import (
 
 // Job in jenkins
 type job struct {
+	RefId    string `mapstructure:"ref_id"`
 	Name     string `mapstructure:"name"`
 	Disabled bool   `mapstructure:"disabled"`
 }
 
 func (j *job) toClientJob() *client.Job {
-	return &client.Job{
-		Name:     j.Name,
-		Disabled: j.Disabled,
-	}
+	job := client.NewJob()
+	job.Id = j.RefId
+	job.Name = j.Name
+	job.Disabled = j.Disabled
+	return job
 }
 
 func JobfromClientJob(j *client.Job) *job {
@@ -38,6 +40,7 @@ func (j *job) setResourceData(d *schema.ResourceData) error {
 	return nil
 }
 
+// TODO can we get rid of this?
 // JobFromResourceData get job from resource data
 func JobFromResourceData(job *client.Job, d *schema.ResourceData) {
 	job.Name = d.Get("name").(string)

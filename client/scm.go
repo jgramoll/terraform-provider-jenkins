@@ -1,11 +1,21 @@
 package client
 
-type SCM struct {
-	ConfigVersion     int64             `xml:"configVersion"`
-	UserRemoteConfigs UserRemoteConfigs `xml:"userRemoteConfigs"`
+type GitSCM struct {
+	ConfigVersion     string                `xml:"configVersion"`
+	UserRemoteConfigs *GitUserRemoteConfigs `xml:"userRemoteConfigs"`
 
-	Branches                          Branches `xml:"branches"`
-	DoGenerateSubmoduleConfigurations bool     `xml:"doGenerateSubmoduleConfigurations"`
+	Branches                          *Branches `xml:"branches"`
+	DoGenerateSubmoduleConfigurations bool      `xml:"doGenerateSubmoduleConfigurations"`
 	// submoduleCfg
-	//extensions
+	// extensions
+}
+
+func NewGitScm() *GitSCM {
+	return &GitSCM{
+		UserRemoteConfigs: NewGitUserRemoteConfigs(),
+	}
+}
+
+func (scm *GitSCM) AppendUserRemoteConfig(config *GitUserRemoteConfig) *GitUserRemoteConfigs {
+	return scm.UserRemoteConfigs.Append(config)
 }

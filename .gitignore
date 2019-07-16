@@ -1,3 +1,4 @@
 dist/
 vendor/
 .envrc
+terraform-provider-jenkins

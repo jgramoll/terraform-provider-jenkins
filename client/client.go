@@ -54,8 +54,9 @@ func (client *Client) NewRequestWithBody(method string, path string, data interf
 		return nil, xmlErr
 	}
 
-	log.Printf("[INFO] Sending %s %s with body %s\n", method, reqURL, xmlValue)
-	req, err := http.NewRequest(method, reqURL.String(), bytes.NewBuffer(xmlValue))
+	body := bytes.NewBuffer(xmlValue)
+	log.Printf("[INFO] Sending %s %s with body %s\n", method, reqURL, body)
+	req, err := http.NewRequest(method, reqURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +133,8 @@ func validateResponse(r *http.Response) error {
 
 	jenkinsError := JenkinsError{}
 	err := xml.Unmarshal([]byte(bodyString), &jenkinsError)
-	if err != nil {
+	// Hack around malformed html
+	if err != nil && err.Error() != "XML syntax error on line 10: element <hr> closed by </body>" {
 		return err
 	}
 

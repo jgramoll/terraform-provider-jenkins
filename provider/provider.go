@@ -11,15 +11,15 @@ import (
 
 // Services used by provider
 type Services struct {
-	Config             client.Config
-	JobService   client.JobService
+	Config     client.Config
+	JobService client.JobService
 }
 
 // Config for provider
 type Config struct {
-	Address   string `mapstructure:"address"`
-	Username  string `mapstructure:"username"`
-	Token     string `mapstructure:"token"`
+	Address  string `mapstructure:"address"`
+	Username string `mapstructure:"username"`
+	Token    string `mapstructure:"token"`
 }
 
 // Provider for terraform
@@ -49,7 +49,12 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"jenkins_job":              jobResource(),
+			"jenkins_job": jobResource(),
+
+			"jenkins_job_pipeline_triggers_property": jobPipelineTriggersPropertyResource(),
+			"jenkins_job_git_scm":                    jobGitScmResource(),
+			"jenkins_job_git_scm_user_remote_config": jobGitScmUserRemoteConfigResource(),
+			// "jenkins_job_gerrit_trigger":             jobPipelineJobGerritTriggerResource(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -68,7 +73,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	clientConfig := client.Config(config)
 	c := client.NewClient(clientConfig)
 	return &Services{
-		Config:             clientConfig,
-		JobService:    client.JobService{Client: c},
+		Config:     clientConfig,
+		JobService: client.JobService{Client: c},
 	}, nil
 }

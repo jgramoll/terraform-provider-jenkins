@@ -1,6 +1,7 @@
 package client
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -24,49 +25,87 @@ func TestGetJobs(t *testing.T) {
 
 func TestGetJob(t *testing.T) {
 	jobName := "Bridge Career/migrations_change"
-	jobConfig, err := jobService.GetJob(jobName)
+	job, err := jobService.GetJob(jobName)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if jobConfig.Name != "Bridge Career/migrations_change" {
-		t.Fatalf("Job name should be %v, was %v", "Bridge Career/migrations_change", jobConfig.Name)
+	if job.Name != "Bridge Career/migrations_change" {
+		t.Fatalf("Job name should be %v, was %v", "Bridge Career/migrations_change", job.Name)
 	}
-	if jobConfig.Description != "" {
-		t.Fatalf("Job config description should be %v, was %v", "", jobConfig.Description)
+	if job.Description != "" {
+		t.Fatalf("Job description should be %v, was %v", "", job.Description)
 	}
-	// if jobConfig.Definition.SCM.ConfigVersion != 2 {
-	// 	t.Fatalf("Job scm config version should be %v, was %v", 2, jobConfig.Definition.SCM.ConfigVersion)
-	// }
-	// if (*jobConfig.Definition.SCM.UserRemoteConfigs.Items)[0].Url != "ssh://gerrit.instructure.com:29418/bridge-career-infrastructure.git" {
-	// 	t.Fatalf("Job scm url should be %v, was %v", "ssh://gerrit.instructure.com:29418/bridge-career-infrastructure.git", (*jobConfig.Definition.SCM.UserRemoteConfigs.Items)[0].Url)
-	// }
-	// if (*jobConfig.Definition.SCM.UserRemoteConfigs.Items)[0].CredentialsId != "44aa91d6-ab24-498a-b2b4-911bcb17cc35" {
-	// 	t.Fatalf("Job scm CredentialsId should be %v, was %v", "44aa91d6-ab24-498a-b2b4-911bcb17cc35", (*jobConfig.Definition.SCM.UserRemoteConfigs.Items)[0].CredentialsId)
-	// }
-	// if (*jobConfig.Definition.SCM.Branches.Items)[0].Name != "FETCH_HEAD" {
-	// 	t.Fatalf("Job scm branch name should be %v, was %v", "FETCH_HEAD", (*jobConfig.Definition.SCM.Branches.Items)[0].Name)
-	// }
-	// if jobConfig.Definition.ScriptPath != "migrations.Jenkinsfile" {
-	// 	t.Fatalf("Job scm branch name should be %v, was %v", "migrations.Jenkinsfile", jobConfig.Definition.ScriptPath)
-	// }
+	var properties = *(*job.Properties).Items
+	if len(properties) != 1 {
+		t.Fatalf("Job should have %v properties, was %v", 1, len(properties))
+	}
+	var pipelineProperties = *properties[0].(*JobPipelineTriggersProperty)
+	var triggers = *pipelineProperties.Triggers
+	if len(triggers) != 1 {
+		t.Fatalf("Job should have %v triggers, was %v", 1, len(triggers))
+	}
+	gerritTrigger, ok := triggers[0].(*JobGerritTrigger)
+	if !ok {
+		t.Fatalf("Job should have %v, was %v", "client.JobGerritTrigger", reflect.TypeOf(triggers[0]))
+	}
+	if gerritTrigger.ServerName != "gerrit.instructure.com" {
+		t.Fatalf("Job Trigger ServerName should be %v, was %v", "gerrit.instructure.com", gerritTrigger.ServerName)
+	}
+	var projects = *(*gerritTrigger.Projects).Items
+	if len(projects) != 1 {
+		t.Fatalf("Job should have %v trigger gerrit projects, was %v", 1, len(projects))
+	}
+	gerritProject := projects[0]
+	if gerritProject.CompareType != "PLAIN" {
+		t.Fatalf("Job should have gerrit project compare type %v, was %v", "PLAIN", gerritProject.CompareType)
+	}
+	if gerritProject.Pattern != "bridge-career-infrastructure" {
+		t.Fatalf("Job should have gerrit project pattern %v, was %v", "bridge-career-infrastructure", gerritProject.Pattern)
+	}
+	var branches = *(*gerritProject.Branches).Items
+	if len(branches) != 1 {
+		t.Fatalf("Job should have %v trigger gerrit branches, was %v", 1, len(branches))
+	}
+	branch := branches[0]
+	if branch.CompareType != "REG_EXP" {
+		t.Fatalf("Job should have gerrit branch compare type %v, was %v", "REG_EXP", branch.CompareType)
+	}
+	if branch.Pattern != "^(?!refs/meta/config).*$" {
+		t.Fatalf("Job should have gerrit branch pattern %v, was %v", "^(?!refs/meta/config).*$", branch.Pattern)
+	}
+	definition := job.Definition.(*CpsScmFlowDefinition)
+	if definition.ScriptPath != "migrations.Jenkinsfile" {
+		t.Fatalf("Job should have script path %v, was %v", "migrations.Jenkinsfile", definition.ScriptPath)
+	}
+	scm := *definition.SCM
+	userRemoteConfigs := *(*scm.UserRemoteConfigs).Items
+	if len(userRemoteConfigs) != 1 {
+		t.Fatalf("Job should have %v user remote configs, was %v", 1, len(userRemoteConfigs))
+	}
+	userRemoteConfig := userRemoteConfigs[0]
+	if userRemoteConfig.Url != "ssh://gerrit.instructure.com:29418/bridge-career-infrastructure.git" {
+		t.Fatalf("Job should have user remote config url %v, was %v", "ssh://gerrit.instructure.com:29418/bridge-career-infrastructure.git", userRemoteConfig.Url)
+	}
 }
 
 func TestCreateJob(t *testing.T) {
-	job := Job{Name: "Bridge Career/my_test_job"}
-	jobName := job.Name
+	job := NewJob()
+	job.Name = "Bridge Career/my test job"
+	*(*job.Properties).Items = append(*(*job.Properties).Items, &JobPipelineTriggersProperty{})
 
-	err := jobService.CreateJob(&job)
+	var err error
+	err = jobService.CreateJob(job)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	job.Description = "my new desc 3"
-	err = jobService.UpdateJob(&job)
+	job.Description = "my new desc 4"
+	err = jobService.UpdateJob(job)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = jobService.DeleteJob(jobName)
+	err = jobService.DeleteJob(job.Name)
 	if err != nil {
 		t.Fatal(err)
 	}

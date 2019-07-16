@@ -34,7 +34,96 @@ provider "jenkins" {
 }
 
 resource "jenkins_job" "premerge" {
-  name = "Premerge checks"
+  name        = "Premerge checks"
+}
+
+resource "jenkins_job_git_scm" "premerge" {
+  job = "${jenkins_job.premerge.id}"
+
+  config_version = "2"
+  script_path = "Jenkinsfile.api"
+  lightweight = false
+}
+
+resource "jenkins_job_git_scm_user_remote_config" "premerge" {
+  scm = "${jenkins_job_git_scm.premerge.id}"
+
+  refspec        = "${GERRIT_REFSPEC}"
+  url            = "ssh://git.server/git-repo.git"
+  credentials_id = "123-abc"
+}
+
+resource "jenkins_job_git_scm_branch" "premerge" {
+  job = "${jenkins_job.premerge.id}"
+
+  name = "FETCH_HEAD"
+}
+
+resource "jenkins_job_git_scm_clean_before_checkout_extention" "premerge" {
+  job = "${jenkins_job.premerge.id}"
+}
+
+resource "jenkins_job_build_discard_property" "main" {
+  job = "${jenkins_job.premerge.id}"
+
+  strategy              = "hudson.tasks.LogRotator"
+  days_to_keep          = "30"
+  num_to_keep           = "-1"
+  artifact_days_to_keep = "-1"
+  artifact_num_to_keep  = "-1"
+}
+
+resource "jenkins_job_pipeline_triggers_property" "main" {
+  job = "${jenkins_job.premerge.id}"
+}
+
+resource "jenkins_job_gerrit_trigger" "main" {
+  property = "${jenkins_job_pipeline_triggers_property.main.id}"
+
+  server_name       = "__ANY__"
+  silent_mode       = false
+  silent_start_mode = false
+  escape_quotes     = true
+
+  name_and_email_parameter_mode = "PLAIN"
+  commit_message_parameter_mode = "BASE64"
+  change_subject_parameter_mode = "PLAIN"
+  comment_text_parameter_mode   = "BASE64"
+
+  skip_vote = {
+    on_successful = false
+    on_failed     = false
+    on_unstable   = false
+    on_not_built   = false
+  }
+}
+
+resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
+  trigger = "${jenkins_job_gerrit_trigger.main.id}"
+
+  exclude_drafts         = false
+  exclude_trivial_rebase = false
+  exclude_no_code_change = false
+  exclude_private_state  = false
+  exclude_wip_state      = false
+}
+
+resource "jenkins_job_gerrit_trigger_draft_published_event" "main" {
+  trigger = "${jenkins_job_gerrit_trigger.main.id}"
+}
+
+resource "jenkins_job_gerrit_project" "main" {
+  trigger = "${jenkins_job_gerrit_trigger.main.id}"
+
+  compareType = "PLAIN"
+  pattern     = "bridge-skills"
+}
+
+resource "jenkins_job_gerrit_branch" "main" {
+  project = "${jenkins_job_gerrit_project.main.id}"
+
+  compareType = "REG_EXP"
+  pattern     = "^(?!refs/meta/config).*$"
 }
 
 ```
