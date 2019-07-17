@@ -74,7 +74,7 @@ func resourceJobGerritProjectCreate(d *schema.ResourceData, m interface{}) error
 
 	log.Println("[DEBUG] Creating job git scm branch:", id)
 	d.SetId(id.String())
-	return resourceJobBuildDiscardPropertyRead(d, m)
+	return resourceJobGerritProjectRead(d, m)
 }
 
 func resourceJobGerritProjectUpdate(d *schema.ResourceData, m interface{}) error {

@@ -1,6 +1,7 @@
 package client
 
 type JobPipelineBuildDiscarderPropertyStrategyLogRotator struct {
+	Id string `xml:"id,attr"`
 	Class string `xml:"class,attr"`
 
 	DaysToKeep         int `xml:"daysToKeep"`

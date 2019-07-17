@@ -10,44 +10,40 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-func TestAccJobGerritTriggerDraftPublishedEventBasic(t *testing.T) {
+func TestAccJobBuildDiscarderPropertyBasic(t *testing.T) {
 	var jobRef client.Job
 	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-	jobResourceName := "jenkins_job.test"
-	// extensionResourceName := "jenkins_job_git_scm_clean_before_checkout_extension.test"
+	jobResourceName := "jenkins_job.main"
+	// propertyResourceName := "jenkins_job_build_discarder_property.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccJobGitScmCleanBeforeCheckoutExtensionDestroy,
+		CheckDestroy: testAccJobBuildDiscarderPropertyDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccJobGerritTriggerDraftPublishedEventConfigBasic(jobName),
+				Config: testAccJobBuildDiscarderPropertyConfigBasic(jobName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
+					// TODO check that property exists
 				),
 			},
 		},
 	})
 }
 
-func testAccJobGerritTriggerDraftPublishedEventConfigBasic(jobName string) string {
+func testAccJobBuildDiscarderPropertyConfigBasic(jobName string) string {
 	return fmt.Sprintf(`
-resource "jenkins_job" "test" {
+resource "jenkins_job" "main" {
 	name = "%s"
 }
 
-resource "jenkins_job_git_scm" "test" {
-	job = "${jenkins_job.test.id}"
-}
-
-resource "jenkins_job_git_scm_clean_before_checkout_extension" "test" {
-  job = "${jenkins_job.test.id}"
-  scm = "${jenkins_job_git_scm.test.id}"
+resource "jenkins_job_build_discarder_property" "main" {
+  job = "${jenkins_job.main.id}"
 }`, jobName)
 }
 
-func testAccJobGerritTriggerDraftPublishedEventDestroy(s *terraform.State) error {
+func testAccJobBuildDiscarderPropertyDestroy(s *terraform.State) error {
 	jobService := testAccProvider.Meta().(*Services).JobService
 	for _, rs := range s.RootModule().Resources {
 		if _, ok := jobPropertyTypes[rs.Type]; ok {

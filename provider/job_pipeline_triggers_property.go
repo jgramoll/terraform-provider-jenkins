@@ -26,9 +26,9 @@ func (p *jobPipelineTriggersProperty) getRefID() string {
 	return ""
 }
 
-func (p *jobPipelineTriggersProperty) toClientProperty() client.JobProperty {
+func (p *jobPipelineTriggersProperty) toClientProperty(id string) client.JobProperty {
 	return &client.JobPipelineTriggersProperty{
-		// Id: p.RefId,
+		Id: id,
 	}
 }
 

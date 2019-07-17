@@ -10,28 +10,28 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-func TestAccJobBuildDiscardPropertyBasic(t *testing.T) {
+func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 	var jobRef client.Job
 	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	jobResourceName := "jenkins_job.test"
-	propertyResourceName := "jenkins_job_build_discard_property.test"
+	propertyResourceName := "jenkins_job_build_discarder_property.test"
 	strategy := "hudson.tasks.LogRotator"
 	newStrategy := "hudson.tasks.LogRotatorNew"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccJobBuildDiscardPropertyDestroy,
+		CheckDestroy: testAccJobGerritTriggerPatchsetCreatedEventDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccJobBuildDiscardPropertyConfigBasic(jobName, strategy),
+				Config: testAccJobGerritTriggerPatchsetCreatedEventConfigBasic(jobName, strategy),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(propertyResourceName, "strategy", strategy),
 					testAccCheckJobExists(jobResourceName, &jobRef),
 				),
 			},
 			{
-				Config: testAccJobGitScmBranchConfigBasic(jobName, newStrategy),
+				Config: testAccJobGerritTriggerPatchsetCreatedEventConfigBasic(jobName, newStrategy),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(propertyResourceName, "strategy", newStrategy),
 					testAccCheckJobExists(jobResourceName, &jobRef),
@@ -41,13 +41,13 @@ func TestAccJobBuildDiscardPropertyBasic(t *testing.T) {
 	})
 }
 
-func testAccJobBuildDiscardPropertyConfigBasic(jobName string, strategy string) string {
+func testAccJobGerritTriggerPatchsetCreatedEventConfigBasic(jobName string, strategy string) string {
 	return fmt.Sprintf(`
 resource "jenkins_job" "test" {
 	name = "%s"
 }
 
-resource "jenkins_job_build_discard_property" "test" {
+resource "jenkins_job_build_discarder_property" "test" {
   job = "${jenkins_job.test.id}"
 
   strategy              = "%s"
@@ -58,7 +58,7 @@ resource "jenkins_job_build_discard_property" "test" {
 }`, jobName, strategy)
 }
 
-func testAccJobBuildDiscardPropertyDestroy(s *terraform.State) error {
+func testAccJobGerritTriggerPatchsetCreatedEventDestroy(s *terraform.State) error {
 	jobService := testAccProvider.Meta().(*Services).JobService
 	for _, rs := range s.RootModule().Resources {
 		if _, ok := jobPropertyTypes[rs.Type]; ok {

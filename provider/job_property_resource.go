@@ -1,53 +1,70 @@
 package provider
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mitchellh/mapstructure"
 )
 
+// ErrInvalidPropertyId
+var ErrInvalidPropertyId = errors.New("Invalid property id, must be jobName_propertyId")
+
+func resourceJobPropertyId(propertyString string) (jobName string, propertyId string, err error) {
+	parts := strings.Split(propertyString, "_")
+	if len(parts) != 2 {
+		err = ErrInvalidPropertyId
+		return
+	}
+	jobName = parts[0]
+	propertyId = parts[1]
+	return
+}
+
 func resourceJobPropertyCreate(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
-	s := createJobProperty()
+	jobName := d.Get("job").(string)
+	property := createJobProperty()
 	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &s); err != nil {
+	if err := mapstructure.Decode(configRaw, &property); err != nil {
 		return err
 	}
-	property := s.(jobProperty)
 
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return err
 	}
-	property.setRefID(id.String())
-
-	jobName := d.Get("job").(string)
+	propertyId := id.String()
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
-	job, err := jobService.GetJob(jobName)
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err
 	}
 
-	properties := append(*(*job.Properties).Items, property.toClientProperty())
-	job.Properties.Items = &properties
+	j.Properties = j.Properties.Append(property.toClientProperty(propertyId))
 
-	err = jobService.UpdateJob(job)
+	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[DEBUG] Creating job property:", id)
-	d.SetId(id.String())
+	log.Println("[DEBUG] Creating job property:", propertyId)
+	d.SetId(fmt.Sprintf("%s_%s", jobName, propertyId))
 	return resourceJobPropertyRead(d, m, createJobProperty)
 }
 
 func resourceJobPropertyRead(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
-	jobName := d.Get("job").(string)
+	jobName, propertyId, err := resourceJobPropertyId(d.Id())
+	if err != nil {
+		return err
+	}
 
 	jobService := m.(*Services).JobService
 	jobLock.RLock(jobName)
@@ -58,41 +75,34 @@ func resourceJobPropertyRead(d *schema.ResourceData, m interface{}, createJobPro
 		d.SetId("")
 		return nil
 	}
-
-	clientProperty, err := j.GetProperty(d.Id())
+	clientProperty, err := j.GetProperty(propertyId)
 	if err != nil {
-		log.Println("[WARN] No Job Property found:", err)
+		log.Println("[WARN] No Property found:", err)
 		d.SetId("")
-	} else {
-		property := createJobProperty().(jobProperty)
-		property = property.fromClientJobProperty(clientProperty)
-		log.Println("[INFO] Updating from job property", clientProperty)
-		err = property.setResourceData(d)
+		return err
 	}
+	property := createJobProperty().fromClientJobProperty(clientProperty)
 
-	return err
+	// property := createJobProperty().(jobProperty)
+	log.Println("[INFO] Updating from job property", d.Id())
+	return property.setResourceData(d)
 }
 
 func resourceJobPropertyDelete(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
-	p := createJobProperty()
-	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &p); err != nil {
+	jobName, propertyId, err := resourceJobPropertyId(d.Id())
+	if err != nil {
 		return err
 	}
-	property := p.(jobProperty)
-	property.setRefID(d.Id())
-
-	jobName := d.Get("job").(string)
-	jobLock.Lock(jobName)
 
 	jobService := m.(*Services).JobService
+	jobLock.Lock(jobName)
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err
 	}
 
-	err = j.DeleteProperty(d.Id())
+	err = j.DeleteProperty(propertyId)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err

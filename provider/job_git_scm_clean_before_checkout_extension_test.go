@@ -22,7 +22,7 @@ func TestAccJobGitScmCleanBeforeCheckoutExtensionBasic(t *testing.T) {
 		CheckDestroy: testAccJobGitScmCleanBeforeCheckoutExtensionDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccJobGitScmBranchConfigBasic(jobName),
+				Config: testAccJobGitScmCleanBeforeCheckoutExtensionConfigBasic(jobName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
 				),

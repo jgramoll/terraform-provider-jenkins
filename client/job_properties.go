@@ -5,8 +5,8 @@ import (
 )
 
 type JobProperties struct {
-	XMLName xml.Name `xml:"properties"`
-	Items   *[]JobProperty
+	XMLName xml.Name       `xml:"properties"`
+	Items   *[]JobProperty `xml:",any"`
 }
 
 func NewJobProperties() *JobProperties {
@@ -35,6 +35,13 @@ func (properties *JobProperties) UnmarshalXML(d *xml.Decoder, start xml.StartEle
 		if elem, ok := tok.(xml.StartElement); ok {
 			// TODO use map
 			switch elem.Name.Local {
+			case "jenkins.model.BuildDiscarderProperty":
+				property := NewJobPipelineBuildDiscarderProperty()
+				err := d.DecodeElement(property, &elem)
+				if err != nil {
+					return err
+				}
+				*properties.Items = append(*(*properties).Items, property)
 			case "org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty":
 				property := NewJobPipelineTriggersProperty()
 				err := d.DecodeElement(property, &elem)

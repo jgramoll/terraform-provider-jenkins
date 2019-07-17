@@ -7,8 +7,6 @@ import (
 
 type jobProperty interface {
 	fromClientJobProperty(client.JobProperty) jobProperty
-	toClientProperty() client.JobProperty
+	toClientProperty(id string) client.JobProperty
 	setResourceData(*schema.ResourceData) error
-	setRefID(string)
-	getRefID() string
 }

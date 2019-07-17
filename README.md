@@ -63,10 +63,13 @@ resource "jenkins_job_git_scm_clean_before_checkout_extension" "premerge" {
   scm = "${jenkins_job_git_scm.premerge.id}"
 }
 
-resource "jenkins_job_build_discard_property" "main" {
+resource "jenkins_job_build_discarder_property" "main" {
   job = "${jenkins_job.premerge.id}"
+}
 
-  strategy              = "hudson.tasks.LogRotator"
+resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
+  property = "${jenkins_job_build_discarder_property.main.id}"
+
   days_to_keep          = "30"
   num_to_keep           = "-1"
   artifact_days_to_keep = "-1"
