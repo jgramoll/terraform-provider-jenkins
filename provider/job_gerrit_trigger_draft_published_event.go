@@ -14,8 +14,8 @@ func newJobGerritTriggerDraftPublishedEvent() *jobGerritTriggerDraftPublishedEve
 	return &jobGerritTriggerDraftPublishedEvent{}
 }
 
-func (branch *jobGerritTriggerDraftPublishedEvent) toClientExtension() *client.GitBranchSpec {
-	return &client.GitBranchSpec{
+func (branch *jobGerritTriggerDraftPublishedEvent) toClientExtension() *client.GitScmBranchSpec {
+	return &client.GitScmBranchSpec{
 		// TODO
 		// Id: branch.RefId,
 	}

@@ -82,7 +82,7 @@ func resourceJobGitScmUserRemoteConfigCreate(d *schema.ResourceData, m interface
 
 	// TODO better place for this cast?
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
-	definition.SCM.AppendUserRemoteConfig(c.toClientConfig())
+	definition.SCM.UserRemoteConfigs = definition.SCM.UserRemoteConfigs.Append(c.toClientConfig())
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {

@@ -10,8 +10,8 @@ type JobGerritTriggerSkipVote struct {
 func NewJobGerritTriggerSkipVote() *JobGerritTriggerSkipVote {
 	return &JobGerritTriggerSkipVote{
 		OnSuccessful: false,
-		OnFailed: false,
-		OnUnstable: false,
-		OnNotBuilt: false,
+		OnFailed:     false,
+		OnUnstable:   false,
+		OnNotBuilt:   false,
 	}
 }

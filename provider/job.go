@@ -20,11 +20,11 @@ func (j *job) toClientJob() *client.Job {
 	return job
 }
 
-func JobfromClientJob(j *client.Job) *job {
-	return &job{
-		Name:     j.Name,
-		Disabled: j.Disabled,
-	}
+func JobfromClientJob(clientJob *client.Job) *job {
+	j := job{}
+	j.Name = clientJob.Name
+	j.Disabled = clientJob.Disabled
+	return &j
 }
 
 func (j *job) setResourceData(d *schema.ResourceData) error {

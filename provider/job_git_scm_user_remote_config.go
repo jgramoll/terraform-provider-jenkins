@@ -17,11 +17,11 @@ func newJobGitScmUserRemoteConfig() *jobGitScmUserRemoteConfig {
 }
 
 func (config *jobGitScmUserRemoteConfig) toClientConfig() *client.GitUserRemoteConfig {
-	return &client.GitUserRemoteConfig{
-		Refspec:       config.Refspec,
-		Url:           config.Url,
-		CredentialsId: config.CredentialsId,
-	}
+	clientConfig := client.NewGitUserRemoteConfig()
+	clientConfig.Refspec = config.Refspec
+	clientConfig.Url = config.Url
+	clientConfig.CredentialsId = config.CredentialsId
+	return clientConfig
 }
 
 func (config *jobGitScmUserRemoteConfig) setResourceData(d *schema.ResourceData) error {

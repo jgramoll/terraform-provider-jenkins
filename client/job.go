@@ -38,7 +38,7 @@ func (job *Job) NameOnly() string {
 }
 
 func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
-	job := Job{}
+	job := NewJob()
 
 	if details != nil {
 		job.Name = details.FullName
@@ -54,7 +54,7 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 		}
 	}
 
-	return &job
+	return job
 }
 
 func (job *Job) GetProperty(propertyId string) (JobProperty, error) {

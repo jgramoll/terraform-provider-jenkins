@@ -14,8 +14,8 @@ func newJobGitScmCleanBeforeCheckoutExtension() *jobGitScmCleanBeforeCheckoutExt
 	return &jobGitScmCleanBeforeCheckoutExtension{}
 }
 
-func (branch *jobGitScmCleanBeforeCheckoutExtension) toClientExtension() *client.GitBranchSpec {
-	return &client.GitBranchSpec{
+func (branch *jobGitScmCleanBeforeCheckoutExtension) toClientExtension() *client.GitScmBranchSpec {
+	return &client.GitScmBranchSpec{
 		// Id: branch.RefId,
 	}
 }

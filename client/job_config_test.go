@@ -16,12 +16,20 @@ func TestJobConfigSerialize(t *testing.T) {
 	definition.SCM = NewGitScm()
 	definition.SCM.ConfigVersion = "my-version"
 
+	remoteConfig := NewGitUserRemoteConfig()
+	remoteConfig.Refspec = "refspec"
+	remoteConfig.Url = "url.to.here"
+	remoteConfig.CredentialsId = "creds"
+	definition.SCM.UserRemoteConfigs = definition.SCM.UserRemoteConfigs.Append(remoteConfig)
+
+	scmExtension := NewGitScmCleanBeforeCheckoutExtension()
+	scmExtension.Id = "extension-id"
+	definition.SCM.Extensions = definition.SCM.Extensions.Append(scmExtension)
+
 	branchSpec := NewGitScmBranchSpec()
 	branchSpec.Name = "branchspec"
 	definition.Id = "definition-id"
 	definition.SCM.Branches = definition.SCM.Branches.Append(branchSpec)
-	//userRemoteConfigs
-	//extensions
 	job.Definition = definition
 
 	gerritBranch := NewJobGerritTriggerBranch()
@@ -118,13 +126,22 @@ func TestJobConfigSerialize(t *testing.T) {
 	<definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" id="definition-id">
 		<scm class="hudson.plugins.git.GitSCM">
 			<configVersion>my-version</configVersion>
-			<userRemoteConfigs></userRemoteConfigs>
+			<userRemoteConfigs>
+				<hudson.plugins.git.UserRemoteConfig>
+					<refspec>refspec</refspec>
+					<url>url.to.here</url>
+					<credentialsId>creds</credentialsId>
+				</hudson.plugins.git.UserRemoteConfig>
+			</userRemoteConfigs>
 			<branches>
 				<hudson.plugins.git.BranchSpec id="">
 					<name>branchspec</name>
 				</hudson.plugins.git.BranchSpec>
 			</branches>
 			<doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+			<extensions>
+				<hudson.plugins.git.extensions.impl.CleanBeforeCheckout id="extension-id"></hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
+			</extensions>
 		</scm>
 		<scriptPath></scriptPath>
 		<lightweight>false</lightweight>

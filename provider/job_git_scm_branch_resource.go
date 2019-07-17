@@ -73,7 +73,7 @@ func resourceJobGitScmBranchCreate(d *schema.ResourceData, m interface{}) error 
 
 	// TODO better place for this cast?
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
-	definition.SCM.AppendBranch(branch.toClientBranch())
+	definition.SCM.Branches = definition.SCM.Branches.Append(branch.toClientBranch())
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {

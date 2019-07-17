@@ -8,16 +8,16 @@ import (
 type jobGerritBranch struct {
 	Project string `mapstructure:"project"`
 	// TODO enum / validation
-	CompareType string           `mapstructure:"compare_type"`
-	Pattern     string           `mapstructure:"pattern"`
+	CompareType string `mapstructure:"compare_type"`
+	Pattern     string `mapstructure:"pattern"`
 }
 
 func newJobGerritBranch() *jobGerritProject {
 	return &jobGerritProject{}
 }
 
-func (branch *jobGerritBranch) toClientProperty() *client.GitBranchSpec {
-	return &client.GitBranchSpec{
+func (branch *jobGerritBranch) toClientProperty() *client.GitScmBranchSpec {
+	return &client.GitScmBranchSpec{
 		// TODO
 		// Id: branch.RefId,
 	}

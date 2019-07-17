@@ -1,4 +1,3 @@
 package client
 
-type JobPipelineBuildDiscarderPropertyStrategy interface {
-}
+type JobPipelineBuildDiscarderPropertyStrategy interface{}

@@ -2,6 +2,8 @@ package client
 
 import (
 	"encoding/xml"
+	"errors"
+	"fmt"
 )
 
 type ParameterMode int
@@ -17,4 +19,20 @@ func (t ParameterMode) String() string {
 
 func (t ParameterMode) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeElement(t.String(), start)
+}
+
+func (t *ParameterMode) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var s string
+	if err := d.DecodeElement(&s, &start); err != nil {
+		return err
+	}
+	switch s {
+	default:
+		return errors.New(fmt.Sprintf("Unknown Parameter Mode %s", s))
+	case "PLAIN":
+		*t = ParameterModePlain
+	case "BASE64":
+		*t = ParameterModeBase64
+	}
+	return nil
 }

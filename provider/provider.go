@@ -62,7 +62,7 @@ func Provider() terraform.ResourceProvider {
 			"jenkins_job_gerrit_trigger_patchset_created_event":   jobGerritTriggerPatchSetCreatedEventResource(),
 			"jenkins_job_gerrit_trigger_draft_published_event":    jobGerritTriggerDraftPublishedEventResource(),
 			"jenkins_job_gerrit_project":                          jobGerritProjectResource(),
-			"jenkins_job_gerrit_branch": jobGerritBranchResource(),
+			"jenkins_job_gerrit_branch":                           jobGerritBranchResource(),
 		},
 
 		ConfigureFunc: providerConfigure,

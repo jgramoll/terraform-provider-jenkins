@@ -23,7 +23,7 @@ func TestGetJobs(t *testing.T) {
 	}
 }
 
-func TestGetJob(t *testing.T) {
+func TestGetJobDetails(t *testing.T) {
 	jobName := "Bridge Career/migrations_change"
 	job, err := jobService.GetJob(jobName)
 	if err != nil {
@@ -46,7 +46,7 @@ func TestGetJob(t *testing.T) {
 	}
 	gerritTrigger, ok := (*triggers.Items)[0].(*JobGerritTrigger)
 	if !ok {
-		t.Fatalf("Job should have %v, was %v", "client.JobGerritTrigger", reflect.TypeOf((*triggers.Items)[0]))
+		t.Fatalf("Job should have %v, was %v", "*client.JobGerritTrigger", reflect.TypeOf((*triggers.Items)[0]))
 	}
 	if gerritTrigger.ServerName != "gerrit.instructure.com" {
 		t.Fatalf("Job Trigger ServerName should be %v, was %v", "gerrit.instructure.com", gerritTrigger.ServerName)

@@ -2,12 +2,8 @@ package client
 
 import (
 	"encoding/xml"
-	"errors"
 	"log"
 )
-
-// ErrDefinitionMissingClass
-var ErrDefinitionMissingClass = errors.New("job definition did not contain class")
 
 type JobDefinitionXml struct {
 	Item JobDefinition

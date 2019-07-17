@@ -4,7 +4,7 @@ import "encoding/xml"
 
 type JobGerritTriggerProject struct {
 	XMLName     xml.Name                  `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritProject"`
-	CompareType CompareType                    `xml:"compareType"`
+	CompareType CompareType               `xml:"compareType"`
 	Pattern     string                    `xml:"pattern"`
 	Branches    *JobGerritTriggerBranches `xml:"branches"`
 

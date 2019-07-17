@@ -11,21 +11,17 @@ type GitSCM struct {
 
 	DoGenerateSubmoduleConfigurations bool `xml:"doGenerateSubmoduleConfigurations"`
 	// submoduleCfg
-	// extensions
+	Extensions *GitScmExtensions `xml:"extensions"`
 }
 
 func NewGitScm() *GitSCM {
 	return &GitSCM{
 		Class:             "hudson.plugins.git.GitSCM",
-		Branches:          NewGitScmBranches(),
 		UserRemoteConfigs: NewGitUserRemoteConfigs(),
+		Branches:          NewGitScmBranches(),
+
+		DoGenerateSubmoduleConfigurations: false,
+
+		Extensions: NewGitScmExtensions(),
 	}
-}
-
-func (scm *GitSCM) AppendUserRemoteConfig(config *GitUserRemoteConfig) *GitUserRemoteConfigs {
-	return scm.UserRemoteConfigs.Append(config)
-}
-
-func (scm *GitSCM) AppendBranch(branch *GitScmBranchSpec) *GitScmBranches {
-	return scm.Branches.Append(branch)
 }

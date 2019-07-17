@@ -1,3 +1,3 @@
 package client
 
-type JobGerritTriggerOnEvent interface {}
+type JobGerritTriggerOnEvent interface{}

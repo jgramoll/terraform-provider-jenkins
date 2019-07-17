@@ -19,8 +19,8 @@ func newJobGerritTriggerPatchSetCreatedEvent() *jobGerritTriggerPatchSetCreatedE
 	return &jobGerritTriggerPatchSetCreatedEvent{}
 }
 
-func (branch *jobGerritTriggerPatchSetCreatedEvent) toClientEvent() *client.GitBranchSpec {
-	return &client.GitBranchSpec{
+func (branch *jobGerritTriggerPatchSetCreatedEvent) toClientEvent() *client.GitScmBranchSpec {
+	return &client.GitScmBranchSpec{
 		// TODO
 		// Id: branch.RefId,
 	}

@@ -14,8 +14,8 @@ func newJobBuildDiscardProperty() *jobBuildDiscardProperty {
 	return &jobBuildDiscardProperty{}
 }
 
-func (branch *jobBuildDiscardProperty) toClientProperty() *client.GitBranchSpec {
-	return &client.GitBranchSpec{
+func (branch *jobBuildDiscardProperty) toClientProperty() *client.GitScmBranchSpec {
+	return &client.GitScmBranchSpec{
 		// TODO
 		// Id: branch.RefId,
 	}

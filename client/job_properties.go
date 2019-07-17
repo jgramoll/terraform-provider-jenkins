@@ -33,16 +33,16 @@ func (properties *JobProperties) UnmarshalXML(d *xml.Decoder, start xml.StartEle
 	properties.Items = &[]JobProperty{}
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
-			var property JobProperty
 			// TODO use map
 			switch elem.Name.Local {
-			default:
-				continue
 			case "org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty":
-				property = &JobPipelineTriggersProperty{}
+				property := NewJobPipelineTriggersProperty()
+				err := d.DecodeElement(property, &elem)
+				if err != nil {
+					return err
+				}
+				*properties.Items = append(*(*properties).Items, property)
 			}
-			d.DecodeElement(property, &elem)
-			*properties.Items = append(*(*properties).Items, property)
 		}
 		if end, ok := tok.(xml.EndElement); ok {
 			if end.Name.Local == "properties" {
@@ -50,5 +50,6 @@ func (properties *JobProperties) UnmarshalXML(d *xml.Decoder, start xml.StartEle
 			}
 		}
 	}
+
 	return err
 }

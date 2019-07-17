@@ -1,7 +1,7 @@
 package client
 
 type JobGerritTriggerProjects struct {
-	Items *[]*JobGerritTriggerProject
+	Items *[]*JobGerritTriggerProject `xml:",any"`
 }
 
 func NewJobGerritTriggerProjects() *JobGerritTriggerProjects {

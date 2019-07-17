@@ -14,8 +14,8 @@ func newJobGitScmBranch() *jobGitScmBranch {
 	return &jobGitScmBranch{}
 }
 
-func (branch *jobGitScmBranch) toClientBranch() *client.GitBranchSpec {
-	return &client.GitBranchSpec{
+func (branch *jobGitScmBranch) toClientBranch() *client.GitScmBranchSpec {
+	return &client.GitScmBranchSpec{
 		// Id:   branch.RefId,
 		Name: branch.Name,
 	}
