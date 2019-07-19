@@ -36,7 +36,7 @@ func (properties *JobProperties) UnmarshalXML(d *xml.Decoder, start xml.StartEle
 			// TODO use map
 			switch elem.Name.Local {
 			case "jenkins.model.BuildDiscarderProperty":
-				property := NewJobPipelineBuildDiscarderProperty()
+				property := NewJobBuildDiscarderProperty()
 				err := d.DecodeElement(property, &elem)
 				if err != nil {
 					return err
@@ -57,6 +57,5 @@ func (properties *JobProperties) UnmarshalXML(d *xml.Decoder, start xml.StartEle
 			}
 		}
 	}
-
 	return err
 }

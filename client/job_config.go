@@ -20,7 +20,6 @@ type jobConfig struct {
 
 func JobConfigFromJob(job *Job) *jobConfig {
 	return &jobConfig{
-		Id:               job.Id,
 		Description:      job.Description,
 		KeepDependencies: job.KeepDependencies,
 		Disabled:         job.Disabled,

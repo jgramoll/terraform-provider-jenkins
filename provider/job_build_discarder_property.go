@@ -12,7 +12,7 @@ func newJobBuildDiscarderProperty() *jobBuildDiscarderProperty {
 }
 
 func (branch *jobBuildDiscarderProperty) toClientProperty(id string) client.JobProperty {
-	clientProperty := client.NewJobPipelineBuildDiscarderProperty()
+	clientProperty := client.NewJobBuildDiscarderProperty()
 	clientProperty.Id = id
 	return clientProperty
 }

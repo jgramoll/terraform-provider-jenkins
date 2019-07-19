@@ -26,7 +26,7 @@ func TestJobGetProperty(t *testing.T) {
 	job := NewJob()
 	property1 := NewJobPipelineTriggersProperty()
 	property1.Id = "1"
-	property2 := NewJobPipelineBuildDiscarderProperty()
+	property2 := NewJobBuildDiscarderProperty()
 	property2.Id = "2"
 	job.Properties = job.Properties.Append(property1)
 	job.Properties = job.Properties.Append(property2)
@@ -44,7 +44,7 @@ func TestJobDeleteProperty(t *testing.T) {
 	job := NewJob()
 	property1 := NewJobPipelineTriggersProperty()
 	property1.Id = "1"
-	property2 := NewJobPipelineBuildDiscarderProperty()
+	property2 := NewJobBuildDiscarderProperty()
 	property2.Id = "2"
 	job.Properties = job.Properties.Append(property1)
 	job.Properties = job.Properties.Append(property2)

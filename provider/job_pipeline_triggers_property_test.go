@@ -22,15 +22,14 @@ func TestAccJobGerritPropertyBasic(t *testing.T) {
 	property2 := "jenkins_job_pipeline_triggers_property.prop_2"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckJobPropertyDestroy,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccJobGerritPropertyConfigBasic(jobName, 2),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobProperties(jobResourceName, []string{
+					testAccCheckJobProperties(&jobRef, []string{
 						property1,
 						property2,
 					}, &properties),
@@ -40,7 +39,7 @@ func TestAccJobGerritPropertyBasic(t *testing.T) {
 				Config: testAccJobGerritPropertyConfigBasic(jobName, 1),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobProperties(jobResourceName, []string{
+					testAccCheckJobProperties(&jobRef, []string{
 						property1,
 					}, &properties),
 				),
@@ -49,7 +48,7 @@ func TestAccJobGerritPropertyBasic(t *testing.T) {
 				Config: testAccJobGerritPropertyConfigBasic(jobName, 0),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobProperties(jobResourceName, []string{}, &properties),
+					testAccCheckJobProperties(&jobRef, []string{}, &properties),
 				),
 			},
 		},

@@ -25,26 +25,6 @@ func testAccCheckJobDefinition(resourceName string, expected client.JobDefinitio
 		}
 		log.Println("found job", job)
 
-		// properties := *(*job.Properties).Items
-		// if len(expected) != len(properties) {
-		// 	return fmt.Errorf("Job Property count of %v is expected to be %v",
-		// 		len(properties), len(expected))
-		// }
-
-		// for _, stageResourceName := range expected {
-		// 	expectedResource, ok := s.RootModule().Resources[stageResourceName]
-		// 	if !ok {
-		// 		return fmt.Errorf("Property not found: %s", resourceName)
-		// 	}
-		// 	println("expectedResource", expectedResource)
-
-		// 	// stage, err := ensureStage(pipeline, expectedResource)
-		// 	// if err != nil {
-		// 	// 	return err
-		// 	// }
-		// 	// *stages = append(*stages, stage)
-		// }
-
 		return nil
 	}
 }

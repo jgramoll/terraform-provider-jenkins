@@ -4,8 +4,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-var resourceName = "job discard property log rotator strategy"
-
 func jobBuildDiscarderPropertyStrategyLogRotatorResource() *schema.Resource {
 	newJobBuildDiscarderPropertyStrategyLogRotatorInterface := func() jobBuildDiscarderPropertyStrategy {
 		return newJobBuildDiscarderPropertyStrategyLogRotator()

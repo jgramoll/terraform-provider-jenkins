@@ -1,7 +1,7 @@
 package client
 
-type JobPipelineBuildDiscarderPropertyStrategyLogRotator struct {
-	Id string `xml:"id,attr"`
+type JobBuildDiscarderPropertyStrategyLogRotator struct {
+	Id    string `xml:"id,attr"`
 	Class string `xml:"class,attr"`
 
 	DaysToKeep         int `xml:"daysToKeep"`
@@ -10,8 +10,8 @@ type JobPipelineBuildDiscarderPropertyStrategyLogRotator struct {
 	ArtifactNumToKeep  int `xml:"artifactNumToKeep"`
 }
 
-func NewJobPipelineBuildDiscarderPropertyStrategyLogRotator() *JobPipelineBuildDiscarderPropertyStrategyLogRotator {
-	return &JobPipelineBuildDiscarderPropertyStrategyLogRotator{
+func NewJobBuildDiscarderPropertyStrategyLogRotator() *JobBuildDiscarderPropertyStrategyLogRotator {
+	return &JobBuildDiscarderPropertyStrategyLogRotator{
 		Class: "hudson.tasks.LogRotator",
 
 		DaysToKeep:         -1,

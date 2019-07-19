@@ -4,8 +4,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-// var jobBuildDiscarderPropertyResourceName = "jenkins_job_build_discarder_property_resource"
-
 func jobBuildDiscarderPropertyResource() *schema.Resource {
 	newJobBuildDiscarderPropertyInterface := func() jobProperty {
 		return newJobBuildDiscarderProperty()

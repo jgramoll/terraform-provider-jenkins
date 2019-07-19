@@ -14,7 +14,7 @@ func TestAccJobBasic(t *testing.T) {
 	var jobRef client.Job
 	name := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	newName := name + "-changed"
-	resourceName := "jenkins_job.test"
+	resourceName := "jenkins_job.main"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -41,7 +41,7 @@ func TestAccJobBasic(t *testing.T) {
 
 func testAccJobConfigBasic(name string) string {
 	return fmt.Sprintf(`
-resource "jenkins_job" "test" {
+resource "jenkins_job" "main" {
   name   = "%s"
 }`, name)
 }

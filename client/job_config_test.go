@@ -50,12 +50,12 @@ func TestJobConfigSerialize(t *testing.T) {
 	triggerJobProperty.Triggers = triggerJobProperty.Triggers.Append(gerritTrigger)
 	job.Properties = job.Properties.Append(triggerJobProperty)
 
-	discardPropertyStrategy := NewJobPipelineBuildDiscarderPropertyStrategyLogRotator()
+	discardPropertyStrategy := NewJobBuildDiscarderPropertyStrategyLogRotator()
 	discardPropertyStrategy.DaysToKeep = 1
 	discardPropertyStrategy.NumToKeep = 2
 	discardPropertyStrategy.ArtifactDaysToKeep = 3
 	discardPropertyStrategy.ArtifactNumToKeep = 4
-	discardProperty := NewJobPipelineBuildDiscarderProperty()
+	discardProperty := NewJobBuildDiscarderProperty()
 	discardProperty.Id = "discard-id"
 	discardProperty.Strategy = discardPropertyStrategy
 	job.Properties = job.Properties.Append(discardProperty)

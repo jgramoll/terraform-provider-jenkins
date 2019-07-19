@@ -10,7 +10,6 @@ var ErrJobPropertyNotFound = errors.New("Could not find job property")
 
 // Job
 type Job struct {
-	Id               string
 	Name             string
 	Disabled         bool
 	Description      string
@@ -46,7 +45,6 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 	}
 
 	if config != nil {
-		job.Id = config.Id
 		job.Disabled = config.Disabled
 		job.Properties = config.Properties
 		if config.Definition != nil {

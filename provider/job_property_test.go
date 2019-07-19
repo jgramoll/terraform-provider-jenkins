@@ -2,62 +2,61 @@ package provider
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-var jobPropertyTypes map[string]string // TODO TYPE?
+var jobPropertyTypes = map[string]reflect.Type{}
 
-func testAccCheckJobProperties(resourceName string, expected []string, properties *[]client.JobProperty) resource.TestCheckFunc {
+func testAccCheckJobProperties(jobRef *client.Job, expectedPropertyResourceNames []string, returnProperties *[]client.JobProperty) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Pipeline not found: %s", resourceName)
-		}
 
-		jobService := testAccProvider.Meta().(*Services).JobService
-		job, err := jobService.GetJob(rs.Primary.Attributes["name"])
-		if err != nil {
-			return err
+		if len(*jobRef.Properties.Items) != len(expectedPropertyResourceNames) {
+			return fmt.Errorf("Expected %v properties, found %v", len(expectedPropertyResourceNames), len(*jobRef.Properties.Items))
 		}
-
-		properties := *(*job.Properties).Items
-		if len(expected) != len(properties) {
-			return fmt.Errorf("Job Property count of %v is expected to be %v",
-				len(properties), len(expected))
-		}
-
-		for _, stageResourceName := range expected {
-			expectedResource, ok := s.RootModule().Resources[stageResourceName]
+		for _, resourceName := range expectedPropertyResourceNames {
+			propertyResource, ok := s.RootModule().Resources[resourceName]
 			if !ok {
-				return fmt.Errorf("Property not found: %s", resourceName)
+				return fmt.Errorf("Job Property Resource not found: %s", resourceName)
 			}
-			println("expectedResource", expectedResource)
 
-			// stage, err := ensureStage(pipeline, expectedResource)
-			// if err != nil {
-			// 	return err
-			// }
-			// *stages = append(*stages, stage)
+			property, err := ensureProperty(jobRef, propertyResource)
+			if err != nil {
+				return err
+			}
+			*returnProperties = append(*returnProperties, property)
 		}
 
 		return nil
 	}
 }
 
-func testAccCheckJobPropertyDestroy(s *terraform.State) error {
-	jobService := testAccProvider.Meta().(*Services).JobService
-	for _, rs := range s.RootModule().Resources {
-		if _, ok := jobPropertyTypes[rs.Type]; ok {
-			_, err := jobService.GetJob(rs.Primary.Attributes["name"])
-			// TODO does this really check anything?
-			if err == nil {
-				return fmt.Errorf("Pipeline property still exists: %s", rs.Primary.ID)
-			}
-		}
+func ensureProperty(jobRef *client.Job, resource *terraform.ResourceState) (client.JobProperty, error) {
+	jobName, propertyId, err := resourceJobPropertyId(resource.Primary.Attributes["id"])
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	property, err := jobRef.GetProperty(propertyId)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO why is jobRef.Id not set?
+
+	jobAttribute := resource.Primary.Attributes["job"]
+	if jobName != jobAttribute {
+		return nil, fmt.Errorf("Property Job should be %s, was %s", jobName, jobAttribute)
+	}
+
+	expectedType := jobPropertyTypes[resource.Type]
+	propertyType := reflect.TypeOf(property)
+	if expectedType != propertyType {
+		return nil, fmt.Errorf("Job Property %s was type \"%s\", expected type \"%s\"",
+			propertyId, propertyType, expectedType)
+	}
+	return property, nil
 }

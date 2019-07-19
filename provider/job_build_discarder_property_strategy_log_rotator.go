@@ -21,8 +21,8 @@ func newJobBuildDiscarderPropertyStrategyLogRotator() *jobBuildDiscarderProperty
 	}
 }
 
-func (strategy *jobBuildDiscarderPropertyStrategyLogRotator) toClientStrategy(id string) client.JobPipelineBuildDiscarderPropertyStrategy {
-	clientStrategy := client.NewJobPipelineBuildDiscarderPropertyStrategyLogRotator()
+func (strategy *jobBuildDiscarderPropertyStrategyLogRotator) toClientStrategy(id string) client.JobBuildDiscarderPropertyStrategy {
+	clientStrategy := client.NewJobBuildDiscarderPropertyStrategyLogRotator()
 	clientStrategy.Id = id
 	clientStrategy.DaysToKeep = strategy.DaysToKeep
 	clientStrategy.NumToKeep = strategy.NumToKeep
@@ -31,8 +31,8 @@ func (strategy *jobBuildDiscarderPropertyStrategyLogRotator) toClientStrategy(id
 	return clientStrategy
 }
 
-func (s *jobBuildDiscarderPropertyStrategyLogRotator) fromClientStrategy(cs client.JobPipelineBuildDiscarderPropertyStrategy) jobBuildDiscarderPropertyStrategy {
-	clientStrategy := cs.(*client.JobPipelineBuildDiscarderPropertyStrategyLogRotator)
+func (s *jobBuildDiscarderPropertyStrategyLogRotator) fromClientStrategy(cs client.JobBuildDiscarderPropertyStrategy) jobBuildDiscarderPropertyStrategy {
+	clientStrategy := cs.(*client.JobBuildDiscarderPropertyStrategyLogRotator)
 	strategy := newJobBuildDiscarderPropertyStrategyLogRotator()
 	strategy.DaysToKeep = clientStrategy.DaysToKeep
 	strategy.NumToKeep = clientStrategy.NumToKeep

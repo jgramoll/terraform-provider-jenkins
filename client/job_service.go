@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"errors"
 	"strings"
 )
 
@@ -42,6 +43,9 @@ func (service *JobService) GetJobs(folder string) (*[]*Job, error) {
 }
 
 func (service *JobService) GetJob(jobFullName string) (*Job, error) {
+	if jobFullName == "" {
+		return nil, errors.New("Must provide a job name")
+	}
 	details, err := service.getJobDetails(jobFullName)
 	if err != nil {
 		return nil, err
