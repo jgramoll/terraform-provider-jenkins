@@ -8,6 +8,9 @@ import (
 // ErrJobGerritTriggerProjectNotFound job gerrit trigger project not found
 var ErrJobGerritTriggerProjectNotFound = errors.New("Could not find job gerrit trigger project")
 
+// ErrJobGerritTriggerEventNotFound job gerrit trigger event not found
+var ErrJobGerritTriggerEventNotFound = errors.New("Could not find job gerrit trigger event")
+
 type JobGerritTrigger struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger"`
 	Id      string   `xml:"id,attr"`
@@ -51,7 +54,7 @@ func NewJobGerritTrigger() *JobGerritTrigger {
 		ChangeSubjectParameterMode:  ParameterModePlain,
 		CommentTextParameterMode:    ParameterModeBase64,
 		ServerName:                  "__ANY__",
-		TriggerOnEvents:             &JobGerritTriggerOnEvents{},
+		TriggerOnEvents:             NewJobGerritTriggerOnEvents(),
 		DynamicTriggerConfiguration: false,
 	}
 }
@@ -88,4 +91,37 @@ func (trigger *JobGerritTrigger) DeleteProject(projectId string) error {
 		}
 	}
 	return ErrJobGerritTriggerProjectNotFound
+}
+
+func (trigger *JobGerritTrigger) GetEvent(eventId string) (JobGerritTriggerOnEvent, error) {
+	events := trigger.TriggerOnEvents.Items
+	for _, event := range *events {
+		if event.GetId() == eventId {
+			return event, nil
+		}
+	}
+	return nil, ErrJobGerritTriggerEventNotFound
+}
+
+func (trigger *JobGerritTrigger) UpdateEvent(event JobGerritTriggerOnEvent) error {
+	eventId := event.GetId()
+	events := *(trigger.TriggerOnEvents).Items
+	for i, e := range events {
+		if e.GetId() == eventId {
+			(*trigger.TriggerOnEvents.Items)[i] = event
+			return nil
+		}
+	}
+	return ErrJobGerritTriggerEventNotFound
+}
+
+func (trigger *JobGerritTrigger) DeleteEvent(eventId string) error {
+	events := *(trigger.TriggerOnEvents).Items
+	for i, e := range events {
+		if e.GetId() == eventId {
+			*trigger.TriggerOnEvents.Items = append(events[:i], events[i+1:]...)
+			return nil
+		}
+	}
+	return ErrJobGerritTriggerEventNotFound
 }

@@ -10,14 +10,12 @@ func NewJobGerritTriggerBranches() *JobGerritTriggerBranches {
 	}
 }
 
-func (branches *JobGerritTriggerBranches) Append(project *JobGerritTriggerBranch) *JobGerritTriggerBranches {
-	var newBranchItems []*JobGerritTriggerBranch
-	if branches.Items != nil {
-		newBranchItems = append(*branches.Items, project)
-	} else {
-		newBranchItems = append(newBranchItems, project)
-	}
+func (branches *JobGerritTriggerBranches) Append(branch *JobGerritTriggerBranch) *JobGerritTriggerBranches {
 	newBranches := NewJobGerritTriggerBranches()
-	newBranches.Items = &newBranchItems
+	if branches.Items != nil {
+		*newBranches.Items = append(*branches.Items, branch)
+	} else {
+		*newBranches.Items = []*JobGerritTriggerBranch{branch}
+	}
 	return newBranches
 }

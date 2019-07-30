@@ -26,7 +26,7 @@ func newSkipVotefromClient(clientSkipVote *client.JobGerritTriggerSkipVote) *ski
 
 func newClientSkipVote(v *[]*skipVote) *client.JobGerritTriggerSkipVote {
 	clientSkipVote := client.NewJobGerritTriggerSkipVote()
-	if (v != nil && len(*v) != 0) {
+	if v != nil && len(*v) != 0 {
 		vote := (*v)[0]
 		clientSkipVote.OnSuccessful = vote.OnSuccessful
 		clientSkipVote.OnFailed = vote.OnFailed

@@ -11,13 +11,11 @@ func NewGitScmExtensions() *GitScmExtensions {
 }
 
 func (extensions *GitScmExtensions) Append(extension GitScmExtension) *GitScmExtensions {
-	var newExtensionItems []GitScmExtension
-	if extensions.Items != nil {
-		newExtensionItems = append(*extensions.Items, extension)
-	} else {
-		newExtensionItems = append(newExtensionItems, extension)
-	}
 	newExtensions := NewGitScmExtensions()
-	newExtensions.Items = &newExtensionItems
+	if extensions.Items != nil {
+		*newExtensions.Items = append(*extensions.Items, extension)
+	} else {
+		*newExtensions.Items = []GitScmExtension{extension}
+	}
 	return newExtensions
 }

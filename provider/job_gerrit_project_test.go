@@ -112,7 +112,7 @@ func ensureProject(trigger *client.JobGerritTrigger, resource *terraform.Resourc
 	}
 	if project.Pattern != resource.Primary.Attributes["pattern"] {
 		return nil, fmt.Errorf("expected pattern %s, got %s",
-		resource.Primary.Attributes["pattern"], project.Pattern)
+			resource.Primary.Attributes["pattern"], project.Pattern)
 	}
 
 	return project, nil

@@ -134,4 +134,4 @@ resource "jenkins_job_gerrit_branch" "main" {
 ## TODO
 
 1. import resources
-1. Refactor appends
+1. Refactor unmarshall to use map

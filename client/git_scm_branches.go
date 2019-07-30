@@ -16,13 +16,11 @@ func NewGitScmBranches() *GitScmBranches {
 }
 
 func (branches *GitScmBranches) Append(branch *GitScmBranchSpec) *GitScmBranches {
-	var newBranchItems []*GitScmBranchSpec
-	if branches.Items != nil {
-		newBranchItems = append(*branches.Items, branch)
-	} else {
-		newBranchItems = append(newBranchItems, branch)
-	}
 	newBranches := NewGitScmBranches()
-	newBranches.Items = &newBranchItems
+	if branches.Items != nil {
+		*newBranches.Items = append(*branches.Items, branch)
+	} else {
+		*newBranches.Items = []*GitScmBranchSpec{branch}
+	}
 	return newBranches
 }

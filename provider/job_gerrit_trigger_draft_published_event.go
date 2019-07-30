@@ -6,25 +6,22 @@ import (
 )
 
 type jobGerritTriggerDraftPublishedEvent struct {
-	Job     string `mapstructure:"job"`
-	Trigger string `mapstructure:"trigger"`
 }
 
 func newJobGerritTriggerDraftPublishedEvent() *jobGerritTriggerDraftPublishedEvent {
 	return &jobGerritTriggerDraftPublishedEvent{}
 }
 
-func (branch *jobGerritTriggerDraftPublishedEvent) toClientExtension() *client.GitScmBranchSpec {
-	return &client.GitScmBranchSpec{
-		// TODO
-		// Id: branch.RefId,
-	}
+func (event *jobGerritTriggerDraftPublishedEvent) fromClientJobTriggerEvent(clientEvent client.JobGerritTriggerOnEvent) jobGerritTriggerEvent {
+	return newJobGerritTriggerDraftPublishedEvent()
 }
 
-func (config *jobGerritTriggerDraftPublishedEvent) setResourceData(d *schema.ResourceData) error {
-	// if err := d.Set("name", config.Name); err != nil {
-	// 	return err
-	// }
+func (event *jobGerritTriggerDraftPublishedEvent) toClientJobTriggerEvent(eventId string) (client.JobGerritTriggerOnEvent, error) {
+	clientEvent := client.NewJobGerritTriggerPluginDraftPublishedEvent()
+	clientEvent.Id = eventId
+	return clientEvent, nil
+}
+
+func (event *jobGerritTriggerDraftPublishedEvent) setResourceData(d *schema.ResourceData) error {
 	return nil
-	// return d.Set("credentials_id", config.CredentialsId)
 }

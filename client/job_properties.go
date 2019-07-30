@@ -16,14 +16,12 @@ func NewJobProperties() *JobProperties {
 }
 
 func (properties *JobProperties) Append(property JobProperty) *JobProperties {
-	var newPropertyItems []JobProperty
-	if properties.Items != nil {
-		newPropertyItems = append(*properties.Items, property)
-	} else {
-		newPropertyItems = append(newPropertyItems, property)
-	}
 	newProperties := NewJobProperties()
-	newProperties.Items = &newPropertyItems
+	if properties.Items != nil {
+		*newProperties.Items = append(*properties.Items, property)
+	} else {
+		*newProperties.Items = []JobProperty{property}
+	}
 	return newProperties
 }
 

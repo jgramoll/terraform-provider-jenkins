@@ -6,7 +6,6 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -19,9 +18,8 @@ func TestAccJobGitBranchBasic(t *testing.T) {
 	definition := "jenkins_job_git_scm_branch.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckJobBranchDestroy,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccJobGitScmBranchConfigBasic(jobName, branchName),
@@ -58,19 +56,4 @@ resource "jenkins_job_git_scm_branch" "main" {
 
   name = "%s"
 }`, jobName, branchName)
-}
-
-func testAccCheckJobBranchDestroy(s *terraform.State) error {
-	jobService := testAccProvider.Meta().(*Services).JobService
-	for _, rs := range s.RootModule().Resources {
-		if _, ok := jobPropertyTypes[rs.Type]; ok {
-			_, err := jobService.GetJob(rs.Primary.Attributes["name"])
-			// TODO does this really check anything?
-			if err == nil {
-				return fmt.Errorf("Job Git Scm User Remote Config still exists: %s", rs.Primary.ID)
-			}
-		}
-	}
-
-	return nil
 }

@@ -35,12 +35,12 @@ func TestGetJobDetails(t *testing.T) {
 	if job.Description != "" {
 		t.Fatalf("Job description should be %v, was %v", "", job.Description)
 	}
-	var properties = *(job.Properties).Items
+	properties := *(job.Properties).Items
 	if len(properties) != 1 {
 		t.Fatalf("Job should have %v properties, was %v", 1, len(properties))
 	}
-	var pipelineProperties = *properties[0].(*JobPipelineTriggersProperty)
-	var triggers = *pipelineProperties.Triggers
+	pipelineProperties := *properties[0].(*JobPipelineTriggersProperty)
+	triggers := *pipelineProperties.Triggers
 	if len(*triggers.Items) != 1 {
 		t.Fatalf("Job should have %v triggers, was %v", 1, len(*triggers.Items))
 	}
@@ -51,7 +51,7 @@ func TestGetJobDetails(t *testing.T) {
 	if gerritTrigger.ServerName != "gerrit.instructure.com" {
 		t.Fatalf("Job Trigger ServerName should be %v, was %v", "gerrit.instructure.com", gerritTrigger.ServerName)
 	}
-	var projects = *(gerritTrigger.Projects).Items
+	projects := *(gerritTrigger.Projects).Items
 	if len(projects) != 1 {
 		t.Fatalf("Job should have %v trigger gerrit projects, was %v", 1, len(projects))
 	}
@@ -62,7 +62,7 @@ func TestGetJobDetails(t *testing.T) {
 	if gerritProject.Pattern != "bridge-career-infrastructure" {
 		t.Fatalf("Job should have gerrit project pattern %v, was %v", "bridge-career-infrastructure", gerritProject.Pattern)
 	}
-	var branches = *(gerritProject.Branches).Items
+	branches := *(gerritProject.Branches).Items
 	if len(branches) != 1 {
 		t.Fatalf("Job should have %v trigger gerrit branches, was %v", 1, len(branches))
 	}
