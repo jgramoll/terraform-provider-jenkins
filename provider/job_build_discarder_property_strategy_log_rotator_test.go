@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -17,7 +18,7 @@ func init() {
 func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 	var jobRef client.Job
 	var strategyRefs []client.JobBuildDiscarderPropertyStrategy
-	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	jobResourceName := "jenkins_job.main"
 	strategyResourceName := "jenkins_job_build_discarder_property_log_rotator_strategy.main"
 	daysToKeep := "1"
@@ -34,7 +35,7 @@ func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckBuildDiscarderPropertyStrategies(&jobRef, []string{
 						strategyResourceName,
-					}, &strategyRefs),
+					}, &strategyRefs, testAccEnsureJobBuildDiscarderPropertyStrategyLogRotator),
 				),
 			},
 			{
@@ -44,7 +45,14 @@ func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckBuildDiscarderPropertyStrategies(&jobRef, []string{
 						strategyResourceName,
-					}, &strategyRefs),
+					}, &strategyRefs, testAccEnsureJobBuildDiscarderPropertyStrategyLogRotator),
+				),
+			},
+			{
+				Config: testAccJobBuildDiscarderPropertyConfigBasic(jobName, 0),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckJobExists(jobResourceName, &jobRef),
+					testAccCheckBuildDiscarderPropertyStrategies(&jobRef, []string{}, &strategyRefs, testAccEnsureJobBuildDiscarderPropertyStrategyLogRotator),
 				),
 			},
 		},
@@ -52,21 +60,44 @@ func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 }
 
 func testAccJobBuildDiscarderPropertyStrategyLogRotatorConfigBasic(jobName string, daysToKeep string) string {
-	return fmt.Sprintf(`
-resource "jenkins_job" "main" {
-	name = "%s"
-}
-
-resource "jenkins_job_build_discarder_property" "main" {
-  job = "${jenkins_job.main.id}"
-}
-
+	return testAccJobBuildDiscarderPropertyConfigBasic(jobName, 1) +
+		fmt.Sprintf(`
 resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
-  property = "${jenkins_job_build_discarder_property.main.id}"
+  property = "${jenkins_job_build_discarder_property.prop_1.id}"
 
   days_to_keep          = %s
   num_to_keep           = -1
   artifact_days_to_keep = -1
   artifact_num_to_keep  = -1
-}`, jobName, daysToKeep)
+}`, daysToKeep)
+}
+
+func testAccEnsureJobBuildDiscarderPropertyStrategyLogRotator(strategyInterface client.JobBuildDiscarderPropertyStrategy, rs *terraform.ResourceState) error {
+	strategy := strategyInterface.(*client.JobBuildDiscarderPropertyStrategyLogRotator)
+
+	_, _, strategyId, err := resourceJobPropertyStrategyId(rs.Primary.Attributes["id"])
+	if err != nil {
+		return err
+	}
+	if strategyId != strategy.Id {
+		return fmt.Errorf("JobBuildDiscarderPropertyStrategyLogRotator id should be %v, was %v", strategyId, strategy.Id)
+	}
+	err = testCompareResourceInt("JobBuildDiscarderPropertyStrategyLogRotator", "DaysToKeep", rs.Primary.Attributes["days_to_keep"], strategy.DaysToKeep)
+	if err != nil {
+		return err
+	}
+	err = testCompareResourceInt("JobBuildDiscarderPropertyStrategyLogRotator", "NumToKeep", rs.Primary.Attributes["num_to_keep"], strategy.NumToKeep)
+	if err != nil {
+		return err
+	}
+	err = testCompareResourceInt("JobBuildDiscarderPropertyStrategyLogRotator", "ArtifactDaysToKeep", rs.Primary.Attributes["artifact_days_to_keep"], strategy.ArtifactDaysToKeep)
+	if err != nil {
+		return err
+	}
+	err = testCompareResourceInt("JobBuildDiscarderPropertyStrategyLogRotator", "ArtifactNumToKeep", rs.Primary.Attributes["artifact_num_to_keep"], strategy.ArtifactNumToKeep)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

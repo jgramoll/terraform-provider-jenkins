@@ -35,7 +35,7 @@ func TestGetJobDetails(t *testing.T) {
 	if job.Description != "" {
 		t.Fatalf("Job description should be %v, was %v", "", job.Description)
 	}
-	var properties = *(*job.Properties).Items
+	var properties = *(job.Properties).Items
 	if len(properties) != 1 {
 		t.Fatalf("Job should have %v properties, was %v", 1, len(properties))
 	}
@@ -51,7 +51,7 @@ func TestGetJobDetails(t *testing.T) {
 	if gerritTrigger.ServerName != "gerrit.instructure.com" {
 		t.Fatalf("Job Trigger ServerName should be %v, was %v", "gerrit.instructure.com", gerritTrigger.ServerName)
 	}
-	var projects = *(*gerritTrigger.Projects).Items
+	var projects = *(gerritTrigger.Projects).Items
 	if len(projects) != 1 {
 		t.Fatalf("Job should have %v trigger gerrit projects, was %v", 1, len(projects))
 	}
@@ -62,7 +62,7 @@ func TestGetJobDetails(t *testing.T) {
 	if gerritProject.Pattern != "bridge-career-infrastructure" {
 		t.Fatalf("Job should have gerrit project pattern %v, was %v", "bridge-career-infrastructure", gerritProject.Pattern)
 	}
-	var branches = *(*gerritProject.Branches).Items
+	var branches = *(gerritProject.Branches).Items
 	if len(branches) != 1 {
 		t.Fatalf("Job should have %v trigger gerrit branches, was %v", 1, len(branches))
 	}
@@ -78,7 +78,7 @@ func TestGetJobDetails(t *testing.T) {
 		t.Fatalf("Job should have script path %v, was %v", "migrations.Jenkinsfile", definition.ScriptPath)
 	}
 	scm := *definition.SCM
-	userRemoteConfigs := *(*scm.UserRemoteConfigs).Items
+	userRemoteConfigs := *(scm.UserRemoteConfigs).Items
 	if len(userRemoteConfigs) != 1 {
 		t.Fatalf("Job should have %v user remote configs, was %v", 1, len(userRemoteConfigs))
 	}
@@ -91,7 +91,8 @@ func TestGetJobDetails(t *testing.T) {
 func TestCreateJob(t *testing.T) {
 	job := NewJob()
 	job.Name = "Bridge Career/my test job"
-	*(*job.Properties).Items = append(*(*job.Properties).Items, &JobPipelineTriggersProperty{})
+	newItems := append(*(job.Properties).Items, &JobPipelineTriggersProperty{})
+	job.Properties.Items = &newItems
 
 	var err error
 	err = jobService.CreateJob(job)

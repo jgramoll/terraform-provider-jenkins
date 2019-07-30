@@ -5,18 +5,18 @@ import (
 )
 
 func jobPipelineTriggersPropertyResource() *schema.Resource {
-	newJobGerritPropertyInterface := func() jobProperty {
+	newPropertyInterface := func() jobProperty {
 		return newJobPipelineTriggersProperty()
 	}
 	return &schema.Resource{
 		Create: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobPropertyCreate(d, m, newJobGerritPropertyInterface)
+			return resourceJobPropertyCreate(d, m, newPropertyInterface)
 		},
 		Read: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobPropertyRead(d, m, newJobGerritPropertyInterface)
+			return resourceJobPropertyRead(d, m, newPropertyInterface)
 		},
 		Delete: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobPropertyDelete(d, m, newJobGerritPropertyInterface)
+			return resourceJobPropertyDelete(d, m, newPropertyInterface)
 		},
 
 		Schema: map[string]*schema.Schema{

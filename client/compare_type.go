@@ -9,12 +9,24 @@ import (
 type CompareType int
 
 const (
-	CompareTypePlain CompareType = iota
+	CompareTypeUnknown CompareType = iota
+	CompareTypePlain
 	CompareTypeRegExp
 )
 
 func (t CompareType) String() string {
-	return [...]string{"PLAIN", "REG_EXP"}[t]
+	return [...]string{"UNKNOWN", "PLAIN", "REG_EXP"}[t]
+}
+
+func ParseCompareType(s string) (CompareType, error) {
+	switch s {
+	default:
+		return CompareTypeUnknown, errors.New(fmt.Sprintf("Unknown Compare Type %s", s))
+	case "PLAIN":
+		return CompareTypePlain, nil
+	case "REG_EXP":
+		return CompareTypeRegExp, nil
+	}
 }
 
 func (t CompareType) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
@@ -26,13 +38,10 @@ func (t *CompareType) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error
 	if err := d.DecodeElement(&s, &start); err != nil {
 		return err
 	}
-	switch s {
-	default:
-		return errors.New(fmt.Sprintf("Unknown Compare Type %s", s))
-	case "PLAIN":
-		*t = CompareTypePlain
-	case "REG_EXP":
-		*t = CompareTypeRegExp
+	compareType, err := ParseCompareType(s)
+	if err != nil {
+		return err
 	}
+	*t = compareType
 	return nil
 }

@@ -12,8 +12,8 @@ import (
 
 func TestAccJobGitScmCleanBeforeCheckoutExtensionBasic(t *testing.T) {
 	var jobRef client.Job
-	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-	jobResourceName := "jenkins_job.test"
+	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	jobResourceName := "jenkins_job.main"
 	// extensionResourceName := "jenkins_job_git_scm_clean_before_checkout_extension.test"
 
 	resource.Test(t, resource.TestCase{
@@ -33,17 +33,17 @@ func TestAccJobGitScmCleanBeforeCheckoutExtensionBasic(t *testing.T) {
 
 func testAccJobGitScmCleanBeforeCheckoutExtensionConfigBasic(jobName string) string {
 	return fmt.Sprintf(`
-resource "jenkins_job" "test" {
+resource "jenkins_job" "main" {
 	name = "%s"
 }
 
-resource "jenkins_job_git_scm" "test" {
-	job = "${jenkins_job.test.id}"
+resource "jenkins_job_git_scm" "main" {
+	job = "${jenkins_job.main.id}"
 }
 
-resource "jenkins_job_git_scm_clean_before_checkout_extension" "test" {
-  job = "${jenkins_job.test.id}"
-  scm = "${jenkins_job_git_scm.test.id}"
+resource "jenkins_job_git_scm_clean_before_checkout_extension" "main" {
+  job = "${jenkins_job.main.id}"
+  scm = "${jenkins_job_git_scm.main.id}"
 }`, jobName)
 }
 

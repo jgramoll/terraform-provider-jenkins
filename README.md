@@ -133,8 +133,5 @@ resource "jenkins_job_gerrit_branch" "main" {
 
 ## TODO
 
-1. rename job
 1. import resources
-1. use job name as part of id + guid
-1. fix reads to set state from remote
-1. use map for unmarshal class
+1. Refactor appends

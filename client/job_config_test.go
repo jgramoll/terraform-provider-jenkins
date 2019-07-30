@@ -9,7 +9,6 @@ import (
 
 func TestJobConfigSerialize(t *testing.T) {
 	job := NewJob()
-	job.Id = "job-id"
 	job.Description = "my-desc"
 
 	definition := NewCpsScmFlowDefinition()
@@ -57,7 +56,7 @@ func TestJobConfigSerialize(t *testing.T) {
 	discardPropertyStrategy.ArtifactNumToKeep = 4
 	discardProperty := NewJobBuildDiscarderProperty()
 	discardProperty.Id = "discard-id"
-	discardProperty.Strategy = discardPropertyStrategy
+	discardProperty.Strategy.Item = discardPropertyStrategy
 	job.Properties = job.Properties.Append(discardProperty)
 
 	config := JobConfigFromJob(job)

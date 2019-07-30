@@ -16,14 +16,12 @@ func NewJobTriggers() *JobTriggers {
 }
 
 func (triggers *JobTriggers) Append(trigger JobTrigger) *JobTriggers {
-	var newTriggerItems []JobTrigger
-	if triggers.Items != nil {
-		newTriggerItems = append(*triggers.Items, trigger)
-	} else {
-		newTriggerItems = append(newTriggerItems, trigger)
-	}
 	newTriggers := NewJobTriggers()
-	newTriggers.Items = &newTriggerItems
+	if triggers.Items != nil {
+		*newTriggers.Items = append(*triggers.Items, trigger)
+	} else {
+		*newTriggers.Items = append([]JobTrigger{}, trigger)
+	}
 	return newTriggers
 }
 
@@ -40,7 +38,7 @@ func (triggers *JobTriggers) UnmarshalXML(d *xml.Decoder, start xml.StartElement
 				if err != nil {
 					return err
 				}
-				*triggers.Items = append(*(*triggers).Items, trigger)
+				*triggers.Items = append(*(triggers).Items, trigger)
 			}
 		}
 		if end, ok := tok.(xml.EndElement); ok {

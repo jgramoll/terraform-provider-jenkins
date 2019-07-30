@@ -48,15 +48,14 @@ func resourceJobPropertyCreate(d *schema.ResourceData, m interface{}, createJobP
 	}
 
 	j.Properties = j.Properties.Append(property.toClientProperty(propertyId))
-
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[DEBUG] Creating job property:", propertyId)
 	d.SetId(fmt.Sprintf("%s_%s", jobName, propertyId))
+	log.Println("[DEBUG] Creating job property:", d.Id())
 	return resourceJobPropertyRead(d, m, createJobProperty)
 }
 

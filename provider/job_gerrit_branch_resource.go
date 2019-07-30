@@ -1,50 +1,68 @@
 package provider
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/jgramoll/terraform-provider-jenkins/client"
 	"github.com/mitchellh/mapstructure"
 )
 
-// ErrGitScmBranchMissingDefinition
-// var ErrGitScmBranchMissingDefinition = errors.New("definition must be provided for jenkins_git_scm_branch")
+// ErrInvalidTriggerGerritBranchId
+var ErrInvalidTriggerGerritBranchId = errors.New("Invalid gerrit branch id, must be jobName_propertyId_triggerId_projectId_branchId")
 
-func jobGerritProjectResource() *schema.Resource {
+func jobGerritBranchResource() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceJobGerritProjectCreate,
-		Update: resourceJobGerritProjectUpdate,
-		Read:   resourceJobGerritProjectRead,
-		Delete: resourceJobGerritProjectDelete,
+		Create: resourceJobGerritBranchCreate,
+		Update: resourceJobGerritBranchUpdate,
+		Read:   resourceJobGerritBranchRead,
+		Delete: resourceJobGerritBranchDelete,
 
 		Schema: map[string]*schema.Schema{
-			"trigger": &schema.Schema{
+			"project": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Id of the Trigger",
+				Description: "Id of the Project",
 				Required:    true,
 				ForceNew:    true,
 			},
 			"compare_type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Type of strategy to use for discarding job history",
+				Description: "Type of strategy to use for matching gerrit branch",
 				Required:    true,
 			},
 			"pattern": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Type of strategy to use for discarding job history",
+				Description: "Pattern to use for matching gerrit branch",
 				Required:    true,
 			},
 		},
 	}
 }
 
-func resourceJobGerritProjectCreate(d *schema.ResourceData, m interface{}) error {
-	jobName := d.Get("job").(string)
+func resourceJobGerritBranchId(triggerIdString string) (jobName string, propertyId string, triggerId string, projectId string, branchId string, err error) {
+	parts := strings.Split(triggerIdString, "_")
+	if len(parts) != 5 {
+		err = ErrInvalidTriggerGerritBranchId
+		return
+	}
+	jobName = parts[0]
+	propertyId = parts[1]
+	triggerId = parts[2]
+	projectId = parts[3]
+	branchId = parts[4]
+	return
+}
 
-	extension := newJobGerritProject()
+func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error {
+	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectId(d.Get("project").(string))
+
+	branch := newJobGerritBranch()
 	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &extension); err != nil {
+	if err := mapstructure.Decode(configRaw, &branch); err != nil {
 		return err
 	}
 
@@ -52,41 +70,108 @@ func resourceJobGerritProjectCreate(d *schema.ResourceData, m interface{}) error
 	if err != nil {
 		return err
 	}
-	// TODO
-	// extension.RefId = id.String()
+	branchId := id.String()
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
-	j, err := jobService.GetJob(d.Get("job").(string))
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err
 	}
 
-	// TODO better place for this cast?
-	// definition := j.Definition.(*client.CpsScmFlowDefinition)
-	// definition.SCM.AppendBranch(branch.toClientExtension())
+	property, err := j.GetProperty(propertyId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	trigger := triggerInterface.(*client.JobGerritTrigger)
+	project, err := trigger.GetProject(projectId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	clientBranch, err := branch.toClientBranch(branchId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	project.Branches = project.Branches.Append(clientBranch)
+
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[DEBUG] Creating job git scm branch:", id)
-	d.SetId(id.String())
-	return resourceJobGerritProjectRead(d, m)
+	d.SetId(fmt.Sprintf("%s_%s_%s_%s_%s", jobName, propertyId, triggerId, projectId, branchId))
+	log.Println("[DEBUG] Creating job gerrit branch:", d.Id())
+	return resourceJobGerritBranchRead(d, m)
 }
 
-func resourceJobGerritProjectUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceJobGerritProjectRead(d, m)
+func resourceJobGerritBranchUpdate(d *schema.ResourceData, m interface{}) error {
+	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchId(d.Id())
+
+	branch := newJobGerritBranch()
+	configRaw := d.Get("").(map[string]interface{})
+	if err := mapstructure.Decode(configRaw, &branch); err != nil {
+		return err
+	}
+	clientBranch, err := branch.toClientBranch(branchId)
+	if err != nil {
+		return err
+	}
+
+	jobService := m.(*Services).JobService
+	jobLock.Lock(jobName)
+	j, err := jobService.GetJob(jobName)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+
+	property, err := j.GetProperty(propertyId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	trigger := triggerInterface.(*client.JobGerritTrigger)
+	project, err := trigger.GetProject(projectId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	err = project.UpdateBranch(clientBranch)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+
+	err = jobService.UpdateJob(j)
+	jobLock.Unlock(jobName)
+	if err != nil {
+		return err
+	}
+
+	return resourceJobGerritBranchRead(d, m)
 }
 
-func resourceJobGerritProjectRead(d *schema.ResourceData, m interface{}) error {
-	jobName := d.Get("job").(string)
+func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
+	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.RLock(jobName)
-	_, err := jobService.GetJob(jobName)
+	j, err := jobService.GetJob(jobName)
 	jobLock.RUnlock(jobName)
 	if err != nil {
 		log.Println("[WARN] No Job found:", err)
@@ -94,39 +179,65 @@ func resourceJobGerritProjectRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
-	extension := newJobGerritProject()
-	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &extension); err != nil {
+	property, err := j.GetProperty(propertyId)
+	if err != nil {
 		return err
 	}
+	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
+	if err != nil {
+		return err
+	}
+	trigger := triggerInterface.(*client.JobGerritTrigger)
+	project, err := trigger.GetProject(projectId)
+	if err != nil {
+		return err
+	}
+	clientBranch, err := project.GetBranch(branchId)
+	if err != nil {
+		return err
+	}
+	branch := newJobGerritBranchFromClient(clientBranch)
 
-	// definition := j.Definition.(*client.CpsScmFlowDefinition)
-	// if definition == nil {
-	// 	return nil
-	// }
-
-	log.Println("[INFO] Updating from job git scm clean before checkout extension", extension)
-	return extension.setResourceData(d)
+	log.Println("[INFO] Updating gerrit branch state from client", d.Id())
+	return branch.setResourceData(d)
 }
 
-func resourceJobGerritProjectDelete(d *schema.ResourceData, m interface{}) error {
-
-	jobName := d.Get("job").(string)
-	jobLock.Lock(jobName)
+func resourceJobGerritBranchDelete(d *schema.ResourceData, m interface{}) error {
+	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchId(d.Id())
 
 	jobService := m.(*Services).JobService
-	_, err := jobService.GetJob(jobName)
+	jobLock.Lock(jobName)
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err
 	}
 
-	// definition := j.Definition.(*client.CpsScmFlowDefinition)
-	// if definition == nil {
-	// 	return nil
-	// }
+	property, err := j.GetProperty(propertyId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	trigger := triggerInterface.(*client.JobGerritTrigger)
+	project, err := trigger.GetProject(projectId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	err = project.DeleteBranch(branchId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+
+	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 
 	d.SetId("")
-	return nil
+	return err
 }

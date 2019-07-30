@@ -1,17 +1,12 @@
 package provider
 
-// "github.com/hashicorp/terraform/helper/schema"
+import (
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/jgramoll/terraform-provider-jenkins/client"
+)
 
 type jobTrigger interface {
-	// fromClientStage(client.Stage) stage
-	// toClientStage(*client.Config) (client.Stage, error)
-	// SetResourceData(*schema.ResourceData) error
-	// SetRefID(string)
-	// GetRefID() string
+	fromClientJobTrigger(client.JobTrigger) jobTrigger
+	toClientJobTrigger(id string) (client.JobTrigger, error)
+	setResourceData(*schema.ResourceData) error
 }
-
-// TODO why does this not like mapstructure
-// type baseStage struct {
-// 	Name  string           `mapstructure:"name"`
-// 	Type  client.StageType `mapstructure:"type"`
-// }

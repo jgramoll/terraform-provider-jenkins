@@ -7,8 +7,6 @@ import (
 
 type jobDefinition interface {
 	fromClientJobDefintion(client.JobDefinition) jobDefinition
-	toClientDefinition() client.JobDefinition
+	toClientDefinition(definitionId string) client.JobDefinition
 	setResourceData(*schema.ResourceData) error
-	setRefID(string)
-	getRefID() string
 }

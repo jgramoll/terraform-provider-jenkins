@@ -1,3 +1,5 @@
 package client
 
-type JobTrigger interface{}
+type JobTrigger interface {
+	GetId() string
+}

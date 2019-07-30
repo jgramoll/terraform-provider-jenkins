@@ -1,8 +1,8 @@
 package client
 
 import (
-	"log"
 	"encoding/xml"
+	"log"
 )
 
 type JobBuildDiscarderPropertyStrategyXml struct {

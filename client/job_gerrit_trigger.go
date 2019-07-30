@@ -1,9 +1,16 @@
 package client
 
-import "encoding/xml"
+import (
+	"encoding/xml"
+	"errors"
+)
+
+// ErrJobGerritTriggerProjectNotFound job gerrit trigger project not found
+var ErrJobGerritTriggerProjectNotFound = errors.New("Could not find job gerrit trigger project")
 
 type JobGerritTrigger struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger"`
+	Id      string   `xml:"id,attr"`
 
 	// spec
 	Projects *JobGerritTriggerProjects `xml:"gerritProjects"`
@@ -47,4 +54,38 @@ func NewJobGerritTrigger() *JobGerritTrigger {
 		TriggerOnEvents:             &JobGerritTriggerOnEvents{},
 		DynamicTriggerConfiguration: false,
 	}
+}
+
+func (trigger *JobGerritTrigger) GetId() string {
+	return trigger.Id
+}
+
+func (trigger *JobGerritTrigger) GetProject(projectId string) (*JobGerritTriggerProject, error) {
+	projects := *(trigger.Projects).Items
+	for _, project := range projects {
+		if project.Id == projectId {
+			return project, nil
+		}
+	}
+	return nil, ErrJobGerritTriggerProjectNotFound
+}
+
+func (trigger *JobGerritTrigger) UpdateProject(project *JobGerritTriggerProject) error {
+	oldProject, err := trigger.GetProject(project.Id)
+	if err != nil {
+		return err
+	}
+	*oldProject = *project
+	return nil
+}
+
+func (trigger *JobGerritTrigger) DeleteProject(projectId string) error {
+	projects := *(trigger.Projects).Items
+	for i, p := range projects {
+		if p.Id == projectId {
+			*trigger.Projects.Items = append(projects[:i], projects[i+1:]...)
+			return nil
+		}
+	}
+	return ErrJobGerritTriggerProjectNotFound
 }

@@ -28,9 +28,9 @@ func TestProvider(t *testing.T) {
 
 func TestProviderConfigure(t *testing.T) {
 	raw := map[string]interface{}{
-		"address":   "#address",
-		"username":  "#username",
-		"token": "#token",
+		"address":  "#address",
+		"username": "#username",
+		"token":    "#token",
 	}
 	rawConfig, configErr := config.NewRawConfig(raw)
 	if configErr != nil {

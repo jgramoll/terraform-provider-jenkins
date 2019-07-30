@@ -53,7 +53,6 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	// j.RefId = id.String()
 
 	log.Println("[DEBUG] Creating job:", j.Name)
 	jobService := m.(*Services).JobService
@@ -76,7 +75,7 @@ func resourceJobRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		log.Println("[WARN] No Job found:", d.Id())
 		d.SetId("")
-		return err
+		return nil
 	}
 
 	log.Printf("[INFO] Got job %s", j.Name)
@@ -92,6 +91,7 @@ func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
+		log.Println("[WARN] No Job found:", d.Id())
 		return err
 	}
 	JobFromResourceData(j, d)

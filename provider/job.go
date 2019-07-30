@@ -13,8 +13,6 @@ type job struct {
 
 func (j *job) toClientJob() *client.Job {
 	job := client.NewJob()
-	// Todo pass in id / data
-	// job.Id = j.RefId
 	job.Name = j.Name
 	job.Disabled = j.Disabled
 	return job

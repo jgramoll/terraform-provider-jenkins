@@ -56,7 +56,7 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 }
 
 func (job *Job) GetProperty(propertyId string) (JobProperty, error) {
-	properties := *(*job.Properties).Items
+	properties := *(job.Properties).Items
 	for _, property := range properties {
 		if property.GetId() == propertyId {
 			return property, nil
@@ -66,7 +66,7 @@ func (job *Job) GetProperty(propertyId string) (JobProperty, error) {
 }
 
 func (job *Job) DeleteProperty(propertyId string) error {
-	properties := *(*job.Properties).Items
+	properties := *(job.Properties).Items
 	for i, property := range properties {
 		if property.GetId() == propertyId {
 			properties = append(properties[:i], properties[i+1:]...)

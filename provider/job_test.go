@@ -10,9 +10,11 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
+var jenkinsFolder = "Bridge Career"
+
 func TestAccJobBasic(t *testing.T) {
 	var jobRef client.Job
-	name := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	name := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	newName := name + "-changed"
 	resourceName := "jenkins_job.main"
 

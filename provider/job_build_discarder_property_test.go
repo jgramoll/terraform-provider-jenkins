@@ -18,7 +18,7 @@ func TestAccJobBuildDiscarderPropertyBasic(t *testing.T) {
 	var jobRef client.Job
 	var properties []client.JobProperty
 
-	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	jobResourceName := "jenkins_job.main"
 	property1 := "jenkins_job_build_discarder_property.prop_1"
 	property2 := "jenkins_job_build_discarder_property.prop_2"
@@ -66,8 +66,5 @@ resource "jenkins_job_build_discarder_property" "prop_%v" {
 }`, i)
 	}
 
-	return fmt.Sprintf(`
-resource "jenkins_job" "main" {
-	name = "%s"
-}`, jobName) + properties
+	return testAccJobConfigBasic(jobName) + properties
 }

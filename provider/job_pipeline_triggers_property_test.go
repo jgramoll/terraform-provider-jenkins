@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,14 +11,14 @@ import (
 )
 
 func init() {
-	// jobPropertyTypes["jenkins_job_pipeline_triggers_property"] = ""
+	jobPropertyTypes["jenkins_job_pipeline_triggers_property"] = reflect.TypeOf((*client.JobPipelineTriggersProperty)(nil))
 }
 
-func TestAccJobGerritPropertyBasic(t *testing.T) {
+func TestAccJobPipelineTriggersPropertyBasic(t *testing.T) {
 	var jobRef client.Job
 	var properties []client.JobProperty
-	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-	jobResourceName := "jenkins_job.test"
+	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	jobResourceName := "jenkins_job.main"
 	property1 := "jenkins_job_pipeline_triggers_property.prop_1"
 	property2 := "jenkins_job_pipeline_triggers_property.prop_2"
 
@@ -26,7 +27,7 @@ func TestAccJobGerritPropertyBasic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccJobGerritPropertyConfigBasic(jobName, 2),
+				Config: testAccJobPipelineTriggersPropertyConfigBasic(jobName, 2),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckJobProperties(&jobRef, []string{
@@ -36,7 +37,7 @@ func TestAccJobGerritPropertyBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccJobGerritPropertyConfigBasic(jobName, 1),
+				Config: testAccJobPipelineTriggersPropertyConfigBasic(jobName, 1),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckJobProperties(&jobRef, []string{
@@ -45,7 +46,7 @@ func TestAccJobGerritPropertyBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccJobGerritPropertyConfigBasic(jobName, 0),
+				Config: testAccJobPipelineTriggersPropertyConfigBasic(jobName, 0),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckJobProperties(&jobRef, []string{}, &properties),
@@ -55,17 +56,14 @@ func TestAccJobGerritPropertyBasic(t *testing.T) {
 	})
 }
 
-func testAccJobGerritPropertyConfigBasic(jobName string, count int) string {
+func testAccJobPipelineTriggersPropertyConfigBasic(jobName string, count int) string {
 	properties := ""
 	for i := 1; i <= count; i++ {
 		properties += fmt.Sprintf(`
 resource "jenkins_job_pipeline_triggers_property" "prop_%v" {
-	job = "${jenkins_job.test.id}"
+	job = "${jenkins_job.main.id}"
 }`, i)
 	}
 
-	return fmt.Sprintf(`
-resource "jenkins_job" "test" {
-	name = "%s"
-}`, jobName) + properties
+	return testAccJobConfigBasic(jobName) + properties
 }

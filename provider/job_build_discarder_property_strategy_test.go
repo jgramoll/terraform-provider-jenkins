@@ -12,22 +12,35 @@ import (
 
 var jobBuildDiscarderPropertyStrategyTypes = map[string]reflect.Type{}
 
-func testAccCheckBuildDiscarderPropertyStrategies(jobRef *client.Job, expectedStrategyResourceNames []string, returnedStrategies *[]client.JobBuildDiscarderPropertyStrategy) resource.TestCheckFunc {
+func testAccCheckBuildDiscarderPropertyStrategies(
+	jobRef *client.Job,
+	expectedStrategyResourceNames []string,
+	returnedStrategies *[]client.JobBuildDiscarderPropertyStrategy,
+	ensureStrategyFunc func(client.JobBuildDiscarderPropertyStrategy, *terraform.ResourceState) error,
+) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		if jobRef.Properties == nil {
 			return fmt.Errorf("Unexpected nil properties")
 		}
 
-		if len(*jobRef.Properties.Items) != len(expectedStrategyResourceNames) {
-			return fmt.Errorf("Expected %v properties, found %v", len(expectedStrategyResourceNames), len(*jobRef.Properties.Items))
+		strategyCount := 0
+		for _, p := range *(jobRef.Properties.Items) {
+			buildDiscarderProperty := p.(*client.JobBuildDiscarderProperty)
+			if buildDiscarderProperty.Strategy.Item != nil {
+				strategyCount += 1
+			}
 		}
+		if strategyCount != len(expectedStrategyResourceNames) {
+			return fmt.Errorf("Expected %v Job Strategy Resources, found %v", expectedStrategyResourceNames, strategyCount)
+		}
+
 		for _, resourceName := range expectedStrategyResourceNames {
 			strategyResource, ok := s.RootModule().Resources[resourceName]
 			if !ok {
 				return fmt.Errorf("Job Property Resource not found: %s", resourceName)
 			}
 
-			strategy, err := ensureJobBuildDiscarderPropertyStrategy(jobRef, strategyResource)
+			strategy, err := ensureJobBuildDiscarderPropertyStrategy(jobRef, strategyResource, ensureStrategyFunc)
 			if err != nil {
 				return err
 			}
@@ -38,7 +51,11 @@ func testAccCheckBuildDiscarderPropertyStrategies(jobRef *client.Job, expectedSt
 	}
 }
 
-func ensureJobBuildDiscarderPropertyStrategy(jobRef *client.Job, resource *terraform.ResourceState) (client.JobBuildDiscarderPropertyStrategy, error) {
+func ensureJobBuildDiscarderPropertyStrategy(
+	jobRef *client.Job,
+	resource *terraform.ResourceState,
+	ensureStrategyFunc func(client.JobBuildDiscarderPropertyStrategy, *terraform.ResourceState) error,
+) (client.JobBuildDiscarderPropertyStrategy, error) {
 	_, propertyId, strategyId, err := resourceJobPropertyStrategyId(resource.Primary.Attributes["id"])
 	if err != nil {
 		return nil, err
@@ -62,5 +79,11 @@ func ensureJobBuildDiscarderPropertyStrategy(jobRef *client.Job, resource *terra
 		return nil, fmt.Errorf("Job Property Strategy %s was type \"%s\", expected type \"%s\"",
 			strategyId, strategyType, expectedType)
 	}
+
+	err = ensureStrategyFunc(strategy, resource)
+	if err != nil {
+		return nil, err
+	}
+
 	return strategy, nil
 }

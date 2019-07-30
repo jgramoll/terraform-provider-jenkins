@@ -12,8 +12,8 @@ import (
 
 func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 	var jobRef client.Job
-	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-	jobResourceName := "jenkins_job.test"
+	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	jobResourceName := "jenkins_job.main"
 	propertyResourceName := "jenkins_job_build_discarder_property.test"
 	strategy := "hudson.tasks.LogRotator"
 	newStrategy := "hudson.tasks.LogRotatorNew"
@@ -43,12 +43,12 @@ func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 
 func testAccJobGerritTriggerPatchsetCreatedEventConfigBasic(jobName string, strategy string) string {
 	return fmt.Sprintf(`
-resource "jenkins_job" "test" {
+resource "jenkins_job" "main" {
 	name = "%s"
 }
 
-resource "jenkins_job_build_discarder_property" "test" {
-  job = "${jenkins_job.test.id}"
+resource "jenkins_job_build_discarder_property" "main" {
+  job = "${jenkins_job.main.id}"
 
   strategy              = "%s"
   days_to_keep          = "1"

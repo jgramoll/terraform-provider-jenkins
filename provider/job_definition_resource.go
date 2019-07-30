@@ -1,28 +1,43 @@
 package provider
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mitchellh/mapstructure"
 )
 
+// ErrInvalidDefinitionId
+var ErrInvalidDefinitionId = errors.New("Invalid definition id, must be jobName_definitionId")
+
+func resourceJobDefinitionId(propertyString string) (jobName string, definitionId string, err error) {
+	parts := strings.Split(propertyString, "_")
+	if len(parts) != 2 {
+		err = ErrInvalidDefinitionId
+		return
+	}
+	jobName = parts[0]
+	definitionId = parts[1]
+	return
+}
+
 func resourceJobDefinitionCreate(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	s := createJobDefinition()
+	jobName := d.Get("job").(string)
+	definition := createJobDefinition()
 	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &s); err != nil {
+	if err := mapstructure.Decode(configRaw, &definition); err != nil {
 		return err
 	}
-	definition := s.(jobDefinition)
 
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return err
 	}
-	definition.setRefID(id.String())
-
-	jobName := d.Get("job").(string)
+	definitionId := id.String()
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
@@ -32,28 +47,50 @@ func resourceJobDefinitionCreate(d *schema.ResourceData, m interface{}, createJo
 		return err
 	}
 
-	j.Definition = definition.toClientDefinition()
+	j.Definition = definition.toClientDefinition(definitionId)
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[DEBUG] Creating job definition:", id)
-	d.SetId(id.String())
+	d.SetId(fmt.Sprintf("%s_%s", jobName, definitionId))
+	log.Println("[DEBUG] Creating job definition:", d.Id())
 	return resourceJobDefinitionRead(d, m, createJobDefinition)
 }
 
-func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	jobName := d.Get("job").(string)
-
-	s := createJobDefinition()
-	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &s); err != nil {
+func resourceJobDefinitionRead(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
+	jobService := m.(*Services).JobService
+	jobName, _, err := resourceJobDefinitionId(d.Id())
+	if err != nil {
 		return err
 	}
-	definition := s.(jobDefinition)
-	definition.setRefID(d.Id())
+	jobLock.RLock(jobName)
+	j, err := jobService.GetJob(jobName)
+	jobLock.RUnlock(jobName)
+	if err != nil {
+		log.Println("[WARN] No Job found:", err)
+		d.SetId("")
+		return nil
+	}
+
+	definition := createJobDefinition().fromClientJobDefintion(j.Definition)
+
+	log.Println("[INFO] Reading from job definition", d.Id())
+	return definition.setResourceData(d)
+}
+
+func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
+	jobName, definitionId, err := resourceJobDefinitionId(d.Id())
+	if err != nil {
+		return err
+	}
+
+	definition := createJobDefinition()
+	configRaw := d.Get("").(map[string]interface{})
+	if err := mapstructure.Decode(configRaw, &definition); err != nil {
+		return err
+	}
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
@@ -63,7 +100,7 @@ func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJo
 		return err
 	}
 
-	j.Definition = definition.toClientDefinition()
+	j.Definition = definition.toClientDefinition(definitionId)
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {
@@ -74,36 +111,14 @@ func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJo
 	return resourceJobDefinitionRead(d, m, createJobDefinition)
 }
 
-func resourceJobDefinitionRead(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	jobName := d.Get("job").(string)
-
-	jobService := m.(*Services).JobService
-	jobLock.RLock(jobName)
-	j, err := jobService.GetJob(jobName)
-	jobLock.RUnlock(jobName)
-	if err != nil {
-		log.Println("[WARN] No Job found:", err)
-		d.SetId("")
-		return nil
-	}
-
-	definition := createJobDefinition()
-	definition = definition.fromClientJobDefintion(j.Definition)
-	if definition == nil {
-		return nil
-	}
-
-	log.Println("[INFO] Updating from job definition", definition)
-	return definition.setResourceData(d)
-}
-
 func resourceJobDefinitionDelete(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-
-	jobName := d.Get("job").(string)
-
+	jobName, _, err := resourceJobDefinitionId(d.Id())
+	if err != nil {
+		return err
+	}
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
-	j, err := jobService.GetJob(d.Get("job").(string))
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err

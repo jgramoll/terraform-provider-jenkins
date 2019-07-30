@@ -1,10 +1,12 @@
 package client
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"strings"
 )
+
+var ErrJobNameRequired = errors.New("Cannot create a job without a name")
 
 // JobService for interacting with jenkins jobs
 type JobService struct {
@@ -90,6 +92,9 @@ func (service *JobService) getJobConfig(jobFullName string) (*jobConfig, error) 
 }
 
 func (service *JobService) CreateJob(job *Job) error {
+	if job.Name == "" {
+		return ErrJobNameRequired
+	}
 	path := fmt.Sprintf("/%s/createItem", jobNameToUrl(job.Folder()))
 	req, err := service.NewRequestWithBody("POST", path, JobConfigFromJob(job))
 	if err != nil {

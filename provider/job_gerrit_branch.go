@@ -6,27 +6,36 @@ import (
 )
 
 type jobGerritBranch struct {
-	Project string `mapstructure:"project"`
-	// TODO enum / validation
 	CompareType string `mapstructure:"compare_type"`
 	Pattern     string `mapstructure:"pattern"`
 }
 
-func newJobGerritBranch() *jobGerritProject {
-	return &jobGerritProject{}
+func newJobGerritBranch() *jobGerritBranch {
+	return &jobGerritBranch{}
 }
 
-func (branch *jobGerritBranch) toClientProperty() *client.GitScmBranchSpec {
-	return &client.GitScmBranchSpec{
-		// TODO
-		// Id: branch.RefId,
+func newJobGerritBranchFromClient(clientBranch *client.JobGerritTriggerBranch) *jobGerritBranch {
+	branch := newJobGerritBranch()
+	branch.CompareType = clientBranch.CompareType.String()
+	branch.Pattern = clientBranch.Pattern
+	return branch
+}
+
+func (branch *jobGerritBranch) toClientBranch(branchId string) (*client.JobGerritTriggerBranch, error) {
+	clientBranch := client.NewJobGerritTriggerBranch()
+	clientBranch.Id = branchId
+	compareType, err := client.ParseCompareType(branch.CompareType)
+	if err != nil {
+		return nil, err
 	}
+	clientBranch.CompareType = compareType
+	clientBranch.Pattern = branch.Pattern
+	return clientBranch, nil
 }
 
-func (config *jobGerritBranch) setResourceData(d *schema.ResourceData) error {
-	// if err := d.Set("name", config.Name); err != nil {
-	// 	return err
-	// }
-	return nil
-	// return d.Set("credentials_id", config.CredentialsId)
+func (branch *jobGerritBranch) setResourceData(d *schema.ResourceData) error {
+	if err := d.Set("compare_type", branch.CompareType); err != nil {
+		return err
+	}
+	return d.Set("pattern", branch.Pattern)
 }

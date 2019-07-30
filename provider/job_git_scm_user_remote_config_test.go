@@ -12,10 +12,10 @@ import (
 
 func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 	var jobRef client.Job
-	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	refspec := "my-refspec"
 	newRefspec := "new-my-refspec"
-	jobResourceName := "jenkins_job.test"
+	jobResourceName := "jenkins_job.main"
 	definition := "jenkins_job_git_scm_user_remote_config.test"
 
 	resource.Test(t, resource.TestCase{
@@ -47,17 +47,17 @@ func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 
 func testAccJobGitScmUserRemoteConfigConfigBasic(jobName string, refspec string) string {
 	return fmt.Sprintf(`
-resource "jenkins_job" "test" {
+resource "jenkins_job" "main" {
 	name = "%s"
 }
 
-resource "jenkins_job_git_scm" "test" {
-	job = "${jenkins_job.test.id}"
+resource "jenkins_job_git_scm" "main" {
+	job = "${jenkins_job.main.id}"
 }
 
-resource "jenkins_job_git_scm_user_remote_config" "test" {
-	job = "${jenkins_job.test.id}"
-	scm = "${jenkins_job_git_scm.test.id}"
+resource "jenkins_job_git_scm_user_remote_config" "main" {
+	job = "${jenkins_job.main.id}"
+	scm = "${jenkins_job_git_scm.main.id}"
 
   refspec        = "%s"
   url            = "my-test-url"

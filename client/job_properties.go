@@ -41,14 +41,14 @@ func (properties *JobProperties) UnmarshalXML(d *xml.Decoder, start xml.StartEle
 				if err != nil {
 					return err
 				}
-				*properties.Items = append(*(*properties).Items, property)
+				*properties.Items = append(*(properties).Items, property)
 			case "org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty":
 				property := NewJobPipelineTriggersProperty()
 				err := d.DecodeElement(property, &elem)
 				if err != nil {
 					return err
 				}
-				*properties.Items = append(*(*properties).Items, property)
+				*properties.Items = append(*(properties).Items, property)
 			}
 		}
 		if end, ok := tok.(xml.EndElement); ok {

@@ -9,12 +9,24 @@ import (
 type ParameterMode int
 
 const (
-	ParameterModePlain ParameterMode = iota
+	ParameterModeUnknown ParameterMode = iota
+	ParameterModePlain
 	ParameterModeBase64
 )
 
 func (t ParameterMode) String() string {
-	return [...]string{"PLAIN", "BASE64"}[t]
+	return [...]string{"UNKNOWN", "PLAIN", "BASE64"}[t]
+}
+
+func ParseParameterMode(s string) (ParameterMode, error) {
+	switch s {
+	default:
+		return ParameterModeUnknown, errors.New(fmt.Sprintf("Unknown Parameter Mode %s", s))
+	case "PLAIN":
+		return ParameterModePlain, nil
+	case "BASE64":
+		return ParameterModeBase64, nil
+	}
 }
 
 func (t ParameterMode) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
@@ -26,13 +38,11 @@ func (t *ParameterMode) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 	if err := d.DecodeElement(&s, &start); err != nil {
 		return err
 	}
-	switch s {
-	default:
-		return errors.New(fmt.Sprintf("Unknown Parameter Mode %s", s))
-	case "PLAIN":
-		*t = ParameterModePlain
-	case "BASE64":
-		*t = ParameterModeBase64
+	mode, err := ParseParameterMode(s)
+	if err != nil {
+		return err
 	}
+
+	*t = mode
 	return nil
 }

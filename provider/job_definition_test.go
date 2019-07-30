@@ -1,45 +1,58 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
-	"log"
+	"reflect"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-// var jobPropertyTypes map[string]string // TODO TYPE?
+var jobDefinitionTypes = map[string]reflect.Type{}
 
-func testAccCheckJobDefinition(resourceName string, expected client.JobDefinition, definition client.JobDefinition) resource.TestCheckFunc {
+func testAccCheckJobDefinition(jobRef *client.Job, expectedDefinitionResourceName string, ensureJobDefinitionFunc func(client.JobDefinition, *terraform.ResourceState) error) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
+		definitionResource, ok := s.RootModule().Resources[expectedDefinitionResourceName]
 		if !ok {
-			return fmt.Errorf("Job not found: %s", resourceName)
+			return fmt.Errorf("Job Defintion Resource not found: %s", expectedDefinitionResourceName)
 		}
 
-		jobService := testAccProvider.Meta().(*Services).JobService
-		job, err := jobService.GetJob(rs.Primary.Attributes["name"])
+		_, err := ensureJobDefinition(jobRef, definitionResource, ensureJobDefinitionFunc)
 		if err != nil {
 			return err
 		}
-		log.Println("found job", job)
-
 		return nil
 	}
 }
 
-func testAccCheckJobDefinitionDestroy(s *terraform.State) error {
-	jobService := testAccProvider.Meta().(*Services).JobService
-	for _, rs := range s.RootModule().Resources {
-		if _, ok := jobPropertyTypes[rs.Type]; ok {
-			_, err := jobService.GetJob(rs.Primary.Attributes["name"])
-			// TODO does this really check anything?
-			if err == nil {
-				return fmt.Errorf("Job Definition still exists: %s", rs.Primary.ID)
-			}
-		}
+func ensureJobDefinition(jobRef *client.Job, rs *terraform.ResourceState, ensureJobDefinitionFunc func(client.JobDefinition, *terraform.ResourceState) error) (client.JobDefinition, error) {
+	_, definitionId, err := resourceJobDefinitionId(rs.Primary.Attributes["id"])
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	expectedType := jobDefinitionTypes[rs.Type]
+	definitionType := reflect.TypeOf(jobRef.Definition)
+	if expectedType != definitionType {
+		return nil, fmt.Errorf("Job Defintion %s was type \"%s\", expected type \"%s\"",
+			definitionId, definitionType, expectedType)
+	}
+
+	err = ensureJobDefinitionFunc(jobRef.Definition, rs)
+	if err != nil {
+		return nil, err
+	}
+
+	return jobRef.Definition, nil
+}
+
+func testAccCheckNoJobDefinition(jobRef *client.Job) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if jobRef.Definition != nil {
+			return errors.New("Job should not have definition")
+		}
+		return nil
+	}
 }

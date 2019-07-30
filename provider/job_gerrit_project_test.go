@@ -12,63 +12,108 @@ import (
 
 func TestAccJobGerritProjectBasic(t *testing.T) {
 	var jobRef client.Job
-	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
-	jobResourceName := "jenkins_job.test"
-	propertyResourceName := "jenkins_job_build_discarder_property.test"
-	strategy := "hudson.tasks.LogRotator"
-	newStrategy := "hudson.tasks.LogRotatorNew"
+	var projects []*client.JobGerritTriggerProject
+	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	jobResourceName := "jenkins_job.main"
+	projectResourceName := "jenkins_job_gerrit_project.main"
+	pattern := "bridge-skills"
+	newPattern := "new-bridge-skills"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccJobGerritProjectDestroy,
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccJobGerritProjectConfigBasic(jobName, strategy),
+				Config: testAccJobGerritProjectConfigPattern(jobName, pattern),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(propertyResourceName, "strategy", strategy),
+					resource.TestCheckResourceAttr(projectResourceName, "pattern", pattern),
 					testAccCheckJobExists(jobResourceName, &jobRef),
+					testAccCheckJobGerritProjects(&jobRef, []string{
+						projectResourceName,
+					}, &projects),
 				),
 			},
 			{
-				Config: testAccJobGerritProjectConfigBasic(jobName, newStrategy),
+				Config: testAccJobGerritProjectConfigPattern(jobName, newPattern),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(propertyResourceName, "strategy", newStrategy),
+					resource.TestCheckResourceAttr(projectResourceName, "pattern", newPattern),
 					testAccCheckJobExists(jobResourceName, &jobRef),
+					testAccCheckJobGerritProjects(&jobRef, []string{
+						projectResourceName,
+					}, &projects),
+				),
+			},
+			{
+				Config: testAccJobGerritTriggerConfigBasic(jobName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					testAccCheckJobExists(jobResourceName, &jobRef),
+					testAccCheckJobGerritProjects(&jobRef, []string{}, &projects),
 				),
 			},
 		},
 	})
 }
 
-func testAccJobGerritProjectConfigBasic(jobName string, strategy string) string {
-	return fmt.Sprintf(`
-resource "jenkins_job" "test" {
-	name = "%s"
+func testAccJobGerritProjectConfigBasic(jobName string) string {
+	return testAccJobGerritProjectConfigPattern(jobName, "bridge-skills")
 }
 
-resource "jenkins_job_build_discarder_property" "test" {
-  job = "${jenkins_job.test.id}"
+func testAccJobGerritProjectConfigPattern(jobName string, pattern string) string {
+	return testAccJobGerritTriggerConfigBasic(jobName) + fmt.Sprintf(`
+resource "jenkins_job_gerrit_project" "main" {
+	trigger = "${jenkins_job_gerrit_trigger.trigger_1.id}"
 
-  strategy              = "%s"
-  days_to_keep          = "1"
-  num_to_keep           = "2"
-  artifact_days_to_keep = "3"
-  artifact_num_to_keep  = "4"
-}`, jobName, strategy)
+	compare_type = "PLAIN"
+	pattern      = "%v"
+}
+`, pattern)
 }
 
-func testAccJobGerritProjectDestroy(s *terraform.State) error {
-	jobService := testAccProvider.Meta().(*Services).JobService
-	for _, rs := range s.RootModule().Resources {
-		if _, ok := jobPropertyTypes[rs.Type]; ok {
-			_, err := jobService.GetJob(rs.Primary.Attributes["name"])
-			// TODO does this really check anything?
-			if err == nil {
-				return fmt.Errorf("Job Git Scm User Remote Config still exists: %s", rs.Primary.ID)
-			}
+func testAccCheckJobGerritProjects(jobRef *client.Job, expectedResourceNames []string, returnProjects *[]*client.JobGerritTriggerProject) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
+		trigger := (*property.Triggers.Items)[0].(*client.JobGerritTrigger)
+
+		if len(*trigger.Projects.Items) != len(expectedResourceNames) {
+			return fmt.Errorf("Expected %v projects, found %v", len(expectedResourceNames), len(*jobRef.Properties.Items))
 		}
+		for _, resourceName := range expectedResourceNames {
+			resource, ok := s.RootModule().Resources[resourceName]
+			if !ok {
+				return fmt.Errorf("Job Gerrit Project Resource not found: %s", resourceName)
+			}
+
+			project, err := ensureProject(trigger, resource)
+			if err != nil {
+				return err
+			}
+			*returnProjects = append(*returnProjects, project)
+		}
+
+		return nil
+	}
+}
+
+func ensureProject(trigger *client.JobGerritTrigger, resource *terraform.ResourceState) (*client.JobGerritTriggerProject, error) {
+	_, _, _, projectId, err := resourceJobGerritProjectId(resource.Primary.Attributes["id"])
+	if err != nil {
+		return nil, err
 	}
 
-	return nil
+	project, err := trigger.GetProject(projectId)
+	if err != nil {
+		return nil, err
+	}
+
+	if project.CompareType.String() != resource.Primary.Attributes["compare_type"] {
+		return nil, fmt.Errorf("expected compare_type %s, got %s",
+			resource.Primary.Attributes["compare_type"], project.CompareType)
+	}
+	if project.Pattern != resource.Primary.Attributes["pattern"] {
+		return nil, fmt.Errorf("expected pattern %s, got %s",
+		resource.Primary.Attributes["pattern"], project.Pattern)
+	}
+
+	return project, nil
 }

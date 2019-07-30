@@ -11,13 +11,11 @@ func NewJobGerritTriggerProjects() *JobGerritTriggerProjects {
 }
 
 func (projects *JobGerritTriggerProjects) Append(project *JobGerritTriggerProject) *JobGerritTriggerProjects {
-	var newProjectItems []*JobGerritTriggerProject
-	if projects.Items != nil {
-		newProjectItems = append(*projects.Items, project)
-	} else {
-		newProjectItems = append(newProjectItems, project)
-	}
 	newProjects := NewJobGerritTriggerProjects()
-	newProjects.Items = &newProjectItems
+	if projects.Items != nil {
+		*newProjects.Items = append(*projects.Items, project)
+	} else {
+		*newProjects.Items = []*JobGerritTriggerProject{project}
+	}
 	return newProjects
 }

@@ -63,7 +63,7 @@ func resourceJobBuildDiscarderPropertyStrategyCreate(d *schema.ResourceData, m i
 	}
 
 	d.SetId(fmt.Sprintf("%s_%s_%s", jobName, propertyId, strategyId))
-	log.Println("[DEBUG] Creating", d.Id())
+	log.Println("[DEBUG] Creating build discarder propety strategy", d.Id())
 	return resourceJobBuildDiscarderPropertyStrategyRead(d, m, createJobBuildDiscarderPropertyStrategy)
 }
 
@@ -94,7 +94,7 @@ func resourceJobBuildDiscarderPropertyStrategyRead(d *schema.ResourceData, m int
 	}
 	strategy := createJobBuildDiscarderPropertyStrategy().fromClientStrategy(discardProperty.Strategy.Item)
 
-	log.Println("[INFO] setting state for ", d.Id())
+	log.Println("[INFO] Reading build discarder propety strategy", d.Id())
 	return strategy.setResourceData(d)
 }
 
@@ -132,18 +132,18 @@ func resourceJobBuildDiscarderPropertyStrategyUpdate(d *schema.ResourceData, m i
 		return err
 	}
 
-	log.Println("[DEBUG] Updating", d.Id())
+	log.Println("[DEBUG] Updating build discarder propety strategy", d.Id())
 	return resourceJobBuildDiscarderPropertyStrategyRead(d, m, createJobBuildDiscarderPropertyStrategy)
 }
 
 func resourceJobBuildDiscarderPropertyStrategyDelete(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
+
 	jobName, propertyId, err := resourceJobPropertyId(d.Get("property").(string))
 	if err != nil {
 		return err
 	}
-	jobLock.Lock(jobName)
-
 	jobService := m.(*Services).JobService
+	jobLock.Lock(jobName)
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
@@ -155,7 +155,6 @@ func resourceJobBuildDiscarderPropertyStrategyDelete(d *schema.ResourceData, m i
 		jobLock.Unlock(jobName)
 		return err
 	}
-	// TODO better place for this cast?
 	discardProperty := property.(*client.JobBuildDiscarderProperty)
 	discardProperty.Strategy.Item = nil
 	err = jobService.UpdateJob(j)

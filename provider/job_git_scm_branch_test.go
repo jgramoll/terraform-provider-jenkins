@@ -12,10 +12,10 @@ import (
 
 func TestAccJobGitBranchBasic(t *testing.T) {
 	var jobRef client.Job
-	jobName := fmt.Sprintf("Bridge Career/tf-acc-test-%s", acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
+	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	branchName := "my-branch"
 	newBranchName := "new-my-branch"
-	jobResourceName := "jenkins_job.test"
+	jobResourceName := "jenkins_job.main"
 	definition := "jenkins_job_git_scm_branch.test"
 
 	resource.Test(t, resource.TestCase{
@@ -43,18 +43,18 @@ func TestAccJobGitBranchBasic(t *testing.T) {
 
 func testAccJobGitScmBranchConfigBasic(jobName string, branchName string) string {
 	return fmt.Sprintf(`
-resource "jenkins_job" "test" {
+resource "jenkins_job" "main" {
 	name = "%s"
 }
 
-resource "jenkins_job_git_scm" "test" {
-	job = "${jenkins_job.test.id}"
+resource "jenkins_job_git_scm" "main" {
+	job = "${jenkins_job.main.id}"
 }
 
 
-resource "jenkins_job_git_scm_branch" "test" {
-	job = "${jenkins_job.test.id}"
-  scm = "${jenkins_job_git_scm.test.id}"
+resource "jenkins_job_git_scm_branch" "main" {
+	job = "${jenkins_job.main.id}"
+  scm = "${jenkins_job_git_scm.main.id}"
 
   name = "%s"
 }`, jobName, branchName)
