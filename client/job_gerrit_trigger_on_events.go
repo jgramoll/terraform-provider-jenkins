@@ -40,6 +40,13 @@ func (events *JobGerritTriggerOnEvents) UnmarshalXML(d *xml.Decoder, start xml.S
 					return err
 				}
 				*events.Items = append(*events.Items, event)
+			case "com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginPatchsetCreatedEvent":
+				event := NewJobGerritTriggerPluginPatchsetCreatedEvent()
+				err := d.DecodeElement(event, &elem)
+				if err != nil {
+					return err
+				}
+				*events.Items = append(*events.Items, event)
 			}
 		}
 		if end, ok := tok.(xml.EndElement); ok {

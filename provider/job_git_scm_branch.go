@@ -6,7 +6,6 @@ import (
 )
 
 type jobGitScmBranch struct {
-	Job  string `mapstructure:"job"`
 	Name string `mapstructure:"name"`
 }
 
@@ -14,17 +13,19 @@ func newJobGitScmBranch() *jobGitScmBranch {
 	return &jobGitScmBranch{}
 }
 
-func (branch *jobGitScmBranch) toClientBranch() *client.GitScmBranchSpec {
-	return &client.GitScmBranchSpec{
-		// Id:   branch.RefId,
-		Name: branch.Name,
-	}
+func newGitScmBranchFromClient(clientBranch *client.GitScmBranchSpec) *jobGitScmBranch {
+	branch := newJobGitScmBranch()
+	branch.Name = clientBranch.Name
+	return branch
 }
 
-func (config *jobGitScmBranch) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("name", config.Name); err != nil {
-		return err
-	}
-	return nil
-	// return d.Set("credentials_id", config.CredentialsId)
+func (branch *jobGitScmBranch) toClientBranch(branchId string) *client.GitScmBranchSpec {
+	clientBranch := client.NewGitScmBranchSpec()
+	clientBranch.Id = branchId
+	clientBranch.Name = branch.Name
+	return clientBranch
+}
+
+func (branch *jobGitScmBranch) setResourceData(d *schema.ResourceData) error {
+	return d.Set("name", branch.Name)
 }

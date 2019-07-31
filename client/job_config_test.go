@@ -65,7 +65,7 @@ func TestJobConfigSerialize(t *testing.T) {
 		t.Fatalf("failed to serialize xml %s", err)
 	}
 	result := string(resultBytes)
-	expected := `<flow-definition id="job-id">
+	expected := `<flow-definition>
 	<description>my-desc</description>
 	<keepDependencies>false</keepDependencies>
 	<properties>

@@ -6,7 +6,6 @@ import (
 )
 
 type jobGitScmCleanBeforeCheckoutExtension struct {
-	Job string `mapstructure:"job"`
 	Scm string `mapstructure:"scm"`
 }
 
@@ -14,16 +13,16 @@ func newJobGitScmCleanBeforeCheckoutExtension() *jobGitScmCleanBeforeCheckoutExt
 	return &jobGitScmCleanBeforeCheckoutExtension{}
 }
 
-func (branch *jobGitScmCleanBeforeCheckoutExtension) toClientExtension() *client.GitScmBranchSpec {
-	return &client.GitScmBranchSpec{
-		// Id: branch.RefId,
-	}
+func (branch *jobGitScmCleanBeforeCheckoutExtension) fromClientExtension(clientExtension client.GitScmExtension) jobGitScmExtension {
+	return newJobGitScmCleanBeforeCheckoutExtension()
+}
+
+func (branch *jobGitScmCleanBeforeCheckoutExtension) toClientExtension(extensionId string) (client.GitScmExtension, error) {
+	clientExtension := client.NewGitScmCleanBeforeCheckoutExtension()
+	clientExtension.Id = extensionId
+	return clientExtension, nil
 }
 
 func (config *jobGitScmCleanBeforeCheckoutExtension) setResourceData(d *schema.ResourceData) error {
-	// if err := d.Set("name", config.Name); err != nil {
-	// 	return err
-	// }
 	return nil
-	// return d.Set("credentials_id", config.CredentialsId)
 }

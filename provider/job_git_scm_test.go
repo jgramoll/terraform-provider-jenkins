@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"reflect"
-	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -29,7 +28,7 @@ func TestAccJobGitScmBasic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccJobGitScmConfigBasic(jobName, scriptPath),
+				Config: testAccJobGitScmConfigScript(jobName, scriptPath),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(definitionResourceName, "script_path", scriptPath),
 					testAccCheckJobExists(jobResourceName, &jobRef),
@@ -37,7 +36,7 @@ func TestAccJobGitScmBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccJobGitScmConfigBasic(jobName, newScriptPath),
+				Config: testAccJobGitScmConfigScript(jobName, newScriptPath),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(definitionResourceName, "script_path", newScriptPath),
 					testAccCheckJobExists(jobResourceName, &jobRef),
@@ -55,17 +54,20 @@ func TestAccJobGitScmBasic(t *testing.T) {
 	})
 }
 
-func testAccJobGitScmConfigBasic(jobName string, scriptPath string) string {
-	return fmt.Sprintf(`
-resource "jenkins_job" "main" {
-	name = "%s"
+func testAccJobGitScmConfigBasic(jobName string) string {
+	return testAccJobConfigBasic(jobName) + `
+resource "jenkins_job_git_scm" "main" {
+	job = "${jenkins_job.main.id}"
+}`
 }
 
+func testAccJobGitScmConfigScript(jobName string, scriptPath string) string {
+	return testAccJobConfigBasic(jobName) + fmt.Sprintf(`
 resource "jenkins_job_git_scm" "main" {
 	job = "${jenkins_job.main.id}"
 
 	script_path = "%s"
-}`, jobName, scriptPath)
+}`, scriptPath)
 }
 
 func testAccJobGitScmEnsureDefinition(definitionInterface client.JobDefinition, rs *terraform.ResourceState) error {
@@ -81,12 +83,9 @@ func testAccJobGitScmEnsureDefinition(definitionInterface client.JobDefinition, 
 	if rs.Primary.Attributes["script_path"] != definition.ScriptPath {
 		return fmt.Errorf("CpsScmFlowDefinition script_path should be %v, was %v", rs.Primary.Attributes["script_path"], definition.ScriptPath)
 	}
-	lightweight, err := strconv.ParseBool(rs.Primary.Attributes["lightweight"])
+	err = testCompareResourceBool("CpsScmFlowDefinition", "lightweight", rs.Primary.Attributes["lightweight"], definition.Lightweight)
 	if err != nil {
 		return err
-	}
-	if lightweight != definition.Lightweight {
-		return fmt.Errorf("CpsScmFlowDefinition lightweight should be %v, was %v", rs.Primary.Attributes["lightweight"], definition.Lightweight)
 	}
 	if rs.Primary.Attributes["config_version"] != definition.SCM.ConfigVersion {
 		return fmt.Errorf("CpsScmFlowDefinition config_version should be %v, was %v", rs.Primary.Attributes["config_version"], definition.SCM.ConfigVersion)

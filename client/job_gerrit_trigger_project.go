@@ -10,7 +10,7 @@ var ErrJobGerritTriggerBranchNotFound = errors.New("Could not find job trigger g
 
 type JobGerritTriggerProject struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritProject"`
-	Id      string   `xml:"id,attr"`
+	Id      string   `xml:"id,attr,omitempty"`
 
 	CompareType CompareType               `xml:"compareType"`
 	Pattern     string                    `xml:"pattern"`
@@ -45,7 +45,7 @@ func (project *JobGerritTriggerProject) UpdateBranch(branch *JobGerritTriggerBra
 }
 
 func (project *JobGerritTriggerProject) DeleteBranch(branchId string) error {
-	branches := *(project.Branches).Items
+	branches := *project.Branches.Items
 	for i, branch := range branches {
 		if branch.Id == branchId {
 			*project.Branches.Items = append(branches[:i], branches[i+1:]...)

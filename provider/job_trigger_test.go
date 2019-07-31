@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/hashicorp/terraform/helper/resource"
@@ -10,52 +11,41 @@ import (
 
 var jobTriggerTypes = map[string]reflect.Type{}
 
-func testAccCheckJobTriggers(jobRef *client.Job, expectedResourceNames []string, returnTriggers *[]client.JobTrigger) resource.TestCheckFunc {
+func testAccCheckJobTriggers(
+	jobRef *client.Job,
+	expectedResourceNames []string,
+	returnTriggers *[]client.JobTrigger,
+	ensureTrigger func(client.JobTrigger, *terraform.ResourceState) error,
+) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
-		// if len(*jobRef.Properties.Items) != len(expectedPropertyResourceNames) {
-		// 	return fmt.Errorf("Expected %v properties, found %v", len(expectedPropertyResourceNames), len(*jobRef.Properties.Items))
-		// }
-		// for _, resourceName := range expectedPropertyResourceNames {
-		// 	propertyResource, ok := s.RootModule().Resources[resourceName]
-		// 	if !ok {
-		// 		return fmt.Errorf("Job Property Resource not found: %s", resourceName)
-		// 	}
+		property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
+		if len(*property.Triggers.Items) != len(expectedResourceNames) {
+			return fmt.Errorf("Expected %v triggers, found %v", len(expectedResourceNames), len(*property.Triggers.Items))
+		}
+		for _, resourceName := range expectedResourceNames {
+			resource, ok := s.RootModule().Resources[resourceName]
+			if !ok {
+				return fmt.Errorf("Job Trigger Resource not found: %s", resourceName)
+			}
 
-		// 	property, err := ensureProperty(jobRef, propertyResource)
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// 	*returnProperties = append(*returnProperties, property)
-		// }
+			_, _, triggerId, err := resourceJobTriggerId(resource.Primary.Attributes["id"])
+			if err != nil {
+				return err
+			}
+
+			triggerInteface, err := property.GetTrigger(triggerId)
+			if err != nil {
+				return err
+			}
+
+			err = ensureTrigger(triggerInteface, resource)
+			if err != nil {
+				return err
+			}
+			*returnTriggers = append(*returnTriggers, triggerInteface)
+		}
 
 		return nil
 	}
-}
-
-func ensureTrigger(jobRef *client.Job, resource *terraform.ResourceState) (client.JobTrigger, error) {
-	jobName, propertyId, triggerId, err := resourceJobTriggerId(resource.Primary.Attributes["id"])
-	if err != nil {
-		return nil, err
-	}
-	println("jobName", jobName)
-	println("triggerId", triggerId)
-
-	property, err := jobRef.GetProperty(propertyId)
-	if err != nil {
-		return nil, err
-	}
-
-	// jobAttribute := resource.Primary.Attributes["job"]
-	// if jobName != jobAttribute {
-	// 	return nil, fmt.Errorf("Property Job should be %s, was %s", jobName, jobAttribute)
-	// }
-
-	// expectedType := jobPropertyTypes[resource.Type]
-	// propertyType := reflect.TypeOf(property)
-	// if expectedType != propertyType {
-	// 	return nil, fmt.Errorf("Job Property %s was type \"%s\", expected type \"%s\"",
-	// 		propertyId, propertyType, expectedType)
-	// }
-	return property, nil
 }

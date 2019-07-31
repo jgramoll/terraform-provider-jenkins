@@ -4,7 +4,7 @@ import "encoding/xml"
 
 type JobGerritTriggerPluginDraftPublishedEvent struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginDraftPublishedEvent"`
-	Id      string   `xml:"id,attr"`
+	Id      string   `xml:"id,attr,omitempty"`
 }
 
 func NewJobGerritTriggerPluginDraftPublishedEvent() *JobGerritTriggerPluginDraftPublishedEvent {

@@ -35,12 +35,16 @@ func TestGetJobDetails(t *testing.T) {
 	if job.Description != "" {
 		t.Fatalf("Job description should be %v, was %v", "", job.Description)
 	}
-	properties := *(job.Properties).Items
-	if len(properties) != 1 {
-		t.Fatalf("Job should have %v properties, was %v", 1, len(properties))
+	properties := *job.Properties.Items
+	if len(properties) != 2 {
+		t.Fatalf("Job should have %v properties, was %v", 2, len(properties))
 	}
-	pipelineProperties := *properties[0].(*JobPipelineTriggersProperty)
-	triggers := *pipelineProperties.Triggers
+	pipelineDiscarderProperty := *properties[1].(*JobBuildDiscarderProperty)
+	if pipelineDiscarderProperty.Strategy.Item == nil {
+		t.Fatalf("Job missing discarder strategy")
+	}
+	pipelineTriggersProperty := *properties[0].(*JobPipelineTriggersProperty)
+	triggers := *pipelineTriggersProperty.Triggers
 	if len(*triggers.Items) != 1 {
 		t.Fatalf("Job should have %v triggers, was %v", 1, len(*triggers.Items))
 	}

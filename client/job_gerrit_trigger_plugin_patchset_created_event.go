@@ -4,7 +4,7 @@ import "encoding/xml"
 
 type JobGerritTriggerPluginPatchsetCreatedEvent struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginPatchsetCreatedEvent"`
-	Id      string   `xml:"id,attr"`
+	Id      string   `xml:"id,attr,omitempty"`
 
 	ExcludeDrafts        bool `xml:"excludeDrafts"`
 	ExcludeTrivialRebase bool `xml:"excludeTrivialRebase"`

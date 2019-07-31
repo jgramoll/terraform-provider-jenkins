@@ -1,7 +1,12 @@
 package client
 
+import (
+	"encoding/xml"
+)
+
 type GitUserRemoteConfigs struct {
-	Items *[]*GitUserRemoteConfig `xml:"hudson.plugins.git.UserRemoteConfig"`
+	XMLName xml.Name                `xml:"userRemoteConfigs"`
+	Items   *[]*GitUserRemoteConfig `xml:"hudson.plugins.git.UserRemoteConfig"`
 }
 
 func NewGitUserRemoteConfigs() *GitUserRemoteConfigs {

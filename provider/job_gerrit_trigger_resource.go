@@ -77,6 +77,12 @@ func jobGerritTriggerResource() *schema.Resource {
 				Optional:    true,
 				Default:     "BASE64",
 			},
+			"dynamic_trigger_configuration": &schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "?",
+				Optional:    true,
+				Default:     false,
+			},
 			"skip_vote": {
 				Type:        schema.TypeList,
 				Description: "Skip vote",

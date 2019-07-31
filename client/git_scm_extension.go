@@ -1,3 +1,5 @@
 package client
 
-type GitScmExtension interface{}
+type GitScmExtension interface {
+	GetId() string
+}

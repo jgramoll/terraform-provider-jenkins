@@ -10,3 +10,7 @@ type GitScmCleanBeforeCheckoutExtension struct {
 func NewGitScmCleanBeforeCheckoutExtension() *GitScmCleanBeforeCheckoutExtension {
 	return &GitScmCleanBeforeCheckoutExtension{}
 }
+
+func (e *GitScmCleanBeforeCheckoutExtension) GetId() string {
+	return e.Id
+}

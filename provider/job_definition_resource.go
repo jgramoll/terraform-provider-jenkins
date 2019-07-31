@@ -94,7 +94,7 @@ func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJo
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
-	j, err := jobService.GetJob(d.Get("job").(string))
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err

@@ -33,7 +33,7 @@ func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckJobGerritTriggerEvents(&jobRef, []string{
 						eventResourceName,
-					}, &events, testAccEnsureJobGerritTriggerDraftPublishedEvent),
+					}, &events, ensureJobGerritTriggerPatchsetCreatedEvent),
 				),
 			},
 			{
@@ -43,14 +43,14 @@ func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckJobGerritTriggerEvents(&jobRef, []string{
 						eventResourceName,
-					}, &events, testAccEnsureJobGerritTriggerDraftPublishedEvent),
+					}, &events, ensureJobGerritTriggerPatchsetCreatedEvent),
 				),
 			},
 			{
 				Config: testAccJobGerritTriggerConfigBasic(jobName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGerritTriggerEvents(&jobRef, []string{}, &events, testAccEnsureJobGerritTriggerDraftPublishedEvent),
+					testAccCheckJobGerritTriggerEvents(&jobRef, []string{}, &events, ensureJobGerritTriggerPatchsetCreatedEvent),
 				),
 			},
 		},
@@ -66,20 +66,17 @@ resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
 }`, excludeDrafts)
 }
 
-func testAccEnsureJobGerritTriggerPatchsetCreatedEvent(
+func ensureJobGerritTriggerPatchsetCreatedEvent(
 	eventInterface client.JobGerritTriggerOnEvent,
 	rs *terraform.ResourceState,
 ) error {
-	event := eventInterface.(*client.JobGerritTriggerPluginPatchsetCreatedEvent)
+	event, ok := eventInterface.(*client.JobGerritTriggerPluginPatchsetCreatedEvent)
+	if !ok {
+		return fmt.Errorf("Unexpected event type got %s, expected *client.JobGerritTriggerPluginPatchsetCreatedEvent",
+			reflect.TypeOf(eventInterface).String())
+	}
 
-	_, _, _, eventId, err := resourceJobTriggerEventId(rs.Primary.Attributes["id"])
-	if err != nil {
-		return err
-	}
-	if event.Id != eventId {
-		return fmt.Errorf("testAccEnsureJobGerritTriggerPatchsetCreatedEvent id should be %v, was %v", eventId, event.Id)
-	}
-	err = testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeDrafts", rs.Primary.Attributes["exclude_drafts"], event.ExcludeDrafts)
+	err := testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeDrafts", rs.Primary.Attributes["exclude_drafts"], event.ExcludeDrafts)
 	if err != nil {
 		return err
 	}

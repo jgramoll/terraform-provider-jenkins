@@ -11,7 +11,12 @@ import (
 
 var jobPropertyTypes = map[string]reflect.Type{}
 
-func testAccCheckJobProperties(jobRef *client.Job, expectedPropertyResourceNames []string, returnProperties *[]client.JobProperty) resource.TestCheckFunc {
+func testAccCheckJobProperties(
+	jobRef *client.Job,
+	expectedPropertyResourceNames []string,
+	returnProperties *[]client.JobProperty,
+	ensurePropertyFunc func(client.JobProperty, *terraform.ResourceState) error,
+) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 
 		if len(*jobRef.Properties.Items) != len(expectedPropertyResourceNames) {
@@ -23,7 +28,7 @@ func testAccCheckJobProperties(jobRef *client.Job, expectedPropertyResourceNames
 				return fmt.Errorf("Job Property Resource not found: %s", resourceName)
 			}
 
-			property, err := ensureProperty(jobRef, propertyResource)
+			property, err := ensureProperty(jobRef, propertyResource, ensurePropertyFunc)
 			if err != nil {
 				return err
 			}
@@ -34,7 +39,11 @@ func testAccCheckJobProperties(jobRef *client.Job, expectedPropertyResourceNames
 	}
 }
 
-func ensureProperty(jobRef *client.Job, resource *terraform.ResourceState) (client.JobProperty, error) {
+func ensureProperty(
+	jobRef *client.Job,
+	resource *terraform.ResourceState,
+	ensurePropertyFunc func(client.JobProperty, *terraform.ResourceState) error,
+) (client.JobProperty, error) {
 	jobName, propertyId, err := resourceJobPropertyId(resource.Primary.Attributes["id"])
 	if err != nil {
 		return nil, err
@@ -44,8 +53,6 @@ func ensureProperty(jobRef *client.Job, resource *terraform.ResourceState) (clie
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO why is jobRef.Id not set?
 
 	jobAttribute := resource.Primary.Attributes["job"]
 	if jobName != jobAttribute {
@@ -58,5 +65,11 @@ func ensureProperty(jobRef *client.Job, resource *terraform.ResourceState) (clie
 		return nil, fmt.Errorf("Job Property %s was type \"%s\", expected type \"%s\"",
 			propertyId, propertyType, expectedType)
 	}
+
+	err = ensurePropertyFunc(property, resource)
+	if err != nil {
+		return nil, err
+	}
+
 	return property, nil
 }

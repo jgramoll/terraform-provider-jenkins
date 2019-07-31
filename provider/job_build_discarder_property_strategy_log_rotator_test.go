@@ -35,7 +35,7 @@ func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckBuildDiscarderPropertyStrategies(&jobRef, []string{
 						strategyResourceName,
-					}, &strategyRefs, testAccEnsureJobBuildDiscarderPropertyStrategyLogRotator),
+					}, &strategyRefs, ensureJobBuildDiscarderPropertyStrategyLogRotator),
 				),
 			},
 			{
@@ -45,14 +45,14 @@ func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckBuildDiscarderPropertyStrategies(&jobRef, []string{
 						strategyResourceName,
-					}, &strategyRefs, testAccEnsureJobBuildDiscarderPropertyStrategyLogRotator),
+					}, &strategyRefs, ensureJobBuildDiscarderPropertyStrategyLogRotator),
 				),
 			},
 			{
-				Config: testAccJobBuildDiscarderPropertyConfigBasic(jobName, 0),
+				Config: testAccJobBuildDiscarderPropertyConfigBasic(jobName, 1),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckBuildDiscarderPropertyStrategies(&jobRef, []string{}, &strategyRefs, testAccEnsureJobBuildDiscarderPropertyStrategyLogRotator),
+					testAccCheckBuildDiscarderPropertyStrategies(&jobRef, []string{}, &strategyRefs, ensureJobBuildDiscarderPropertyStrategyLogRotator),
 				),
 			},
 		},
@@ -72,8 +72,12 @@ resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
 }`, daysToKeep)
 }
 
-func testAccEnsureJobBuildDiscarderPropertyStrategyLogRotator(strategyInterface client.JobBuildDiscarderPropertyStrategy, rs *terraform.ResourceState) error {
-	strategy := strategyInterface.(*client.JobBuildDiscarderPropertyStrategyLogRotator)
+func ensureJobBuildDiscarderPropertyStrategyLogRotator(strategyInterface client.JobBuildDiscarderPropertyStrategy, rs *terraform.ResourceState) error {
+	strategy, ok := strategyInterface.(*client.JobBuildDiscarderPropertyStrategyLogRotator)
+	if !ok {
+		return fmt.Errorf("Strategy is not of expected type, expected *client.JobBuildDiscarderPropertyStrategyLogRotator, actually %s",
+			reflect.TypeOf(strategyInterface).String())
+	}
 
 	_, _, strategyId, err := resourceJobPropertyStrategyId(rs.Primary.Attributes["id"])
 	if err != nil {

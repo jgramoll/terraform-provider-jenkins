@@ -46,7 +46,6 @@ func resourceJobPropertyCreate(d *schema.ResourceData, m interface{}, createJobP
 		jobLock.Unlock(jobName)
 		return err
 	}
-
 	j.Properties = j.Properties.Append(property.toClientProperty(propertyId))
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
@@ -81,8 +80,6 @@ func resourceJobPropertyRead(d *schema.ResourceData, m interface{}, createJobPro
 		return err
 	}
 	property := createJobProperty().fromClientJobProperty(clientProperty)
-
-	// property := createJobProperty().(jobProperty)
 	log.Println("[INFO] Updating from job property", d.Id())
 	return property.setResourceData(d)
 }

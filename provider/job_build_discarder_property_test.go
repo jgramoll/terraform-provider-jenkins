@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -34,7 +35,7 @@ func TestAccJobBuildDiscarderPropertyBasic(t *testing.T) {
 					testAccCheckJobProperties(&jobRef, []string{
 						property1,
 						property2,
-					}, &properties),
+					}, &properties, ensureJobBuildDiscarderProperty),
 				),
 			},
 			{
@@ -43,14 +44,14 @@ func TestAccJobBuildDiscarderPropertyBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckJobProperties(&jobRef, []string{
 						property1,
-					}, &properties),
+					}, &properties, ensureJobBuildDiscarderProperty),
 				),
 			},
 			{
 				Config: testAccJobBuildDiscarderPropertyConfigBasic(jobName, 0),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobProperties(&jobRef, []string{}, &properties),
+					testAccCheckJobProperties(&jobRef, []string{}, &properties, ensureJobBuildDiscarderProperty),
 				),
 			},
 		},
@@ -67,4 +68,13 @@ resource "jenkins_job_build_discarder_property" "prop_%v" {
 	}
 
 	return testAccJobConfigBasic(jobName) + properties
+}
+
+func ensureJobBuildDiscarderProperty(propertyInterface client.JobProperty, resource *terraform.ResourceState) error {
+	_, ok := propertyInterface.(*client.JobBuildDiscarderProperty)
+	if !ok {
+		return fmt.Errorf("Property is not of expected type, expected *client.JobBuildDiscarderProperty, actually %s",
+			reflect.TypeOf(propertyInterface).String())
+	}
+	return nil
 }

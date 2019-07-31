@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -39,7 +40,7 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 					testAccCheckJobTriggers(&jobRef, []string{
 						trigger1,
 						trigger2,
-					}, &triggers),
+					}, &triggers, ensureJobGerritTrigger),
 				),
 			},
 			{
@@ -53,7 +54,7 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 					testAccCheckJobTriggers(&jobRef, []string{
 						trigger1,
 						trigger2,
-					}, &triggers),
+					}, &triggers, ensureJobGerritTrigger),
 				),
 			},
 			{
@@ -64,14 +65,14 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckJobTriggers(&jobRef, []string{
 						trigger1,
-					}, &triggers),
+					}, &triggers, ensureJobGerritTrigger),
 				),
 			},
 			{
 				Config: testAccJobGerritTriggerConfigServerName(jobName, serverName, 0),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobTriggers(&jobRef, []string{}, &triggers),
+					testAccCheckJobTriggers(&jobRef, []string{}, &triggers, ensureJobGerritTrigger),
 				),
 			},
 		},
@@ -90,11 +91,58 @@ resource "jenkins_job_gerrit_trigger" "trigger_%v" {
 	property = "${jenkins_job_pipeline_triggers_property.prop_1.id}"
 
 	server_name = "%v"
-
 	skip_vote {}
 }`, i, serverName)
 	}
 
 	t := testAccJobPipelineTriggersPropertyConfigBasic(jobName, 1) + triggers
 	return t
+}
+
+func ensureJobGerritTrigger(triggerInterface client.JobTrigger, rs *terraform.ResourceState) error {
+	trigger, ok := triggerInterface.(*client.JobGerritTrigger)
+	if !ok {
+		return fmt.Errorf("Strategy is not of expected type, expected *client.JobGerritTrigger, actually %s",
+			reflect.TypeOf(triggerInterface).String())
+	}
+
+	var err error
+	err = testCompareResourceBool("JobGerritTrigger", "SilentMode", rs.Primary.Attributes["silent_mode"], trigger.SilentMode)
+	if err != nil {
+		return err
+	}
+	err = testCompareResourceBool("JobGerritTrigger", "SilentStartMode", rs.Primary.Attributes["silent_start_mode"], trigger.SilentStartMode)
+	if err != nil {
+		return err
+	}
+	err = testCompareResourceBool("JobGerritTrigger", "EscapeQuotes", rs.Primary.Attributes["escape_quotes"], trigger.EscapeQuotes)
+	if err != nil {
+		return err
+	}
+	if trigger.NameAndEmailParameterMode.String() != rs.Primary.Attributes["name_and_email_parameter_mode"] {
+		return fmt.Errorf("expected name_and_email_parameter_mode %s, got %s",
+			rs.Primary.Attributes["name_and_email_parameter_mode"], trigger.NameAndEmailParameterMode)
+	}
+	if trigger.CommitMessageParameterMode.String() != rs.Primary.Attributes["commit_message_parameter_mode"] {
+		return fmt.Errorf("expected commit_message_parameter_mode %s, got %s",
+			rs.Primary.Attributes["commit_message_parameter_mode"], trigger.CommitMessageParameterMode)
+	}
+	if trigger.ChangeSubjectParameterMode.String() != rs.Primary.Attributes["change_subject_parameter_mode"] {
+		return fmt.Errorf("expected change_subject_parameter_mode %s, got %s",
+			rs.Primary.Attributes["change_subject_parameter_mode"], trigger.ChangeSubjectParameterMode)
+	}
+	if trigger.CommentTextParameterMode.String() != rs.Primary.Attributes["comment_text_parameter_mode"] {
+		return fmt.Errorf("expected comment_text_parameter_mode %s, got %s",
+			rs.Primary.Attributes["comment_text_parameter_mode"], trigger.CommentTextParameterMode)
+	}
+	if trigger.ServerName != rs.Primary.Attributes["server_name"] {
+		return fmt.Errorf("expected server_name %s, got %s",
+			rs.Primary.Attributes["server_name"], trigger.ServerName)
+	}
+	err = testCompareResourceBool("JobGerritTrigger", "DynamicTriggerConfiguration", rs.Primary.Attributes["dynamic_trigger_configuration"], trigger.DynamicTriggerConfiguration)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

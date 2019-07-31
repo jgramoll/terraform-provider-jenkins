@@ -1,13 +1,8 @@
 package provider
 
 import (
-	"errors"
-
 	"github.com/hashicorp/terraform/helper/schema"
 )
-
-// ErrJobMultipleDefinitions
-var ErrJobMultipleDefinitions = errors.New("Job cannot have have more than one definition")
 
 func jobGitScmResource() *schema.Resource {
 	newJobGitScmInterface := func() jobDefinition {

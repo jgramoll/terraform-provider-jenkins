@@ -32,14 +32,14 @@ func TestAccJobGerritTriggerDraftPublishedEventBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					testAccCheckJobGerritTriggerEvents(&jobRef, []string{
 						eventResourceName,
-					}, &events, testAccEnsureJobGerritTriggerDraftPublishedEvent),
+					}, &events, ensureJobGerritTriggerDraftPublishedEvent),
 				),
 			},
 			{
 				Config: testAccJobGerritTriggerConfigBasic(jobName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGerritTriggerEvents(&jobRef, []string{}, &events, testAccEnsureJobGerritTriggerDraftPublishedEvent),
+					testAccCheckJobGerritTriggerEvents(&jobRef, []string{}, &events, ensureJobGerritTriggerDraftPublishedEvent),
 				),
 			},
 		},
@@ -53,18 +53,22 @@ resource "jenkins_job_gerrit_trigger_draft_published_event" "main" {
 }`
 }
 
-func testAccEnsureJobGerritTriggerDraftPublishedEvent(
+func ensureJobGerritTriggerDraftPublishedEvent(
 	eventInterface client.JobGerritTriggerOnEvent,
 	rs *terraform.ResourceState,
 ) error {
-	event := eventInterface.(*client.JobGerritTriggerPluginDraftPublishedEvent)
+	event, ok := eventInterface.(*client.JobGerritTriggerPluginDraftPublishedEvent)
+	if !ok {
+		return fmt.Errorf("Unexpected event type got %s, expected *client.JobGerritTriggerPluginDraftPublishedEvent",
+			reflect.TypeOf(eventInterface).String())
+	}
 
 	_, _, _, eventId, err := resourceJobTriggerEventId(rs.Primary.Attributes["id"])
 	if err != nil {
 		return err
 	}
 	if eventId != event.Id {
-		return fmt.Errorf("testAccEnsureJobGerritTriggerDraftPublishedEvent id should be %v, was %v", eventId, event.Id)
+		return fmt.Errorf("JobGerritTriggerPluginDraftPublishedEvent id should be %v, was %v", eventId, event.Id)
 	}
 
 	return nil

@@ -10,6 +10,7 @@ var ErrJobPropertyNotFound = errors.New("Could not find job property")
 
 // Job
 type Job struct {
+	Id               string
 	Name             string
 	Disabled         bool
 	Description      string
@@ -45,6 +46,7 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 	}
 
 	if config != nil {
+		job.Id = config.Id
 		job.Disabled = config.Disabled
 		job.Properties = config.Properties
 		if config.Definition != nil {
@@ -66,11 +68,10 @@ func (job *Job) GetProperty(propertyId string) (JobProperty, error) {
 }
 
 func (job *Job) DeleteProperty(propertyId string) error {
-	properties := *(job.Properties).Items
+	properties := *job.Properties.Items
 	for i, property := range properties {
 		if property.GetId() == propertyId {
-			properties = append(properties[:i], properties[i+1:]...)
-			job.Properties.Items = &properties
+			*job.Properties.Items = append(properties[:i], properties[i+1:]...)
 			return nil
 		}
 	}

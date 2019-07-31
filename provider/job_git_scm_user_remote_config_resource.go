@@ -2,7 +2,9 @@ package provider
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -13,6 +15,9 @@ import (
 // ErrGitScmUserRemoteConfigMissingDefinition
 var ErrGitScmUserRemoteConfigMissingDefinition = errors.New("definition must be provided for jenkins_git_scm_user_remote_config")
 
+// ErrInvalidJobGitScmUserRemoteConfigId
+var ErrInvalidJobGitScmUserRemoteConfigId = errors.New("Invalid git scm user remote id, must be jobName_definitionId_configId")
+
 func jobGitScmUserRemoteConfigResource() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceJobGitScmUserRemoteConfigCreate,
@@ -21,12 +26,6 @@ func jobGitScmUserRemoteConfigResource() *schema.Resource {
 		Delete: resourceJobGitScmUserRemoteConfigDelete,
 
 		Schema: map[string]*schema.Schema{
-			"job": &schema.Schema{
-				Type:        schema.TypeString,
-				Description: "Name of the job",
-				Required:    true,
-				ForceNew:    true,
-			},
 			"scm": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Id of the scm definition",
@@ -52,7 +51,21 @@ func jobGitScmUserRemoteConfigResource() *schema.Resource {
 	}
 }
 
+func resourceJobGitScmUserRemoteConfigId(input string) (jobName string, definitionId string, configId string, err error) {
+	parts := strings.Split(input, "_")
+	if len(parts) != 3 {
+		err = ErrInvalidJobGitScmUserRemoteConfigId
+		return
+	}
+	jobName = parts[0]
+	definitionId = parts[1]
+	configId = parts[2]
+	return
+}
+
 func resourceJobGitScmUserRemoteConfigCreate(d *schema.ResourceData, m interface{}) error {
+	jobName, definitionId, err := resourceJobDefinitionId(d.Get("scm").(string))
+
 	c := newJobGitScmUserRemoteConfig()
 	configRaw := d.Get("").(map[string]interface{})
 	if err := mapstructure.Decode(configRaw, &c); err != nil {
@@ -63,12 +76,10 @@ func resourceJobGitScmUserRemoteConfigCreate(d *schema.ResourceData, m interface
 	if err != nil {
 		return err
 	}
-	// c.RefId = id.String()
-
-	jobName := d.Get("job").(string)
-	jobLock.Lock(jobName)
+	configId := id.String()
 
 	jobService := m.(*Services).JobService
+	jobLock.Lock(jobName)
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
@@ -82,52 +93,63 @@ func resourceJobGitScmUserRemoteConfigCreate(d *schema.ResourceData, m interface
 
 	// TODO better place for this cast?
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
-	definition.SCM.UserRemoteConfigs = definition.SCM.UserRemoteConfigs.Append(c.toClientConfig())
+	definition.SCM.UserRemoteConfigs = definition.SCM.UserRemoteConfigs.Append(c.toClientConfig(configId))
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[DEBUG] Creating job git scm user remote config:", id)
-	d.SetId(id.String())
+	d.SetId(fmt.Sprintf("%s_%s_%s", jobName, definitionId, configId))
+	log.Println("[DEBUG] Creating job git scm user remote config:", d.Id())
 	return resourceJobGitScmUserRemoteConfigRead(d, m)
 }
 
 func resourceJobGitScmUserRemoteConfigUpdate(d *schema.ResourceData, m interface{}) error {
+	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigId(d.Id())
+
 	c := newJobGitScmUserRemoteConfig()
 	configRaw := d.Get("").(map[string]interface{})
 	if err := mapstructure.Decode(configRaw, &c); err != nil {
 		return err
 	}
 
-	jobName := d.Get("job").(string)
-	jobLock.Lock(jobName)
-
 	jobService := m.(*Services).JobService
-	j, err := jobService.GetJob(d.Get("job").(string))
+	jobLock.Lock(jobName)
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err
 	}
 
-	// j.Definition = c.toClientConfig()
+	if j.Definition == nil {
+		jobLock.Unlock(jobName)
+		return ErrGitScmUserRemoteConfigMissingDefinition
+	}
+
+	definition := j.Definition.(*client.CpsScmFlowDefinition)
+	err = definition.SCM.UpdateUserRemoteConfig(c.toClientConfig(configId))
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
 	if err != nil {
 		return err
 	}
 
-	log.Println("[DEBUG] Updated job definition:", d.Id())
+	log.Println("[DEBUG] Updated job git scm user remote config:", d.Id())
 	return resourceJobGitScmUserRemoteConfigRead(d, m)
 }
 
 func resourceJobGitScmUserRemoteConfigRead(d *schema.ResourceData, m interface{}) error {
-	jobName := d.Get("job").(string)
+	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.RLock(jobName)
-	_, err := jobService.GetJob(jobName)
+	j, err := jobService.GetJob(jobName)
 	jobLock.RUnlock(jobName)
 	if err != nil {
 		log.Println("[WARN] No Job found:", err)
@@ -135,38 +157,51 @@ func resourceJobGitScmUserRemoteConfigRead(d *schema.ResourceData, m interface{}
 		return nil
 	}
 
-	c := newJobGitScmUserRemoteConfig()
-	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &c); err != nil {
-		return err
+	if j.Definition == nil {
+		jobLock.Unlock(jobName)
+		return ErrGitScmUserRemoteConfigMissingDefinition
+	}
+	definition := j.Definition.(*client.CpsScmFlowDefinition)
+
+	clientConfig, err := definition.SCM.GetUserRemoteConfig(configId)
+	if err != nil {
+		log.Println("[WARN] No Config found:", err)
+		d.SetId("")
+		return nil
 	}
 
-	// definition := j.Definition.(*client.CpsScmFlowDefinition)
-	// if definition == nil {
-	// 	return nil
-	// }
-
+	c := newJobGitScmUserRemoteConfigFromClient(clientConfig)
 	log.Println("[INFO] Updating from job git scm user remote config", c)
 	return c.setResourceData(d)
 }
 
 func resourceJobGitScmUserRemoteConfigDelete(d *schema.ResourceData, m interface{}) error {
-
-	jobName := d.Get("job").(string)
+	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
-	_, err := jobService.GetJob(d.Get("job").(string))
+	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err
 	}
 
-	// definition := j.Definition.(*client.CpsScmFlowDefinition)
-	// if definition == nil {
-	// 	return nil
-	// }
+	if j.Definition == nil {
+		jobLock.Unlock(jobName)
+		return ErrGitScmUserRemoteConfigMissingDefinition
+	}
+	definition := j.Definition.(*client.CpsScmFlowDefinition)
+	err = definition.SCM.DeleteUserRemoteConfig(configId)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+
+	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
+	if err != nil {
+		return err
+	}
 
 	d.SetId("")
 	return nil

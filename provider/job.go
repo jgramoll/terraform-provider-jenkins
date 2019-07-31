@@ -11,8 +11,13 @@ type job struct {
 	Disabled bool   `mapstructure:"disabled"`
 }
 
-func (j *job) toClientJob() *client.Job {
+func newJob() *job {
+	return &job{}
+}
+
+func (j *job) toClientJob(jobId string) *client.Job {
 	job := client.NewJob()
+	job.Id = jobId
 	job.Name = j.Name
 	job.Disabled = j.Disabled
 	return job
@@ -36,11 +41,4 @@ func (j *job) setResourceData(d *schema.ResourceData) error {
 		return err
 	}
 	return nil
-}
-
-// TODO can we get rid of this?
-// JobFromResourceData get job from resource data
-func JobFromResourceData(job *client.Job, d *schema.ResourceData) {
-	job.Name = d.Get("name").(string)
-	job.Disabled = d.Get("disabled").(bool)
 }

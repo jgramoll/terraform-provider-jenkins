@@ -43,9 +43,9 @@ func jobResource() *schema.Resource {
 }
 
 func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
-	var j job
+	j := newJob()
 	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &j); err != nil {
+	if err := mapstructure.Decode(configRaw, j); err != nil {
 		return err
 	}
 
@@ -53,15 +53,16 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	jobId := id.String()
 
-	log.Println("[DEBUG] Creating job:", j.Name)
 	jobService := m.(*Services).JobService
-	err = jobService.CreateJob(j.toClientJob())
+	err = jobService.CreateJob(j.toClientJob(jobId))
 	if err != nil {
 		return err
 	}
 
-	d.SetId(id.String())
+	d.SetId(jobId)
+	log.Println("[DEBUG] Creating job:", j.Name)
 	return resourceJobRead(d, m)
 }
 
@@ -83,21 +84,16 @@ func resourceJobRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
-
-	jobName := d.Get("name").(string)
-
-	jobService := m.(*Services).JobService
-	jobLock.Lock(jobName)
-	j, err := jobService.GetJob(jobName)
-	if err != nil {
-		jobLock.Unlock(jobName)
-		log.Println("[WARN] No Job found:", d.Id())
+	j := newJob()
+	configRaw := d.Get("").(map[string]interface{})
+	if err := mapstructure.Decode(configRaw, &j); err != nil {
 		return err
 	}
-	JobFromResourceData(j, d)
 
-	err = jobService.UpdateJob(j)
-	jobLock.Unlock(jobName)
+	jobService := m.(*Services).JobService
+	jobLock.Lock(j.Name)
+	err := jobService.UpdateJob(j.toClientJob(d.Id()))
+	jobLock.Unlock(j.Name)
 	if err != nil {
 		return err
 	}
@@ -107,13 +103,13 @@ func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobDelete(d *schema.ResourceData, m interface{}) error {
-	log.Println("[DEBUG] Deleting job:", d.Id())
-	d.SetId("")
-	jobService := m.(*Services).JobService
-
 	jobName := d.Get("name").(string)
+
+	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
 	defer jobLock.Unlock(jobName)
 
+	log.Println("[DEBUG] Deleting job:", d.Id())
+	d.SetId("")
 	return jobService.DeleteJob(jobName)
 }
