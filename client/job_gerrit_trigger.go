@@ -16,10 +16,10 @@ type JobGerritTrigger struct {
 	Id      string   `xml:"id,attr,omitempty"`
 
 	// spec
-	Projects *JobGerritTriggerProjects `xml:"gerritProjects"`
-	// dynamicGerritProjects
-	SkipVote   *JobGerritTriggerSkipVote `xml:"skipVote"`
-	SilentMode bool                      `xml:"silentMode"`
+	Projects              *JobGerritTriggerProjects `xml:"gerritProjects"`
+	dynamicGerritProjects *DynamicGerritProjects    `xml:"dynamicGerritProjects"`
+	SkipVote              *JobGerritTriggerSkipVote `xml:"skipVote"`
+	SilentMode            bool                      `xml:"silentMode"`
 	// notificationLevel
 	SilentStartMode           bool          `xml:"silentStartMode"`
 	EscapeQuotes              bool          `xml:"escapeQuotes"`

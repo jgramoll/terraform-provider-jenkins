@@ -39,6 +39,9 @@ func NewGitScm() *GitSCM {
 }
 
 func (scm *GitSCM) GetBranch(branchId string) (*GitScmBranchSpec, error) {
+	if scm.Branches == nil || scm.Branches.Items == nil {
+		return nil, ErrGitScmBranchNotFound
+	}
 	for _, branch := range *scm.Branches.Items {
 		if branch.Id == branchId {
 			return branch, nil
@@ -101,6 +104,9 @@ func (scm *GitSCM) DeleteExtension(extensionId string) error {
 }
 
 func (scm *GitSCM) GetUserRemoteConfig(configId string) (*GitUserRemoteConfig, error) {
+	if scm.UserRemoteConfigs == nil || scm.UserRemoteConfigs.Items == nil {
+		return nil, ErrGitScmUserRemoteConfigNotFound
+	}
 	for _, config := range *scm.UserRemoteConfigs.Items {
 		if config.Id == configId {
 			return config, nil

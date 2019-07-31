@@ -88,7 +88,9 @@ func resourceJobGitScmExtensionRead(d *schema.ResourceData, m interface{}, creat
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
 	clientExtension, err := definition.SCM.GetExtension(extensionId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Job SCM found:", err)
+		d.SetId("")
+		return nil
 	}
 	extension := createGitScmExtension().fromClientExtension(clientExtension)
 

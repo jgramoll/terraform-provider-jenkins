@@ -10,6 +10,8 @@ import (
 func TestJobConfigSerialize(t *testing.T) {
 	job := NewJob()
 	job.Description = "my-desc"
+	job.Actions = job.Actions.Append(NewJobConfigDeclarativeJobAction())
+	job.Actions = job.Actions.Append(NewJobConfigDeclarativeJobPropertyTrackerAction())
 
 	definition := NewCpsScmFlowDefinition()
 	definition.SCM = NewGitScm()
@@ -66,6 +68,15 @@ func TestJobConfigSerialize(t *testing.T) {
 	}
 	result := string(resultBytes)
 	expected := `<flow-definition>
+	<actions>
+		<org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction></org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction>
+		<org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+			<jobProperties></jobProperties>
+			<triggers></triggers>
+			<parameters></parameters>
+			<options></options>
+		</org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+	</actions>
 	<description>my-desc</description>
 	<keepDependencies>false</keepDependencies>
 	<properties>

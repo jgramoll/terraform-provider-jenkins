@@ -193,7 +193,9 @@ func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
 	}
 	clientBranch, err := project.GetBranch(branchId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Gerrit Branch found:", err)
+		d.SetId("")
+		return nil
 	}
 	branch := newJobGerritBranchFromClient(clientBranch)
 

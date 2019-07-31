@@ -9,7 +9,7 @@ type jobConfig struct {
 	Id      string   `xml:"id,attr,omitempty"`
 	Plugin  string   `xml:"plugin,attr,omitempty"`
 
-	// actions
+	Actions          *JobConfigActions `xml:"actions"`
 	Description      string            `xml:"description"`
 	KeepDependencies bool              `xml:"keepDependencies"`
 	Properties       *JobProperties    `xml:"properties"`
@@ -20,6 +20,7 @@ type jobConfig struct {
 
 func JobConfigFromJob(job *Job) *jobConfig {
 	return &jobConfig{
+		Actions:          job.Actions,
 		Description:      job.Description,
 		KeepDependencies: job.KeepDependencies,
 		Disabled:         job.Disabled,

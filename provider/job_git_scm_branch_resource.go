@@ -149,7 +149,9 @@ func resourceJobGitScmBranchRead(d *schema.ResourceData, m interface{}) error {
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
 	clientBranch, err := definition.SCM.GetBranch(branchId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Gerrit Branch found:", err)
+		d.SetId("")
+		return nil
 	}
 	branch := newGitScmBranchFromClient(clientBranch)
 

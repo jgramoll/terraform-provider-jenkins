@@ -13,6 +13,7 @@ type Job struct {
 	Id               string
 	Name             string
 	Disabled         bool
+	Actions          *JobConfigActions `xml:"actions"`
 	Description      string
 	KeepDependencies bool
 	Properties       *JobProperties
@@ -22,6 +23,7 @@ type Job struct {
 // NewJob return Job object with default values
 func NewJob() *Job {
 	return &Job{
+		Actions:          NewJobConfigActions(),
 		KeepDependencies: false,
 		Properties:       NewJobProperties(),
 	}
@@ -47,6 +49,7 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 
 	if config != nil {
 		job.Id = config.Id
+		job.Actions = config.Actions
 		job.Disabled = config.Disabled
 		job.Properties = config.Properties
 		if config.Definition != nil {
