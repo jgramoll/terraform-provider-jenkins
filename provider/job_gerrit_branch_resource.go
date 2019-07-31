@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -43,8 +42,8 @@ func jobGerritBranchResource() *schema.Resource {
 	}
 }
 
-func resourceJobGerritBranchId(triggerIdString string) (jobName string, propertyId string, triggerId string, projectId string, branchId string, err error) {
-	parts := strings.Split(triggerIdString, "_")
+func resourceJobGerritBranchId(input string) (jobName string, propertyId string, triggerId string, projectId string, branchId string, err error) {
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 5 {
 		err = ErrInvalidTriggerGerritBranchId
 		return
@@ -109,7 +108,7 @@ func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s_%s_%s_%s_%s", jobName, propertyId, triggerId, projectId, branchId))
+	d.SetId(strings.Join([]string{jobName, propertyId, triggerId, projectId, branchId}, IdDelimiter))
 	log.Println("[DEBUG] Creating job gerrit branch:", d.Id())
 	return resourceJobGerritBranchRead(d, m)
 }

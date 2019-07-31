@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -52,7 +51,7 @@ func jobGitScmUserRemoteConfigResource() *schema.Resource {
 }
 
 func resourceJobGitScmUserRemoteConfigId(input string) (jobName string, definitionId string, configId string, err error) {
-	parts := strings.Split(input, "_")
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
 		err = ErrInvalidJobGitScmUserRemoteConfigId
 		return
@@ -100,7 +99,7 @@ func resourceJobGitScmUserRemoteConfigCreate(d *schema.ResourceData, m interface
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s_%s_%s", jobName, definitionId, configId))
+	d.SetId(strings.Join([]string{jobName, definitionId, configId}, IdDelimiter))
 	log.Println("[DEBUG] Creating job git scm user remote config:", d.Id())
 	return resourceJobGitScmUserRemoteConfigRead(d, m)
 }

@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -16,7 +15,7 @@ import (
 var ErrInvalidJobGitScmExtensionId = errors.New("Invalid git scm extension id, must be jobName_definitionId_extensionId")
 
 func resourceJobGitScmExtensionId(input string) (jobName string, definitionId string, extensionId string, err error) {
-	parts := strings.Split(input, "_")
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
 		err = ErrInvalidJobGitScmExtensionId
 		return
@@ -66,7 +65,7 @@ func resourceJobGitScmExtensionCreate(d *schema.ResourceData, m interface{}, cre
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s_%s_%s", jobName, definitionId, extensionId))
+	d.SetId(strings.Join([]string{jobName, definitionId, extensionId}, IdDelimiter))
 	log.Println("[DEBUG] Creating job git scm extension:", d.Id())
 	return resourceJobGitScmExtensionRead(d, m, createGitScmExtension)
 }

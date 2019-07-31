@@ -34,21 +34,21 @@ provider "jenkins" {
 }
 
 resource "jenkins_job" "premerge" {
-  name        = "Premerge checks"
+  name = "Premerge checks"
 }
 
 resource "jenkins_job_git_scm" "premerge" {
   job = "${jenkins_job.premerge.id}"
 
   config_version = "2"
-  script_path = "Jenkinsfile.api"
-  lightweight = false
+  script_path    = "Jenkinsfile.api"
+  lightweight    = false
 }
 
 resource "jenkins_job_git_scm_user_remote_config" "premerge" {
   scm = "${jenkins_job_git_scm.premerge.id}"
 
-  refspec        = "${GERRIT_REFSPEC}"
+  refspec        = "GERRIT_REFSPEC"
   url            = "ssh://git.server/git-repo.git"
   credentials_id = "123-abc"
 }
@@ -97,7 +97,7 @@ resource "jenkins_job_gerrit_trigger" "main" {
     on_successful = false
     on_failed     = false
     on_unstable   = false
-    on_not_built   = false
+    on_not_built  = false
   }
 }
 
@@ -118,15 +118,15 @@ resource "jenkins_job_gerrit_trigger_draft_published_event" "main" {
 resource "jenkins_job_gerrit_project" "main" {
   trigger = "${jenkins_job_gerrit_trigger.main.id}"
 
-  compareType = "PLAIN"
-  pattern     = "bridge-skills"
+  compare_type = "PLAIN"
+  pattern      = "bridge-skills"
 }
 
 resource "jenkins_job_gerrit_branch" "main" {
   project = "${jenkins_job_gerrit_project.main.id}"
 
-  compareType = "REG_EXP"
-  pattern     = "^(?!refs/meta/config).*$"
+  compare_type = "REG_EXP"
+  pattern      = "^(?!refs/meta/config).*$"
 }
 
 ```

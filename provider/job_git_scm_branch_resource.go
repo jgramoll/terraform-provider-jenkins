@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -42,8 +41,8 @@ func jobGitScmBranchResource() *schema.Resource {
 	}
 }
 
-func resourceJobGitScmBranchId(triggerIdString string) (jobName string, scmId string, branchId string, err error) {
-	parts := strings.Split(triggerIdString, "_")
+func resourceJobGitScmBranchId(input string) (jobName string, scmId string, branchId string, err error) {
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
 		err = ErrInvalidJobGitScmBranchId
 		return
@@ -94,8 +93,8 @@ func resourceJobGitScmBranchCreate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	log.Println("[DEBUG] Creating job git scm branch:", id)
-	d.SetId(fmt.Sprintf("%s_%s_%s", jobName, scmId, branchId))
+	d.SetId(strings.Join([]string{jobName, scmId, branchId}, IdDelimiter))
+	log.Println("[DEBUG] Creating job git scm branch:", d.Id())
 	return resourceJobGitScmBranchRead(d, m)
 }
 

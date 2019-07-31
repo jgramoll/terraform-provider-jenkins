@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -43,8 +42,8 @@ func jobGerritProjectResource() *schema.Resource {
 	}
 }
 
-func resourceJobGerritProjectId(triggerIdString string) (jobName string, propertyId string, triggerId string, projectId string, err error) {
-	parts := strings.Split(triggerIdString, "_")
+func resourceJobGerritProjectId(input string) (jobName string, propertyId string, triggerId string, projectId string, err error) {
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 4 {
 		err = ErrInvalidTriggerGerritProjectId
 		return
@@ -103,7 +102,7 @@ func resourceJobGerritProjectCreate(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s_%s_%s_%s", jobName, propertyId, triggerId, projectId))
+	d.SetId(strings.Join([]string{jobName, propertyId, triggerId, projectId}, IdDelimiter))
 	log.Println("[DEBUG] Creating job trigger gerrit project:", d.Id())
 	return resourceJobGerritProjectRead(d, m)
 }

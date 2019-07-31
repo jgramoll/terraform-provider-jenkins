@@ -1,7 +1,9 @@
 dist/
 vendor/
+sonar/
+.scannerwork/
+
 .envrc
 terraform-provider-jenkins
-sonar/
 report.json
 coverage.out

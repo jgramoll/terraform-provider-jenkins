@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -14,8 +13,8 @@ import (
 // ErrInvalidDefinitionId
 var ErrInvalidDefinitionId = errors.New("Invalid definition id, must be jobName_definitionId")
 
-func resourceJobDefinitionId(propertyString string) (jobName string, definitionId string, err error) {
-	parts := strings.Split(propertyString, "_")
+func resourceJobDefinitionId(input string) (jobName string, definitionId string, err error) {
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 2 {
 		err = ErrInvalidDefinitionId
 		return
@@ -54,7 +53,7 @@ func resourceJobDefinitionCreate(d *schema.ResourceData, m interface{}, createJo
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s_%s", jobName, definitionId))
+	d.SetId(strings.Join([]string{jobName, definitionId}, IdDelimiter))
 	log.Println("[DEBUG] Creating job definition:", d.Id())
 	return resourceJobDefinitionRead(d, m, createJobDefinition)
 }

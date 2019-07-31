@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"log"
 	"strings"
 
@@ -11,8 +10,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-func resourceJobPropertyStrategyId(propertyString string) (jobName string, propertyId string, strategyId string, err error) {
-	parts := strings.Split(propertyString, "_")
+func resourceJobPropertyStrategyId(input string) (jobName string, propertyId string, strategyId string, err error) {
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
 		err = ErrInvalidPropertyId
 		return
@@ -62,7 +61,7 @@ func resourceJobBuildDiscarderPropertyStrategyCreate(d *schema.ResourceData, m i
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s_%s_%s", jobName, propertyId, strategyId))
+	d.SetId(strings.Join([]string{jobName, propertyId, strategyId}, IdDelimiter))
 	log.Println("[DEBUG] Creating build discarder propety strategy", d.Id())
 	return resourceJobBuildDiscarderPropertyStrategyRead(d, m, createJobBuildDiscarderPropertyStrategy)
 }

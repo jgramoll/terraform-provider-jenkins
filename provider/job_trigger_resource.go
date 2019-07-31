@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -15,8 +14,8 @@ import (
 // ErrInvalidJobTriggerId
 var ErrInvalidJobTriggerId = errors.New("Invalid trigger id, must be jobName_propertyId_triggerId")
 
-func resourceJobTriggerId(triggerIdString string) (jobName string, propertyId string, triggerId string, err error) {
-	parts := strings.Split(triggerIdString, "_")
+func resourceJobTriggerId(input string) (jobName string, propertyId string, triggerId string, err error) {
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
 		err = ErrInvalidJobTriggerId
 		return
@@ -71,7 +70,7 @@ func resourceJobTriggerCreate(d *schema.ResourceData, m interface{}, createJobTr
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s_%s_%s", jobName, propertyId, triggerId))
+	d.SetId(strings.Join([]string{jobName, propertyId, triggerId}, IdDelimiter))
 	log.Println("[DEBUG] Creating job trigger:", d.Id())
 	return resourceJobTriggerRead(d, m, createJobTrigger)
 }

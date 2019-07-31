@@ -2,7 +2,6 @@ package provider
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -14,8 +13,8 @@ import (
 // ErrInvalidPropertyId
 var ErrInvalidPropertyId = errors.New("Invalid property id, must be jobName_propertyId")
 
-func resourceJobPropertyId(propertyString string) (jobName string, propertyId string, err error) {
-	parts := strings.Split(propertyString, "_")
+func resourceJobPropertyId(input string) (jobName string, propertyId string, err error) {
+	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 2 {
 		err = ErrInvalidPropertyId
 		return
@@ -53,7 +52,7 @@ func resourceJobPropertyCreate(d *schema.ResourceData, m interface{}, createJobP
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s_%s", jobName, propertyId))
+	d.SetId(strings.Join([]string{jobName, propertyId}, IdDelimiter))
 	log.Println("[DEBUG] Creating job property:", d.Id())
 	return resourceJobPropertyRead(d, m, createJobProperty)
 }
