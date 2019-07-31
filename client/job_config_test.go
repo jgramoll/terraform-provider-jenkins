@@ -10,8 +10,8 @@ import (
 func TestJobConfigSerialize(t *testing.T) {
 	job := NewJob()
 	job.Description = "my-desc"
-	job.Actions = job.Actions.Append(NewJobConfigDeclarativeJobAction())
-	job.Actions = job.Actions.Append(NewJobConfigDeclarativeJobPropertyTrackerAction())
+	job.Actions = job.Actions.Append(NewJobDeclarativeJobAction())
+	job.Actions = job.Actions.Append(NewJobDeclarativeJobPropertyTrackerAction())
 
 	definition := NewCpsScmFlowDefinition()
 	definition.SCM = NewGitScm()

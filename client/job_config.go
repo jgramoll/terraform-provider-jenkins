@@ -9,7 +9,7 @@ type jobConfig struct {
 	Id      string   `xml:"id,attr,omitempty"`
 	Plugin  string   `xml:"plugin,attr,omitempty"`
 
-	Actions          *JobConfigActions `xml:"actions"`
+	Actions          *JobActions       `xml:"actions"`
 	Description      string            `xml:"description"`
 	KeepDependencies bool              `xml:"keepDependencies"`
 	Properties       *JobProperties    `xml:"properties"`

@@ -51,7 +51,9 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"jenkins_job": jobResource(),
 
-			"jenkins_job_git_scm":                    jobGitScmResource(),
+			"jenkins_job_declarative_job_action":                  jobDeclarativeJobActionResource(),
+			"jenkins_job_declarative_job_property_tracker_action": jobDeclarativeJobPropertyTrackerActionResource(),
+
 			"jenkins_job_git_scm_user_remote_config": jobGitScmUserRemoteConfigResource(),
 			"jenkins_job_git_scm_branch":             jobGitScmBranchResource(),
 

@@ -2,7 +2,7 @@ package client
 
 import "encoding/xml"
 
-type JobConfigDeclarativeJobPropertyTrackerAction struct {
+type JobDeclarativeJobPropertyTrackerAction struct {
 	XMLName xml.Name `xml:"org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction"`
 	Id      string   `xml:"id,attr,omitempty"`
 
@@ -12,10 +12,10 @@ type JobConfigDeclarativeJobPropertyTrackerAction struct {
 	Options       string `xml:"options"`
 }
 
-func NewJobConfigDeclarativeJobPropertyTrackerAction() *JobConfigDeclarativeJobPropertyTrackerAction {
-	return &JobConfigDeclarativeJobPropertyTrackerAction{}
+func NewJobDeclarativeJobPropertyTrackerAction() *JobDeclarativeJobPropertyTrackerAction {
+	return &JobDeclarativeJobPropertyTrackerAction{}
 }
 
-func (action *JobConfigDeclarativeJobPropertyTrackerAction) GetId() string {
+func (action *JobDeclarativeJobPropertyTrackerAction) GetId() string {
 	return action.Id
 }

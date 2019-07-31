@@ -37,6 +37,14 @@ resource "jenkins_job" "premerge" {
   name = "Premerge checks"
 }
 
+resource "jenkins_job_declarative_job_action" premerge {
+  job = "${jenkins_job.premerge.id}"
+}
+
+resource "jenkins_job_declarative_job_property_tracker_action" premerge {
+  job = "${jenkins_job.premerge.id}"
+}
+
 resource "jenkins_job_git_scm" "premerge" {
   job = "${jenkins_job.premerge.id}"
 
