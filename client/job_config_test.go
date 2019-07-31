@@ -82,7 +82,8 @@ func TestJobConfigSerialize(t *testing.T) {
 	<properties>
 		<org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty id="trigger-id">
 			<triggers>
-				<com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger>
+				<com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger plugin="gerrit-trigger@2.29.0">
+					<spec></spec>
 					<gerritProjects>
 						<com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritProject>
 							<compareType>PLAIN</compareType>

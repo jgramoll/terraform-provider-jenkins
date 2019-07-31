@@ -32,8 +32,10 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 			{
 				Config: testAccJobGerritTriggerConfigServerName(jobName, serverName, 2),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(trigger1, "plugin", "my-plugin"),
 					resource.TestCheckResourceAttr(trigger1, "server_name", serverName),
 					resource.TestCheckResourceAttr(trigger1, "silent_mode", "false"),
+					resource.TestCheckResourceAttr(trigger2, "plugin", "my-plugin"),
 					resource.TestCheckResourceAttr(trigger2, "server_name", serverName),
 					resource.TestCheckResourceAttr(trigger2, "silent_mode", "false"),
 					testAccCheckJobExists(jobResourceName, &jobRef),
@@ -46,8 +48,10 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 			{
 				Config: testAccJobGerritTriggerConfigServerName(jobName, newServerName, 2),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(trigger1, "plugin", "my-plugin"),
 					resource.TestCheckResourceAttr(trigger1, "server_name", newServerName),
 					resource.TestCheckResourceAttr(trigger1, "silent_mode", "false"),
+					resource.TestCheckResourceAttr(trigger2, "plugin", "my-plugin"),
 					resource.TestCheckResourceAttr(trigger2, "server_name", newServerName),
 					resource.TestCheckResourceAttr(trigger2, "silent_mode", "false"),
 					testAccCheckJobExists(jobResourceName, &jobRef),
@@ -60,6 +64,7 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 			{
 				Config: testAccJobGerritTriggerConfigServerName(jobName, serverName, 1),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr(trigger1, "plugin", "my-plugin"),
 					resource.TestCheckResourceAttr(trigger1, "server_name", serverName),
 					resource.TestCheckResourceAttr(trigger1, "silent_mode", "false"),
 					testAccCheckJobExists(jobResourceName, &jobRef),
@@ -90,6 +95,7 @@ func testAccJobGerritTriggerConfigServerName(jobName string, serverName string, 
 resource "jenkins_job_gerrit_trigger" "trigger_%v" {
 	property = "${jenkins_job_pipeline_triggers_property.prop_1.id}"
 
+	plugin = "my-plugin"
 	server_name = "%v"
 	skip_vote {}
 }`, i, serverName)

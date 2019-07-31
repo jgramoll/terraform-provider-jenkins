@@ -29,6 +29,11 @@ func jobGerritTriggerResource() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
+			"plugin": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Version of the job trigger",
+				Optional:    true,
+			},
 			"server_name": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Id of the job trigger property",

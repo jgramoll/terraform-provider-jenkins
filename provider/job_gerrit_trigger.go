@@ -6,6 +6,7 @@ import (
 )
 
 type jobGerritTrigger struct {
+	Plugin                     string       `mapstructure:"plugin"`
 	ServerName                 string       `mapstructure:"server_name"`
 	SilentMode                 bool         `mapstructure:"silent_mode"`
 	SilentStartMode            bool         `mapstructure:"silent_start_mode"`
@@ -31,6 +32,7 @@ func newJobGerritTrigger() *jobGerritTrigger {
 func (t *jobGerritTrigger) fromClientJobTrigger(clientTriggerInterface client.JobTrigger) jobTrigger {
 	clientTrigger := clientTriggerInterface.(*client.JobGerritTrigger)
 	trigger := newJobGerritTrigger()
+	trigger.Plugin = clientTrigger.Plugin
 	trigger.ServerName = clientTrigger.ServerName
 	trigger.SilentMode = clientTrigger.SilentMode
 	trigger.SilentStartMode = clientTrigger.SilentStartMode
@@ -46,6 +48,7 @@ func (t *jobGerritTrigger) fromClientJobTrigger(clientTriggerInterface client.Jo
 func (t *jobGerritTrigger) toClientJobTrigger(id string) (client.JobTrigger, error) {
 	clientTrigger := client.NewJobGerritTrigger()
 	clientTrigger.Id = id
+	clientTrigger.Plugin = t.Plugin
 	clientTrigger.ServerName = t.ServerName
 	clientTrigger.SilentMode = t.SilentMode
 	clientTrigger.SilentStartMode = t.SilentStartMode
@@ -83,6 +86,9 @@ func (t *jobGerritTrigger) parseParameterMode(clientTrigger *client.JobGerritTri
 }
 
 func (t *jobGerritTrigger) setResourceData(d *schema.ResourceData) error {
+	if err := d.Set("plugin", t.Plugin); err != nil {
+		return err
+	}
 	if err := d.Set("server_name", t.ServerName); err != nil {
 		return err
 	}

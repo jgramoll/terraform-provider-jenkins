@@ -14,8 +14,9 @@ var ErrJobGerritTriggerEventNotFound = errors.New("Could not find job gerrit tri
 type JobGerritTrigger struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger"`
 	Id      string   `xml:"id,attr,omitempty"`
+	Plugin  string   `xml:"plugin,attr,omitempty"`
 
-	// spec
+	Spec                  string                    `xml:"spec"`
 	Projects              *JobGerritTriggerProjects `xml:"gerritProjects"`
 	dynamicGerritProjects *DynamicGerritProjects    `xml:"dynamicGerritProjects"`
 	SkipVote              *JobGerritTriggerSkipVote `xml:"skipVote"`
