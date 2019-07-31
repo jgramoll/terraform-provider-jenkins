@@ -156,6 +156,7 @@ func TestJobConfigSerialize(t *testing.T) {
 		<scriptPath></scriptPath>
 		<lightweight>false</lightweight>
 	</definition>
+	<trigger></trigger>
 	<disabled>false</disabled>
 </flow-definition>`
 	if result != expected {

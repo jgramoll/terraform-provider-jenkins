@@ -17,7 +17,7 @@ func NewJobActions() *JobActions {
 
 func (actions *JobActions) Append(action JobAction) *JobActions {
 	newActions := NewJobActions()
-	if actions.Items != nil {
+	if actions != nil && actions.Items != nil {
 		*newActions.Items = append(*actions.Items, action)
 	} else {
 		*newActions.Items = []JobAction{action}

@@ -14,8 +14,8 @@ type jobConfig struct {
 	KeepDependencies bool              `xml:"keepDependencies"`
 	Properties       *JobProperties    `xml:"properties"`
 	Definition       *JobDefinitionXml `xml:"definition"`
-	// triggers
-	Disabled bool `xml:"disabled"`
+	Triggers         string            `xml:"trigger"`
+	Disabled         bool              `xml:"disabled"`
 }
 
 func JobConfigFromJob(job *Job) *jobConfig {

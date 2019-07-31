@@ -144,4 +144,8 @@ resource "jenkins_job_gerrit_branch" "main" {
 1. import resources
 1. Refactor unmarshall to use map
 1. Refactor types = reflect checks
+1. DatadogJobProperty
+<!-- <org.datadog.jenkins.plugins.datadog.DatadogJobProperty plugin="datadog@0.7.1">
+<emitOnCheckout>false</emitOnCheckout>
+</org.datadog.jenkins.plugins.datadog.DatadogJobProperty> -->
 1. Fragile TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic test
