@@ -41,6 +41,7 @@ func TestJobConfigSerialize(t *testing.T) {
 	gerritProject.Pattern = "my-project"
 	gerritProject.Branches = gerritProject.Branches.Append(gerritBranch)
 	gerritTrigger := NewJobGerritTrigger()
+	gerritTrigger.Plugin = "gerrit-trigger@2.29.0"
 	gerritTrigger.Projects = gerritTrigger.Projects.Append(gerritProject)
 	gerritTriggerPatchsetEvent := NewJobGerritTriggerPluginPatchsetCreatedEvent()
 	gerritTrigger.TriggerOnEvents = gerritTrigger.TriggerOnEvents.Append(gerritTriggerPatchsetEvent)
