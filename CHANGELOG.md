@@ -1,5 +1,9 @@
 # terraform-provider-jenkins Change Log
 
+## 0.0.3
+
+[fabf3bd] fix id delimiter to be less command character
+
 ## 0.0.2
 
 [1fb1065] fix rest of initial resources should be functional now
