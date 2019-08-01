@@ -2,6 +2,10 @@ package client
 
 import "encoding/xml"
 
+func init() {
+	jobActionUnmarshalFunc["org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction"] = unmarshalDeclarativeJobAction
+}
+
 type JobDeclarativeJobAction struct {
 	XMLName xml.Name `xml:"org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction"`
 	Id      string   `xml:"id,attr,omitempty"`
@@ -13,4 +17,13 @@ func NewJobDeclarativeJobAction() *JobDeclarativeJobAction {
 
 func (action *JobDeclarativeJobAction) GetId() string {
 	return action.Id
+}
+
+func unmarshalDeclarativeJobAction(d *xml.Decoder, start xml.StartElement) (JobAction, error) {
+	action := NewJobDeclarativeJobAction()
+	err := d.DecodeElement(action, &start)
+	if err != nil {
+		return nil, err
+	}
+	return action, nil
 }

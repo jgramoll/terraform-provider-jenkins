@@ -4,9 +4,9 @@ import (
 	"encoding/xml"
 )
 
-type PropertyBuilder func(*xml.Decoder, xml.StartElement) (JobProperty, error)
+type propertyUnmarshaler func(*xml.Decoder, xml.StartElement) (JobProperty, error)
 
-var propertyUnmarshalFunc = map[string]PropertyBuilder{}
+var propertyUnmarshalFunc = map[string]propertyUnmarshaler{}
 
 type JobProperties struct {
 	XMLName xml.Name       `xml:"properties"`

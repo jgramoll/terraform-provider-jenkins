@@ -2,6 +2,10 @@ package client
 
 import "encoding/xml"
 
+func init() {
+	jobGerritTriggerOnEventsUnmarshalFunc["com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginPatchsetCreatedEvent"] = unmarshalJobGerritTriggerPluginPatchsetCreatedEvent
+}
+
 type JobGerritTriggerPluginPatchsetCreatedEvent struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginPatchsetCreatedEvent"`
 	Id      string   `xml:"id,attr,omitempty"`
@@ -25,4 +29,13 @@ func NewJobGerritTriggerPluginPatchsetCreatedEvent() *JobGerritTriggerPluginPatc
 
 func (event *JobGerritTriggerPluginPatchsetCreatedEvent) GetId() string {
 	return event.Id
+}
+
+func unmarshalJobGerritTriggerPluginPatchsetCreatedEvent(d *xml.Decoder, start xml.StartElement) (JobGerritTriggerOnEvent, error) {
+	event := NewJobGerritTriggerPluginPatchsetCreatedEvent()
+	err := d.DecodeElement(event, &start)
+	if err != nil {
+		return nil, err
+	}
+	return event, nil
 }

@@ -5,6 +5,10 @@ import (
 	"errors"
 )
 
+func init() {
+	jobTriggerUnmarshalFunc["com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger"] = unmarshalJobGerritTrigger
+}
+
 // ErrJobGerritTriggerProjectNotFound job gerrit trigger project not found
 var ErrJobGerritTriggerProjectNotFound = errors.New("Could not find job gerrit trigger project")
 
@@ -62,6 +66,15 @@ func NewJobGerritTrigger() *JobGerritTrigger {
 
 func (trigger *JobGerritTrigger) GetId() string {
 	return trigger.Id
+}
+
+func unmarshalJobGerritTrigger(d *xml.Decoder, start xml.StartElement) (JobTrigger, error) {
+	trigger := NewJobGerritTrigger()
+	err := d.DecodeElement(trigger, &start)
+	if err != nil {
+		return nil, err
+	}
+	return trigger, nil
 }
 
 func (trigger *JobGerritTrigger) GetProject(projectId string) (*JobGerritTriggerProject, error) {

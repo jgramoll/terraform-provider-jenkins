@@ -4,6 +4,10 @@ import (
 	"encoding/xml"
 )
 
+type jobActionUnmarshaler func(*xml.Decoder, xml.StartElement) (JobAction, error)
+
+var jobActionUnmarshalFunc = map[string]jobActionUnmarshaler{}
+
 type JobActions struct {
 	XMLName xml.Name     `xml:"actions"`
 	Items   *[]JobAction `xml:",any"`
@@ -31,18 +35,8 @@ func (actions *JobActions) UnmarshalXML(d *xml.Decoder, start xml.StartElement) 
 	actions.Items = &[]JobAction{}
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
-			// TODO use map
-			switch elem.Name.Local {
-			case "org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction":
-				action := NewJobDeclarativeJobAction()
-				err := d.DecodeElement(action, &elem)
-				if err != nil {
-					return err
-				}
-				*actions.Items = append(*actions.Items, action)
-			case "org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction":
-				action := NewJobDeclarativeJobPropertyTrackerAction()
-				err := d.DecodeElement(action, &elem)
+			if unmarshalXML, ok := jobActionUnmarshalFunc[elem.Name.Local]; ok {
+				action, err := unmarshalXML(d, elem)
 				if err != nil {
 					return err
 				}

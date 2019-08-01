@@ -4,6 +4,10 @@ import (
 	"encoding/xml"
 )
 
+type jobTriggerUnmarshaler func(*xml.Decoder, xml.StartElement) (JobTrigger, error)
+
+var jobTriggerUnmarshalFunc = map[string]jobTriggerUnmarshaler{}
+
 type JobTriggers struct {
 	XMLName xml.Name `xml:"triggers"`
 	Items   *[]JobTrigger
@@ -30,15 +34,12 @@ func (triggers *JobTriggers) UnmarshalXML(d *xml.Decoder, start xml.StartElement
 	var err error
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
-			// TODO use map
-			switch elem.Name.Local {
-			case "com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger":
-				trigger := NewJobGerritTrigger()
-				err := d.DecodeElement(trigger, &elem)
+			if unmarshalXML, ok := jobTriggerUnmarshalFunc[elem.Name.Local]; ok {
+				trigger, err := unmarshalXML(d, elem)
 				if err != nil {
 					return err
 				}
-				*triggers.Items = append(*(triggers).Items, trigger)
+				*triggers.Items = append(*triggers.Items, trigger)
 			}
 		}
 		if end, ok := tok.(xml.EndElement); ok {

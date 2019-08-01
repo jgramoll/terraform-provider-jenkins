@@ -4,6 +4,10 @@ import (
 	"encoding/xml"
 )
 
+type scmExtensionUnmarshaler func(*xml.Decoder, xml.StartElement) (GitScmExtension, error)
+
+var scmExtensionUnmarshalFunc = map[string]scmExtensionUnmarshaler{}
+
 type GitScmExtensions struct {
 	Items *[]GitScmExtension
 }
@@ -30,11 +34,8 @@ func (extensions *GitScmExtensions) UnmarshalXML(d *xml.Decoder, start xml.Start
 	extensions.Items = &[]GitScmExtension{}
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
-			// TODO use map
-			switch elem.Name.Local {
-			case "hudson.plugins.git.extensions.impl.CleanBeforeCheckout":
-				extension := NewGitScmCleanBeforeCheckoutExtension()
-				err := d.DecodeElement(extension, &elem)
+			if unmarshalXML, ok := scmExtensionUnmarshalFunc[elem.Name.Local]; ok {
+				extension, err := unmarshalXML(d, elem)
 				if err != nil {
 					return err
 				}

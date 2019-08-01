@@ -2,6 +2,10 @@ package client
 
 import "encoding/xml"
 
+type jobGerritTriggerOnEventsUnmarshaler func(*xml.Decoder, xml.StartElement) (JobGerritTriggerOnEvent, error)
+
+var jobGerritTriggerOnEventsUnmarshalFunc = map[string]jobGerritTriggerOnEventsUnmarshaler{}
+
 type JobGerritTriggerOnEvents struct {
 	XMLName    xml.Name `xml:"triggerOnEvents"`
 	LinkedList string   `xml:"class,attr"`
@@ -31,18 +35,8 @@ func (events *JobGerritTriggerOnEvents) UnmarshalXML(d *xml.Decoder, start xml.S
 	events.Items = &[]JobGerritTriggerOnEvent{}
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
-			// TODO use map
-			switch elem.Name.Local {
-			case "com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginDraftPublishedEvent":
-				event := NewJobGerritTriggerPluginDraftPublishedEvent()
-				err := d.DecodeElement(event, &elem)
-				if err != nil {
-					return err
-				}
-				*events.Items = append(*events.Items, event)
-			case "com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginPatchsetCreatedEvent":
-				event := NewJobGerritTriggerPluginPatchsetCreatedEvent()
-				err := d.DecodeElement(event, &elem)
+			if unmarshalXML, ok := jobGerritTriggerOnEventsUnmarshalFunc[elem.Name.Local]; ok {
+				event, err := unmarshalXML(d, elem)
 				if err != nil {
 					return err
 				}
