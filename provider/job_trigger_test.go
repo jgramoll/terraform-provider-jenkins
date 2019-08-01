@@ -2,14 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-var jobTriggerTypes = map[string]reflect.Type{}
 
 func testAccCheckJobTriggers(
 	jobRef *client.Job,

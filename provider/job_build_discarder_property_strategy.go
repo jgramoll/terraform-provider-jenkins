@@ -6,7 +6,7 @@ import (
 )
 
 type jobBuildDiscarderPropertyStrategy interface {
-	fromClientStrategy(client.JobBuildDiscarderPropertyStrategy) jobBuildDiscarderPropertyStrategy
+	fromClientStrategy(client.JobBuildDiscarderPropertyStrategy) (jobBuildDiscarderPropertyStrategy, error)
 	toClientStrategy(id string) client.JobBuildDiscarderPropertyStrategy
 	setResourceData(*schema.ResourceData) error
 }

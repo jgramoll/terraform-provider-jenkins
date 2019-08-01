@@ -91,8 +91,10 @@ func resourceJobBuildDiscarderPropertyStrategyRead(d *schema.ResourceData, m int
 		d.SetId("")
 		return nil
 	}
-	strategy := createJobBuildDiscarderPropertyStrategy().fromClientStrategy(discardProperty.Strategy.Item)
-
+	strategy, err := createJobBuildDiscarderPropertyStrategy().fromClientStrategy(discardProperty.Strategy.Item)
+	if err != nil {
+		return err
+	}
 	log.Println("[INFO] Reading build discarder propety strategy", d.Id())
 	return strategy.setResourceData(d)
 }

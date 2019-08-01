@@ -66,8 +66,5 @@ resource "jenkins_job_datadog_job_property" "prop_%v" {
 
 func ensureJobDatadogJobProperty(propertyInterface client.JobProperty, resource *terraform.ResourceState) error {
 	_, err := newJobDatadogJobProperty().fromClientJobProperty(propertyInterface)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

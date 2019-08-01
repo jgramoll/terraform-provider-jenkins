@@ -6,7 +6,7 @@ import (
 )
 
 type jobGerritTriggerEvent interface {
-	fromClientJobTriggerEvent(client.JobGerritTriggerOnEvent) jobGerritTriggerEvent
+	fromClientJobTriggerEvent(client.JobGerritTriggerOnEvent) (jobGerritTriggerEvent, error)
 	toClientJobTriggerEvent(id string) (client.JobGerritTriggerOnEvent, error)
 	setResourceData(*schema.ResourceData) error
 }

@@ -113,8 +113,10 @@ func resourceJobTriggerEventRead(d *schema.ResourceData, m interface{}, createJo
 	if err != nil {
 		return err
 	}
-	event := createJobTriggerEvent().fromClientJobTriggerEvent(clientEvent)
-
+	event, err := createJobTriggerEvent().fromClientJobTriggerEvent(clientEvent)
+	if err != nil {
+		return err
+	}
 	log.Println("[INFO] Updating state for job trigger event", d.Id())
 	return event.setResourceData(d)
 }

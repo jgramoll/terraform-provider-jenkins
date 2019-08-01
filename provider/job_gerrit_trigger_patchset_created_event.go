@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
@@ -17,15 +20,19 @@ func newJobGerritTriggerPatchSetCreatedEvent() *jobGerritTriggerPatchSetCreatedE
 	return &jobGerritTriggerPatchSetCreatedEvent{}
 }
 
-func (e *jobGerritTriggerPatchSetCreatedEvent) fromClientJobTriggerEvent(clientEventInterface client.JobGerritTriggerOnEvent) jobGerritTriggerEvent {
-	clientEvent := clientEventInterface.(*client.JobGerritTriggerPluginPatchsetCreatedEvent)
+func (e *jobGerritTriggerPatchSetCreatedEvent) fromClientJobTriggerEvent(clientEventInterface client.JobGerritTriggerOnEvent) (jobGerritTriggerEvent, error) {
+	clientEvent, ok := clientEventInterface.(*client.JobGerritTriggerPluginPatchsetCreatedEvent)
+	if !ok {
+		return nil, fmt.Errorf("Unexpected event type got %s, expected *client.JobGerritTriggerPluginPatchsetCreatedEvent",
+			reflect.TypeOf(clientEventInterface).String())
+	}
 	event := newJobGerritTriggerPatchSetCreatedEvent()
 	event.ExcludeDrafts = clientEvent.ExcludeDrafts
 	event.ExcludeTrivialRebase = clientEvent.ExcludeTrivialRebase
 	event.ExcludeNoCodeChange = clientEvent.ExcludeNoCodeChange
 	event.ExcludePrivateState = clientEvent.ExcludePrivateState
 	event.ExcludeWipState = clientEvent.ExcludeWipState
-	return event
+	return event, nil
 }
 
 func (event *jobGerritTriggerPatchSetCreatedEvent) toClientJobTriggerEvent(eventId string) (client.JobGerritTriggerOnEvent, error) {

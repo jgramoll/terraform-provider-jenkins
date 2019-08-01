@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,10 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func init() {
-	jobDefinitionTypes["jenkins_job_git_scm"] = reflect.TypeOf((*client.CpsScmFlowDefinition)(nil))
-}
 
 func TestAccJobGitScmBasic(t *testing.T) {
 	var jobRef client.Job

@@ -6,7 +6,7 @@ import (
 )
 
 type jobTrigger interface {
-	fromClientJobTrigger(client.JobTrigger) jobTrigger
+	fromClientJobTrigger(client.JobTrigger) (jobTrigger, error)
 	toClientJobTrigger(id string) (client.JobTrigger, error)
 	setResourceData(*schema.ResourceData) error
 }

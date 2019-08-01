@@ -6,7 +6,7 @@ import (
 )
 
 type jobGitScmExtension interface {
-	fromClientExtension(client.GitScmExtension) jobGitScmExtension
+	fromClientExtension(client.GitScmExtension) (jobGitScmExtension, error)
 	toClientExtension(id string) (client.GitScmExtension, error)
 	setResourceData(*schema.ResourceData) error
 }

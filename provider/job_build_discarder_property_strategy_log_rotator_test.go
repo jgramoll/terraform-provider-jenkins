@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,10 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func init() {
-	jobBuildDiscarderPropertyStrategyTypes["jenkins_job_build_discarder_property_log_rotator_strategy"] = reflect.TypeOf((*client.JobBuildDiscarderPropertyStrategyLogRotator)(nil))
-}
 
 func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 	var jobRef client.Job
@@ -72,20 +67,13 @@ resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
 }`, daysToKeep)
 }
 
-func ensureJobBuildDiscarderPropertyStrategyLogRotator(strategyInterface client.JobBuildDiscarderPropertyStrategy, rs *terraform.ResourceState) error {
-	strategy, ok := strategyInterface.(*client.JobBuildDiscarderPropertyStrategyLogRotator)
-	if !ok {
-		return fmt.Errorf("Strategy is not of expected type, expected *client.JobBuildDiscarderPropertyStrategyLogRotator, actually %s",
-			reflect.TypeOf(strategyInterface).String())
-	}
-
-	_, _, strategyId, err := resourceJobPropertyStrategyId(rs.Primary.Attributes["id"])
+func ensureJobBuildDiscarderPropertyStrategyLogRotator(clientStrategyInterface client.JobBuildDiscarderPropertyStrategy, rs *terraform.ResourceState) error {
+	strategyInterface, err := newJobBuildDiscarderPropertyStrategyLogRotator().fromClientStrategy(clientStrategyInterface)
 	if err != nil {
 		return err
 	}
-	if strategyId != strategy.Id {
-		return fmt.Errorf("JobBuildDiscarderPropertyStrategyLogRotator id should be %v, was %v", strategyId, strategy.Id)
-	}
+	strategy := strategyInterface.(*jobBuildDiscarderPropertyStrategyLogRotator)
+
 	err = testCompareResourceInt("JobBuildDiscarderPropertyStrategyLogRotator", "DaysToKeep", rs.Primary.Attributes["days_to_keep"], strategy.DaysToKeep)
 	if err != nil {
 		return err

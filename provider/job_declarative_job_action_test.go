@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -51,11 +50,6 @@ resource "jenkins_job_declarative_job_action" "main" {
 }
 
 func ensureJobDeclarativeJobAction(actionInterface client.JobAction, rs *terraform.ResourceState) error {
-	_, ok := actionInterface.(*client.JobDeclarativeJobAction)
-	if !ok {
-		return fmt.Errorf("Action is not of expected type, expected *client.JobDeclarativeJobAction, actually %s",
-			reflect.TypeOf(actionInterface).String())
-	}
-
-	return nil
+	_, err := newJobDeclarativeJobAction().fromClientAction(actionInterface)
+	return err
 }

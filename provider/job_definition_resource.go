@@ -73,8 +73,10 @@ func resourceJobDefinitionRead(d *schema.ResourceData, m interface{}, createJobD
 		return nil
 	}
 
-	definition := createJobDefinition().fromClientJobDefintion(j.Definition)
-
+	definition, err := createJobDefinition().fromClientJobDefintion(j.Definition)
+	if err != nil {
+		return err
+	}
 	log.Println("[INFO] Reading from job definition", d.Id())
 	return definition.setResourceData(d)
 }

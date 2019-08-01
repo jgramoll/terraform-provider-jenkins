@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,10 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func init() {
-	jobTriggerTypes["jenkins_job_gerrit_trigger"] = reflect.TypeOf((*client.JobGerritTrigger)(nil))
-}
 
 func TestAccJobGerritTriggerBasic(t *testing.T) {
 	var jobRef client.Job
@@ -105,14 +100,13 @@ resource "jenkins_job_gerrit_trigger" "trigger_%v" {
 	return t
 }
 
-func ensureJobGerritTrigger(triggerInterface client.JobTrigger, rs *terraform.ResourceState) error {
-	trigger, ok := triggerInterface.(*client.JobGerritTrigger)
-	if !ok {
-		return fmt.Errorf("Strategy is not of expected type, expected *client.JobGerritTrigger, actually %s",
-			reflect.TypeOf(triggerInterface).String())
+func ensureJobGerritTrigger(clientTriggerInterface client.JobTrigger, rs *terraform.ResourceState) error {
+	triggerInterface, err := newJobGerritTrigger().fromClientJobTrigger(clientTriggerInterface)
+	if err != nil {
+		return err
 	}
+	trigger := triggerInterface.(*jobGerritTrigger)
 
-	var err error
 	err = testCompareResourceBool("JobGerritTrigger", "SilentMode", rs.Primary.Attributes["silent_mode"], trigger.SilentMode)
 	if err != nil {
 		return err
@@ -125,19 +119,19 @@ func ensureJobGerritTrigger(triggerInterface client.JobTrigger, rs *terraform.Re
 	if err != nil {
 		return err
 	}
-	if trigger.NameAndEmailParameterMode.String() != rs.Primary.Attributes["name_and_email_parameter_mode"] {
+	if trigger.NameAndEmailParameterMode != rs.Primary.Attributes["name_and_email_parameter_mode"] {
 		return fmt.Errorf("expected name_and_email_parameter_mode %s, got %s",
 			rs.Primary.Attributes["name_and_email_parameter_mode"], trigger.NameAndEmailParameterMode)
 	}
-	if trigger.CommitMessageParameterMode.String() != rs.Primary.Attributes["commit_message_parameter_mode"] {
+	if trigger.CommitMessageParameterMode != rs.Primary.Attributes["commit_message_parameter_mode"] {
 		return fmt.Errorf("expected commit_message_parameter_mode %s, got %s",
 			rs.Primary.Attributes["commit_message_parameter_mode"], trigger.CommitMessageParameterMode)
 	}
-	if trigger.ChangeSubjectParameterMode.String() != rs.Primary.Attributes["change_subject_parameter_mode"] {
+	if trigger.ChangeSubjectParameterMode != rs.Primary.Attributes["change_subject_parameter_mode"] {
 		return fmt.Errorf("expected change_subject_parameter_mode %s, got %s",
 			rs.Primary.Attributes["change_subject_parameter_mode"], trigger.ChangeSubjectParameterMode)
 	}
-	if trigger.CommentTextParameterMode.String() != rs.Primary.Attributes["comment_text_parameter_mode"] {
+	if trigger.CommentTextParameterMode != rs.Primary.Attributes["comment_text_parameter_mode"] {
 		return fmt.Errorf("expected comment_text_parameter_mode %s, got %s",
 			rs.Primary.Attributes["comment_text_parameter_mode"], trigger.CommentTextParameterMode)
 	}

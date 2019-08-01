@@ -1,36 +1,46 @@
 package provider
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
 type jobGerritTrigger struct {
-	Plugin                     string       `mapstructure:"plugin"`
-	ServerName                 string       `mapstructure:"server_name"`
-	SilentMode                 bool         `mapstructure:"silent_mode"`
-	SilentStartMode            bool         `mapstructure:"silent_start_mode"`
-	EscapeQuotes               bool         `mapstructure:"escape_quotes"`
-	NameAndEmailParameterMode  string       `mapstructure:"name_and_email_parameter_mode"`
-	CommitMessageParameterMode string       `mapstructure:"commit_message_parameter_mode"`
-	ChangeSubjectParameterMode string       `mapstructure:"change_subject_parameter_mode"`
-	CommentTextParameterMode   string       `mapstructure:"comment_text_parameter_mode"`
-	SkipVote                   *[]*skipVote `mapstructure:"skip_vote"`
+	Plugin                      string       `mapstructure:"plugin"`
+	ServerName                  string       `mapstructure:"server_name"`
+	SilentMode                  bool         `mapstructure:"silent_mode"`
+	SilentStartMode             bool         `mapstructure:"silent_start_mode"`
+	EscapeQuotes                bool         `mapstructure:"escape_quotes"`
+	NameAndEmailParameterMode   string       `mapstructure:"name_and_email_parameter_mode"`
+	CommitMessageParameterMode  string       `mapstructure:"commit_message_parameter_mode"`
+	ChangeSubjectParameterMode  string       `mapstructure:"change_subject_parameter_mode"`
+	CommentTextParameterMode    string       `mapstructure:"comment_text_parameter_mode"`
+	DynamicTriggerConfiguration bool         `mapstructure:"dynamic_trigger_configuration"`
+	SkipVote                    *[]*skipVote `mapstructure:"skip_vote"`
 }
 
 func newJobGerritTrigger() *jobGerritTrigger {
 	return &jobGerritTrigger{
-		EscapeQuotes:               true,
-		NameAndEmailParameterMode:  "PLAIN",
-		CommitMessageParameterMode: "BASE64",
-		ChangeSubjectParameterMode: "PLAIN",
-		CommentTextParameterMode:   "BASE64",
-		SkipVote:                   &[]*skipVote{},
+		EscapeQuotes:                true,
+		NameAndEmailParameterMode:   "PLAIN",
+		CommitMessageParameterMode:  "BASE64",
+		ChangeSubjectParameterMode:  "PLAIN",
+		CommentTextParameterMode:    "BASE64",
+		DynamicTriggerConfiguration: false,
+		SkipVote:                    &[]*skipVote{},
 	}
 }
 
-func (t *jobGerritTrigger) fromClientJobTrigger(clientTriggerInterface client.JobTrigger) jobTrigger {
-	clientTrigger := clientTriggerInterface.(*client.JobGerritTrigger)
+func (t *jobGerritTrigger) fromClientJobTrigger(clientTriggerInterface client.JobTrigger) (jobTrigger, error) {
+	clientTrigger, ok := clientTriggerInterface.(*client.JobGerritTrigger)
+	if !ok {
+		return nil, fmt.Errorf("Strategy is not of expected type, expected *client.JobGerritTrigger, actually %s",
+			reflect.TypeOf(clientTriggerInterface).String())
+	}
+
 	trigger := newJobGerritTrigger()
 	trigger.Plugin = clientTrigger.Plugin
 	trigger.ServerName = clientTrigger.ServerName
@@ -41,8 +51,9 @@ func (t *jobGerritTrigger) fromClientJobTrigger(clientTriggerInterface client.Jo
 	trigger.CommitMessageParameterMode = clientTrigger.CommitMessageParameterMode.String()
 	trigger.ChangeSubjectParameterMode = clientTrigger.ChangeSubjectParameterMode.String()
 	trigger.CommentTextParameterMode = clientTrigger.CommentTextParameterMode.String()
+	trigger.DynamicTriggerConfiguration = clientTrigger.DynamicTriggerConfiguration
 	*trigger.SkipVote = []*skipVote{newSkipVotefromClient(clientTrigger.SkipVote)}
-	return trigger
+	return trigger, nil
 }
 
 func (t *jobGerritTrigger) toClientJobTrigger(id string) (client.JobTrigger, error) {
@@ -57,6 +68,7 @@ func (t *jobGerritTrigger) toClientJobTrigger(id string) (client.JobTrigger, err
 	if err != nil {
 		return nil, err
 	}
+	clientTrigger.DynamicTriggerConfiguration = t.DynamicTriggerConfiguration
 	clientTrigger.SkipVote = newClientSkipVote(t.SkipVote)
 	return clientTrigger, nil
 }
@@ -111,6 +123,9 @@ func (t *jobGerritTrigger) setResourceData(d *schema.ResourceData) error {
 		return err
 	}
 	if err := d.Set("comment_text_parameter_mode", t.CommentTextParameterMode); err != nil {
+		return err
+	}
+	if err := d.Set("dynamic_trigger_configuration", t.DynamicTriggerConfiguration); err != nil {
 		return err
 	}
 	return d.Set("skip_vote", t.SkipVote)

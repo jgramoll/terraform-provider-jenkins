@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,10 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func init() {
-	jobGitScmExtensionTypes["jenkins_job_git_scm_clean_before_checkout_extension"] = reflect.TypeOf((*client.GitScmCleanBeforeCheckoutExtension)(nil))
-}
 
 func TestAccJobGitScmCleanBeforeCheckoutExtensionBasic(t *testing.T) {
 	var jobRef client.Job
@@ -57,15 +52,6 @@ func ensureJobGitScmCleanBeforeCheckoutExtension(
 	extensionInterface client.GitScmExtension,
 	rs *terraform.ResourceState,
 ) error {
-	extension := extensionInterface.(*client.GitScmCleanBeforeCheckoutExtension)
-
-	_, _, extensionId, err := resourceJobGitScmExtensionId(rs.Primary.Attributes["id"])
-	if err != nil {
-		return err
-	}
-	if extension.Id != extensionId {
-		return fmt.Errorf("GitScmCleanBeforeCheckoutExtension id should be %v, was %v", extensionId, extension.Id)
-	}
-
-	return nil
+	_, err := newJobGitScmCleanBeforeCheckoutExtension().fromClientExtension(extensionInterface)
+	return err
 }

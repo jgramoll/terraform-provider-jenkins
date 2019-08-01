@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
@@ -31,14 +34,18 @@ func (strategy *jobBuildDiscarderPropertyStrategyLogRotator) toClientStrategy(id
 	return clientStrategy
 }
 
-func (s *jobBuildDiscarderPropertyStrategyLogRotator) fromClientStrategy(cs client.JobBuildDiscarderPropertyStrategy) jobBuildDiscarderPropertyStrategy {
-	clientStrategy := cs.(*client.JobBuildDiscarderPropertyStrategyLogRotator)
+func (s *jobBuildDiscarderPropertyStrategyLogRotator) fromClientStrategy(clientStrategyInterface client.JobBuildDiscarderPropertyStrategy) (jobBuildDiscarderPropertyStrategy, error) {
+	clientStrategy, ok := clientStrategyInterface.(*client.JobBuildDiscarderPropertyStrategyLogRotator)
+	if !ok {
+		return nil, fmt.Errorf("Strategy is not of expected type, expected *client.JobBuildDiscarderPropertyStrategyLogRotator, actually %s",
+			reflect.TypeOf(clientStrategyInterface).String())
+	}
 	strategy := newJobBuildDiscarderPropertyStrategyLogRotator()
 	strategy.DaysToKeep = clientStrategy.DaysToKeep
 	strategy.NumToKeep = clientStrategy.NumToKeep
 	strategy.ArtifactDaysToKeep = clientStrategy.ArtifactDaysToKeep
 	strategy.ArtifactNumToKeep = clientStrategy.ArtifactNumToKeep
-	return strategy
+	return strategy, nil
 }
 
 func (strategy *jobBuildDiscarderPropertyStrategyLogRotator) setResourceData(d *schema.ResourceData) error {

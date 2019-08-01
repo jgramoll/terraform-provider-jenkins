@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,10 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func init() {
-	jobTriggerEventTypes["jenkins_job_gerrit_trigger_patchset_created_event"] = reflect.TypeOf((*client.JobGerritTriggerPluginPatchsetCreatedEvent)(nil))
-}
 
 func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 	var jobRef client.Job
@@ -67,16 +62,15 @@ resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
 }
 
 func ensureJobGerritTriggerPatchsetCreatedEvent(
-	eventInterface client.JobGerritTriggerOnEvent,
+	clientEventInterface client.JobGerritTriggerOnEvent,
 	rs *terraform.ResourceState,
 ) error {
-	event, ok := eventInterface.(*client.JobGerritTriggerPluginPatchsetCreatedEvent)
-	if !ok {
-		return fmt.Errorf("Unexpected event type got %s, expected *client.JobGerritTriggerPluginPatchsetCreatedEvent",
-			reflect.TypeOf(eventInterface).String())
+	eventInterface, err := newJobGerritTriggerPatchSetCreatedEvent().fromClientJobTriggerEvent(clientEventInterface)
+	if err != nil {
+		return err
 	}
-
-	err := testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeDrafts", rs.Primary.Attributes["exclude_drafts"], event.ExcludeDrafts)
+	event := eventInterface.(*jobGerritTriggerPatchSetCreatedEvent)
+	err = testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeDrafts", rs.Primary.Attributes["exclude_drafts"], event.ExcludeDrafts)
 	if err != nil {
 		return err
 	}

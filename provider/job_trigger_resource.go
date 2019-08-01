@@ -101,8 +101,10 @@ func resourceJobTriggerRead(d *schema.ResourceData, m interface{}, createJobTrig
 	if err != nil {
 		return err
 	}
-	trigger := createJobTrigger().fromClientJobTrigger(clientTrigger)
-
+	trigger, err := createJobTrigger().fromClientJobTrigger(clientTrigger)
+	if err != nil {
+		return err
+	}
 	log.Println("[INFO] Updating state for job trigger", d.Id())
 	return trigger.setResourceData(d)
 }

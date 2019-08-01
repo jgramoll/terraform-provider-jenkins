@@ -1,8 +1,10 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
+	"reflect"
 )
 
 type jobGitScm struct {
@@ -17,17 +19,18 @@ func newJobGitScm() *jobGitScm {
 	}
 }
 
-func (scm *jobGitScm) fromClientJobDefintion(clientDefinition client.JobDefinition) jobDefinition {
-	if clientDefinition == nil {
-		return nil
+func (scm *jobGitScm) fromClientJobDefintion(clientDefinitionInterface client.JobDefinition) (jobDefinition, error) {
+	clientScmDefinition, ok := clientDefinitionInterface.(*client.CpsScmFlowDefinition)
+	if !ok {
+		return nil, fmt.Errorf("Strategy is not of expected type, expected *client.CpsScmFlowDefinition, actually %s",
+			reflect.TypeOf(clientDefinitionInterface).String())
 	}
-	clientScmDefinition := clientDefinition.(*client.CpsScmFlowDefinition)
 
 	definition := newJobGitScm()
 	definition.ConfigVersion = clientScmDefinition.SCM.ConfigVersion
 	definition.ScriptPath = clientScmDefinition.ScriptPath
 	definition.Lightweight = clientScmDefinition.Lightweight
-	return definition
+	return definition, nil
 }
 
 func (scm *jobGitScm) setResourceData(*schema.ResourceData) error {

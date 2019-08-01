@@ -3,14 +3,11 @@ package provider
 import (
 	"errors"
 	"fmt"
-	"reflect"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-var jobBuildDiscarderPropertyStrategyTypes = map[string]reflect.Type{}
 
 func testAccCheckBuildDiscarderPropertyStrategies(
 	jobRef *client.Job,
@@ -56,7 +53,7 @@ func ensureJobBuildDiscarderPropertyStrategy(
 	resource *terraform.ResourceState,
 	ensureStrategyFunc func(client.JobBuildDiscarderPropertyStrategy, *terraform.ResourceState) error,
 ) (client.JobBuildDiscarderPropertyStrategy, error) {
-	_, propertyId, strategyId, err := resourceJobPropertyStrategyId(resource.Primary.Attributes["id"])
+	_, propertyId, _, err := resourceJobPropertyStrategyId(resource.Primary.Attributes["id"])
 	if err != nil {
 		return nil, err
 	}
@@ -71,13 +68,6 @@ func ensureJobBuildDiscarderPropertyStrategy(
 
 	if strategy == nil {
 		return nil, errors.New("Property does not have strategy")
-	}
-
-	expectedType := jobBuildDiscarderPropertyStrategyTypes[resource.Type]
-	strategyType := reflect.TypeOf(strategy)
-	if expectedType != strategyType {
-		return nil, fmt.Errorf("Job Property Strategy %s was type \"%s\", expected type \"%s\"",
-			strategyId, strategyType, expectedType)
 	}
 
 	err = ensureStrategyFunc(strategy, resource)

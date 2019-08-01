@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,10 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func init() {
-	jobTriggerEventTypes["jenkins_job_gerrit_trigger_draft_published_event"] = reflect.TypeOf((*client.JobGerritTriggerPluginDraftPublishedEvent)(nil))
-}
 
 func TestAccJobGerritTriggerDraftPublishedEventBasic(t *testing.T) {
 	var jobRef client.Job
@@ -57,19 +52,6 @@ func ensureJobGerritTriggerDraftPublishedEvent(
 	eventInterface client.JobGerritTriggerOnEvent,
 	rs *terraform.ResourceState,
 ) error {
-	event, ok := eventInterface.(*client.JobGerritTriggerPluginDraftPublishedEvent)
-	if !ok {
-		return fmt.Errorf("Unexpected event type got %s, expected *client.JobGerritTriggerPluginDraftPublishedEvent",
-			reflect.TypeOf(eventInterface).String())
-	}
-
-	_, _, _, eventId, err := resourceJobTriggerEventId(rs.Primary.Attributes["id"])
-	if err != nil {
-		return err
-	}
-	if eventId != event.Id {
-		return fmt.Errorf("JobGerritTriggerPluginDraftPublishedEvent id should be %v, was %v", eventId, event.Id)
-	}
-
-	return nil
+	_, err := newJobGerritTriggerDraftPublishedEvent().fromClientJobTriggerEvent(eventInterface)
+	return err
 }

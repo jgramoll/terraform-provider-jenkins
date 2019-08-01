@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"fmt"
+	"reflect"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
@@ -13,8 +16,13 @@ func newJobGitScmCleanBeforeCheckoutExtension() *jobGitScmCleanBeforeCheckoutExt
 	return &jobGitScmCleanBeforeCheckoutExtension{}
 }
 
-func (branch *jobGitScmCleanBeforeCheckoutExtension) fromClientExtension(clientExtension client.GitScmExtension) jobGitScmExtension {
-	return newJobGitScmCleanBeforeCheckoutExtension()
+func (branch *jobGitScmCleanBeforeCheckoutExtension) fromClientExtension(clientExtensionInterface client.GitScmExtension) (jobGitScmExtension, error) {
+	_, ok := clientExtensionInterface.(*client.GitScmCleanBeforeCheckoutExtension)
+	if !ok {
+		return nil, fmt.Errorf("Strategy is not of expected type, expected *client.GitScmCleanBeforeCheckoutExtension, actually %s",
+			reflect.TypeOf(clientExtensionInterface).String())
+	}
+	return newJobGitScmCleanBeforeCheckoutExtension(), nil
 }
 
 func (branch *jobGitScmCleanBeforeCheckoutExtension) toClientExtension(extensionId string) (client.GitScmExtension, error) {

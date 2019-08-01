@@ -92,8 +92,10 @@ func resourceJobGitScmExtensionRead(d *schema.ResourceData, m interface{}, creat
 		d.SetId("")
 		return nil
 	}
-	extension := createGitScmExtension().fromClientExtension(clientExtension)
-
+	extension, err := createGitScmExtension().fromClientExtension(clientExtension)
+	if err != nil {
+		return err
+	}
 	log.Println("[INFO] Updating state for job git scm extension", d.Id())
 	return extension.setResourceData(d)
 }

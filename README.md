@@ -146,6 +146,4 @@ resource "jenkins_job_datadog_job_property" "main" {
 ## TODO
 
 1. import resources
-1. Refactor unmarshall to use map
-1. Refactor types = reflect checks
 1. Fragile TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic test

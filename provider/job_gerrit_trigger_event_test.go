@@ -2,14 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-var jobTriggerEventTypes = map[string]reflect.Type{}
 
 func testAccCheckJobGerritTriggerEvents(
 	jobRef *client.Job,
@@ -66,13 +63,6 @@ func ensureTriggerEvent(
 	event, err := trigger.GetEvent(eventId)
 	if err != nil {
 		return nil, err
-	}
-
-	expectedType := jobTriggerEventTypes[resource.Type]
-	eventType := reflect.TypeOf(event)
-	if expectedType != eventType {
-		return nil, fmt.Errorf("Job Event %s was type \"%s\", expected type \"%s\"",
-			propertyId, eventType, expectedType)
 	}
 
 	err = ensureTriggerEventFunc(event, resource)
