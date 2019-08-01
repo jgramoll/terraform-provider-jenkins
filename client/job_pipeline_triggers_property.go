@@ -5,6 +5,10 @@ import (
 	"errors"
 )
 
+func init() {
+	propertyUnmarshalFunc["org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty"] = unmarshalPipelineTriggersProperty
+}
+
 // ErrJobTriggerNotFound job property not found
 var ErrJobTriggerNotFound = errors.New("Could not find job pipeline trigger")
 
@@ -22,6 +26,15 @@ func NewJobPipelineTriggersProperty() *JobPipelineTriggersProperty {
 
 func (property *JobPipelineTriggersProperty) GetId() string {
 	return property.Id
+}
+
+func unmarshalPipelineTriggersProperty(d *xml.Decoder, start xml.StartElement) (JobProperty, error) {
+	property := NewJobPipelineTriggersProperty()
+	err := d.DecodeElement(property, &start)
+	if err != nil {
+		return nil, err
+	}
+	return property, nil
 }
 
 func (property *JobPipelineTriggersProperty) GetTrigger(triggerId string) (JobTrigger, error) {

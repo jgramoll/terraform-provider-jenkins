@@ -12,11 +12,11 @@ func jobGerritTriggerPatchSetCreatedEventResource() *schema.Resource {
 		Create: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobTriggerEventCreate(d, m, newTriggerEventInterface)
 		},
-		Update: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobTriggerEventUpdate(d, m, newTriggerEventInterface)
-		},
 		Read: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobTriggerEventRead(d, m, newTriggerEventInterface)
+		},
+		Update: func(d *schema.ResourceData, m interface{}) error {
+			return resourceJobTriggerEventUpdate(d, m, newTriggerEventInterface)
 		},
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobTriggerEventDelete(d, m, newTriggerEventInterface)

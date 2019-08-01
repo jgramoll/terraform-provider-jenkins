@@ -17,8 +17,8 @@ var ErrInvalidTriggerGerritBranchId = errors.New("Invalid gerrit branch id, must
 func jobGerritBranchResource() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceJobGerritBranchCreate,
-		Update: resourceJobGerritBranchUpdate,
 		Read:   resourceJobGerritBranchRead,
+		Update: resourceJobGerritBranchUpdate,
 		Delete: resourceJobGerritBranchDelete,
 
 		Schema: map[string]*schema.Schema{

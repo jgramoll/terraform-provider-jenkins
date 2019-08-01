@@ -64,13 +64,24 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 }
 
 func (job *Job) GetProperty(propertyId string) (JobProperty, error) {
-	properties := *(job.Properties).Items
-	for _, property := range properties {
+	for _, property := range *job.Properties.Items {
 		if property.GetId() == propertyId {
 			return property, nil
 		}
 	}
 	return nil, ErrJobPropertyNotFound
+}
+
+func (job *Job) UpdateProperty(property JobProperty) error {
+	properties := *job.Properties.Items
+	propertyId := property.GetId()
+	for i, oldProp := range properties {
+		if oldProp.GetId() == propertyId {
+			properties[i] = property
+			return nil
+		}
+	}
+	return ErrJobPropertyNotFound
 }
 
 func (job *Job) DeleteProperty(propertyId string) error {

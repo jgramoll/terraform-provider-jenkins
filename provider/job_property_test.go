@@ -2,14 +2,11 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-var jobPropertyTypes = map[string]reflect.Type{}
 
 func testAccCheckJobProperties(
 	jobRef *client.Job,
@@ -57,13 +54,6 @@ func ensureProperty(
 	jobAttribute := resource.Primary.Attributes["job"]
 	if jobName != jobAttribute {
 		return nil, fmt.Errorf("Property Job should be %s, was %s", jobName, jobAttribute)
-	}
-
-	expectedType := jobPropertyTypes[resource.Type]
-	propertyType := reflect.TypeOf(property)
-	if expectedType != propertyType {
-		return nil, fmt.Errorf("Job Property %s was type \"%s\", expected type \"%s\"",
-			propertyId, propertyType, expectedType)
 	}
 
 	err = ensurePropertyFunc(property, resource)

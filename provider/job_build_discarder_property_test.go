@@ -2,7 +2,6 @@ package provider
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -10,10 +9,6 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func init() {
-	jobPropertyTypes["jenkins_job_build_discarder_property"] = reflect.TypeOf((*client.JobBuildDiscarderProperty)(nil))
-}
 
 func TestAccJobBuildDiscarderPropertyBasic(t *testing.T) {
 	var jobRef client.Job
@@ -71,10 +66,6 @@ resource "jenkins_job_build_discarder_property" "prop_%v" {
 }
 
 func ensureJobBuildDiscarderProperty(propertyInterface client.JobProperty, resource *terraform.ResourceState) error {
-	_, ok := propertyInterface.(*client.JobBuildDiscarderProperty)
-	if !ok {
-		return fmt.Errorf("Property is not of expected type, expected *client.JobBuildDiscarderProperty, actually %s",
-			reflect.TypeOf(propertyInterface).String())
-	}
-	return nil
+	_, err := newJobBuildDiscarderProperty().fromClientJobProperty(propertyInterface)
+	return err
 }

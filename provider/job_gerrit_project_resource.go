@@ -17,8 +17,8 @@ var ErrInvalidTriggerGerritProjectId = errors.New("Invalid trigger gerrit projec
 func jobGerritProjectResource() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceJobGerritProjectCreate,
-		Update: resourceJobGerritProjectUpdate,
 		Read:   resourceJobGerritProjectRead,
+		Update: resourceJobGerritProjectUpdate,
 		Delete: resourceJobGerritProjectDelete,
 
 		Schema: map[string]*schema.Schema{

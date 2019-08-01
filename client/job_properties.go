@@ -4,6 +4,10 @@ import (
 	"encoding/xml"
 )
 
+type PropertyBuilder func(*xml.Decoder, xml.StartElement) (JobProperty, error)
+
+var propertyUnmarshalFunc = map[string]PropertyBuilder{}
+
 type JobProperties struct {
 	XMLName xml.Name       `xml:"properties"`
 	Items   *[]JobProperty `xml:",any"`
@@ -31,18 +35,8 @@ func (properties *JobProperties) UnmarshalXML(d *xml.Decoder, start xml.StartEle
 	properties.Items = &[]JobProperty{}
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
-			// TODO use map
-			switch elem.Name.Local {
-			case "jenkins.model.BuildDiscarderProperty":
-				property := NewJobBuildDiscarderProperty()
-				err := d.DecodeElement(property, &elem)
-				if err != nil {
-					return err
-				}
-				*properties.Items = append(*(properties).Items, property)
-			case "org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty":
-				property := NewJobPipelineTriggersProperty()
-				err := d.DecodeElement(property, &elem)
+			if unmarshalXML, ok := propertyUnmarshalFunc[elem.Name.Local]; ok {
+				property, err := unmarshalXML(d, elem)
 				if err != nil {
 					return err
 				}

@@ -36,12 +36,16 @@ func TestGetJobDetails(t *testing.T) {
 		t.Fatalf("Job description should be %v, was %v", "", job.Description)
 	}
 	properties := *job.Properties.Items
-	if len(properties) != 2 {
-		t.Fatalf("Job should have %v properties, was %v", 2, len(properties))
+	if len(properties) != 3 {
+		t.Fatalf("Job should have %v properties, was %v", 3, len(properties))
 	}
-	pipelineDiscarderProperty := *properties[1].(*JobBuildDiscarderProperty)
+	pipelineDiscarderProperty := *properties[2].(*JobBuildDiscarderProperty)
 	if pipelineDiscarderProperty.Strategy.Item == nil {
 		t.Fatalf("Job missing discarder strategy")
+	}
+	_, ok := properties[1].(*JobDatadogJobProperty)
+	if !ok {
+		t.Fatalf("Invalid datadog property, got %s", reflect.TypeOf(properties[2]).String())
 	}
 	pipelineTriggersProperty := *properties[0].(*JobPipelineTriggersProperty)
 	triggers := *pipelineTriggersProperty.Triggers

@@ -33,46 +33,46 @@ provider "jenkins" {
   address = "${var.jenkins_address}"
 }
 
-resource "jenkins_job" "premerge" {
+resource "jenkins_job" "main" {
   name = "Premerge checks"
 }
 
-resource "jenkins_job_declarative_job_action" premerge {
-  job = "${jenkins_job.premerge.id}"
+resource "jenkins_job_declarative_job_action" "main" {
+  job = "${jenkins_job.main.id}"
 }
 
-resource "jenkins_job_declarative_job_property_tracker_action" premerge {
-  job = "${jenkins_job.premerge.id}"
+resource "jenkins_job_declarative_job_property_tracker_action" "main" {
+  job = "${jenkins_job.main.id}"
 }
 
-resource "jenkins_job_git_scm" "premerge" {
-  job = "${jenkins_job.premerge.id}"
+resource "jenkins_job_git_scm" "main" {
+  job = "${jenkins_job.main.id}"
 
   config_version = "2"
   script_path    = "Jenkinsfile.api"
   lightweight    = false
 }
 
-resource "jenkins_job_git_scm_user_remote_config" "premerge" {
-  scm = "${jenkins_job_git_scm.premerge.id}"
+resource "jenkins_job_git_scm_user_remote_config" "main" {
+  scm = "${jenkins_job_git_scm.main.id}"
 
   refspec        = "GERRIT_REFSPEC"
   url            = "ssh://git.server/git-repo.git"
   credentials_id = "123-abc"
 }
 
-resource "jenkins_job_git_scm_branch" "premerge" {
-  scm = "${jenkins_job_git_scm.premerge.id}"
+resource "jenkins_job_git_scm_branch" "main" {
+  scm = "${jenkins_job_git_scm.main.id}"
 
   name = "FETCH_HEAD"
 }
 
-resource "jenkins_job_git_scm_clean_before_checkout_extension" "premerge" {
-  scm = "${jenkins_job_git_scm.premerge.id}"
+resource "jenkins_job_git_scm_clean_before_checkout_extension" "main" {
+  scm = "${jenkins_job_git_scm.main.id}"
 }
 
 resource "jenkins_job_build_discarder_property" "main" {
-  job = "${jenkins_job.premerge.id}"
+  job = "${jenkins_job.main.id}"
 }
 
 resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
@@ -85,7 +85,7 @@ resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
 }
 
 resource "jenkins_job_pipeline_triggers_property" "main" {
-  job = "${jenkins_job.premerge.id}"
+  job = "${jenkins_job.main.id}"
 }
 
 resource "jenkins_job_gerrit_trigger" "main" {
@@ -137,6 +137,10 @@ resource "jenkins_job_gerrit_branch" "main" {
   pattern      = "^(?!refs/meta/config).*$"
 }
 
+resource "jenkins_job_datadog_job_property" "main" {
+	job = "${jenkins_job.main.id}"
+}
+
 ```
 
 ## TODO
@@ -144,8 +148,4 @@ resource "jenkins_job_gerrit_branch" "main" {
 1. import resources
 1. Refactor unmarshall to use map
 1. Refactor types = reflect checks
-1. DatadogJobProperty
-<!-- <org.datadog.jenkins.plugins.datadog.DatadogJobProperty plugin="datadog@0.7.1">
-<emitOnCheckout>false</emitOnCheckout>
-</org.datadog.jenkins.plugins.datadog.DatadogJobProperty> -->
 1. Fragile TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic test

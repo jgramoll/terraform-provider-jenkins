@@ -33,6 +33,10 @@ func TestJobConfigSerialize(t *testing.T) {
 	definition.SCM.Branches = definition.SCM.Branches.Append(branchSpec)
 	job.Definition = definition
 
+	datadogJobProperty := NewJobDatadogJobProperty()
+	datadogJobProperty.Plugin = "datadog@0.7.1"
+	job.Properties = job.Properties.Append(datadogJobProperty)
+
 	gerritBranch := NewJobGerritTriggerBranch()
 	gerritBranch.CompareType = CompareTypeRegExp
 	gerritBranch.Pattern = "my-branch"
@@ -81,6 +85,9 @@ func TestJobConfigSerialize(t *testing.T) {
 	<description>my-desc</description>
 	<keepDependencies>false</keepDependencies>
 	<properties>
+		<org.datadog.jenkins.plugins.datadog.DatadogJobProperty plugin="datadog@0.7.1">
+			<emitOnCheckout>false</emitOnCheckout>
+		</org.datadog.jenkins.plugins.datadog.DatadogJobProperty>
 		<org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty id="trigger-id">
 			<triggers>
 				<com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger plugin="gerrit-trigger@2.29.0">

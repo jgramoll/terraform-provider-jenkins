@@ -6,7 +6,7 @@ import (
 )
 
 type jobProperty interface {
-	fromClientJobProperty(client.JobProperty) jobProperty
+	fromClientJobProperty(client.JobProperty) (jobProperty, error)
 	toClientProperty(id string) client.JobProperty
 	setResourceData(*schema.ResourceData) error
 }

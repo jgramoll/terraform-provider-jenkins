@@ -12,11 +12,11 @@ func jobBuildDiscarderPropertyStrategyLogRotatorResource() *schema.Resource {
 		Create: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobBuildDiscarderPropertyStrategyCreate(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
 		},
-		Read: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobBuildDiscarderPropertyStrategyRead(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
-		},
 		Update: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobBuildDiscarderPropertyStrategyUpdate(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
+		},
+		Read: func(d *schema.ResourceData, m interface{}) error {
+			return resourceJobBuildDiscarderPropertyStrategyRead(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
 		},
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobBuildDiscarderPropertyStrategyDelete(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)

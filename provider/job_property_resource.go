@@ -78,9 +78,47 @@ func resourceJobPropertyRead(d *schema.ResourceData, m interface{}, createJobPro
 		d.SetId("")
 		return err
 	}
-	property := createJobProperty().fromClientJobProperty(clientProperty)
+	property, err := createJobProperty().fromClientJobProperty(clientProperty)
+	if err != nil {
+		log.Println("[WARN] Invalid Property found:", err)
+		return err
+	}
 	log.Println("[INFO] Updating from job property", d.Id())
 	return property.setResourceData(d)
+}
+
+func resourceJobPropertyUpdate(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
+	jobName, propertyId, err := resourceJobPropertyId(d.Id())
+	if err != nil {
+		return err
+	}
+
+	property := createJobProperty()
+	configRaw := d.Get("").(map[string]interface{})
+	if err := mapstructure.Decode(configRaw, &property); err != nil {
+		return err
+	}
+
+	jobService := m.(*Services).JobService
+	jobLock.Lock(jobName)
+	j, err := jobService.GetJob(jobName)
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	err = j.UpdateProperty(property.toClientProperty(propertyId))
+	if err != nil {
+		jobLock.Unlock(jobName)
+		return err
+	}
+	err = jobService.UpdateJob(j)
+	jobLock.Unlock(jobName)
+	if err != nil {
+		return err
+	}
+
+	log.Println("[DEBUG] Updating job property", d.Id())
+	return resourceJobPropertyRead(d, m, createJobProperty)
 }
 
 func resourceJobPropertyDelete(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
