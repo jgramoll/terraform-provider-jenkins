@@ -32,7 +32,7 @@ func (actions *JobActions) Append(action JobAction) *JobActions {
 func (actions *JobActions) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var tok xml.Token
 	var err error
-	actions.Items = &[]JobAction{}
+	*actions = *NewJobActions()
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
 			if unmarshalXML, ok := jobActionUnmarshalFunc[elem.Name.Local]; ok {

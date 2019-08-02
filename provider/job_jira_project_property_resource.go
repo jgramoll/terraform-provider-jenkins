@@ -4,25 +4,25 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func jobDeclarativeJobPropertyTrackerActionResource() *schema.Resource {
-	newJobActionInterface := func() jobAction {
-		return newJobDeclarativeJobPropertyTrackerAction()
+func jobJiraProjectPropertyResource() *schema.Resource {
+	newPropertyInterface := func() jobProperty {
+		return newJobJiraProjectProperty()
 	}
 	return &schema.Resource{
 		Create: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobActionCreate(d, m, newJobActionInterface)
+			return resourceJobPropertyCreate(d, m, newPropertyInterface)
 		},
 		Read: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobActionRead(d, m, newJobActionInterface)
+			return resourceJobPropertyRead(d, m, newPropertyInterface)
 		},
 		Update: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobActionUpdate(d, m, newJobActionInterface)
+			return resourceJobPropertyUpdate(d, m, newPropertyInterface)
 		},
 		Delete: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobActionDelete(d, m, newJobActionInterface)
+			return resourceJobPropertyDelete(d, m, newPropertyInterface)
 		},
 		Importer: &schema.ResourceImporter{
-			State: resourceJobActionImporter,
+			State: resourceJobPropertyImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

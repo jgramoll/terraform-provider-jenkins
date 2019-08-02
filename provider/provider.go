@@ -69,7 +69,8 @@ func Provider() terraform.ResourceProvider {
 			"jenkins_job_gerrit_project":                        jobGerritProjectResource(),
 			"jenkins_job_gerrit_branch":                         jobGerritBranchResource(),
 
-			"jenkins_job_datadog_job_property": jobDatadogJobPropertyResource(),
+			"jenkins_job_datadog_job_property":  jobDatadogJobPropertyResource(),
+			"jenkins_job_jira_project_property": jobJiraProjectPropertyResource(),
 		},
 
 		ConfigureFunc: providerConfigure,

@@ -15,6 +15,9 @@ func jobDeclarativeJobActionResource() *schema.Resource {
 		Read: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobActionRead(d, m, newJobActionInterface)
 		},
+		Update: func(d *schema.ResourceData, m interface{}) error {
+			return resourceJobActionUpdate(d, m, newJobActionInterface)
+		},
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobActionDelete(d, m, newJobActionInterface)
 		},
@@ -28,6 +31,11 @@ func jobDeclarativeJobActionResource() *schema.Resource {
 				Description: "Name of the job",
 				Required:    true,
 				ForceNew:    true,
+			},
+			"plugin": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Plugin name and version",
+				Optional:    true,
 			},
 		},
 	}

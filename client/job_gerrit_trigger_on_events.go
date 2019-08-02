@@ -7,15 +7,15 @@ type jobGerritTriggerOnEventsUnmarshaler func(*xml.Decoder, xml.StartElement) (J
 var jobGerritTriggerOnEventsUnmarshalFunc = map[string]jobGerritTriggerOnEventsUnmarshaler{}
 
 type JobGerritTriggerOnEvents struct {
-	XMLName    xml.Name `xml:"triggerOnEvents"`
-	LinkedList string   `xml:"class,attr"`
-	Items      *[]JobGerritTriggerOnEvent
+	XMLName xml.Name `xml:"triggerOnEvents"`
+	Class   string   `xml:"class,attr"`
+	Items   *[]JobGerritTriggerOnEvent
 }
 
 func NewJobGerritTriggerOnEvents() *JobGerritTriggerOnEvents {
 	return &JobGerritTriggerOnEvents{
-		LinkedList: "linked-list",
-		Items:      &[]JobGerritTriggerOnEvent{},
+		Class: "linked-list",
+		Items: &[]JobGerritTriggerOnEvent{},
 	}
 }
 
@@ -32,7 +32,7 @@ func (events *JobGerritTriggerOnEvents) Append(event JobGerritTriggerOnEvent) *J
 func (events *JobGerritTriggerOnEvents) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var tok xml.Token
 	var err error
-	events.Items = &[]JobGerritTriggerOnEvent{}
+	*events = *NewJobGerritTriggerOnEvents()
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
 			if unmarshalXML, ok := jobGerritTriggerOnEventsUnmarshalFunc[elem.Name.Local]; ok {

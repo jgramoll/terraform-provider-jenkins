@@ -9,6 +9,7 @@ func init() {
 type JobDeclarativeJobPropertyTrackerAction struct {
 	XMLName xml.Name `xml:"org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction"`
 	Id      string   `xml:"id,attr,omitempty"`
+	Plugin  string   `xml:"plugin,attr,omitempty"`
 
 	JobProperties string `xml:"jobProperties"`
 	Triggers      string `xml:"triggers"`

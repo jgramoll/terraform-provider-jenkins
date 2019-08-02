@@ -14,12 +14,14 @@ type jobConfig struct {
 	KeepDependencies bool              `xml:"keepDependencies"`
 	Properties       *JobProperties    `xml:"properties"`
 	Definition       *JobDefinitionXml `xml:"definition"`
-	Triggers         string            `xml:"trigger"`
+	Triggers         string            `xml:"triggers"`
 	Disabled         bool              `xml:"disabled"`
 }
 
 func JobConfigFromJob(job *Job) *jobConfig {
 	return &jobConfig{
+		Id:               job.Id,
+		Plugin:           job.Plugin,
 		Actions:          job.Actions,
 		Description:      job.Description,
 		KeepDependencies: job.KeepDependencies,

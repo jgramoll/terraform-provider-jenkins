@@ -9,6 +9,7 @@ func init() {
 type JobDeclarativeJobAction struct {
 	XMLName xml.Name `xml:"org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction"`
 	Id      string   `xml:"id,attr,omitempty"`
+	Plugin  string   `xml:"plugin,attr,omitempty"`
 }
 
 func NewJobDeclarativeJobAction() *JobDeclarativeJobAction {

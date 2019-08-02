@@ -14,6 +14,7 @@ var ErrJobActionNotFound = errors.New("Could not find job action")
 // Job
 type Job struct {
 	Id               string
+	Plugin           string
 	Name             string
 	Disabled         bool
 	Actions          *JobActions `xml:"actions"`
@@ -52,6 +53,7 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 
 	if config != nil {
 		job.Id = config.Id
+		job.Plugin = config.Plugin
 		job.Actions = config.Actions
 		job.Disabled = config.Disabled
 		job.Properties = config.Properties

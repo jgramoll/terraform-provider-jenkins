@@ -32,6 +32,11 @@ func jobResource() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
+			"plugin": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Name and id of the plugin",
+				Optional:    true,
+			},
 			"disabled": &schema.Schema{
 				Type:        schema.TypeBool,
 				Description: "If the job is disabled",

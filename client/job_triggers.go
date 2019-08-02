@@ -32,6 +32,7 @@ func (triggers *JobTriggers) Append(trigger JobTrigger) *JobTriggers {
 func (triggers *JobTriggers) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var tok xml.Token
 	var err error
+	*triggers = *NewJobTriggers()
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
 			if unmarshalXML, ok := jobTriggerUnmarshalFunc[elem.Name.Local]; ok {

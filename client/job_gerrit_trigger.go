@@ -20,31 +20,31 @@ type JobGerritTrigger struct {
 	Id      string   `xml:"id,attr,omitempty"`
 	Plugin  string   `xml:"plugin,attr,omitempty"`
 
-	Spec                  string                    `xml:"spec"`
-	Projects              *JobGerritTriggerProjects `xml:"gerritProjects"`
-	DynamicGerritProjects *DynamicGerritProjects    `xml:"dynamicGerritProjects"`
-	SkipVote              *JobGerritTriggerSkipVote `xml:"skipVote"`
-	SilentMode            bool                      `xml:"silentMode"`
-	// notificationLevel
-	SilentStartMode           bool          `xml:"silentStartMode"`
-	EscapeQuotes              bool          `xml:"escapeQuotes"`
-	NameAndEmailParameterMode ParameterMode `xml:"nameAndEmailParameterMode"`
-	// dependencyJobsNames
-	CommitMessageParameterMode ParameterMode `xml:"commitMessageParameterMode"`
-	ChangeSubjectParameterMode ParameterMode `xml:"changeSubjectParameterMode"`
-	CommentTextParameterMode   ParameterMode `xml:"commentTextParameterMode"`
-	// buildStartMessage
-	// buildFailureMessage
-	// buildSuccessfulMessage
-	// buildUnstableMessage
-	// buildNotBuiltMessage
-	// buildUnsuccessfulFilepath
-	// customUrl
+	Spec                        string                    `xml:"spec"`
+	Projects                    *JobGerritTriggerProjects `xml:"gerritProjects"`
+	DynamicGerritProjects       *DynamicGerritProjects    `xml:"dynamicGerritProjects"`
+	SkipVote                    *JobGerritTriggerSkipVote `xml:"skipVote"`
+	SilentMode                  bool                      `xml:"silentMode"`
+	NotificationLevel           string                    `xml:"notificationLevel"`
+	SilentStartMode             bool                      `xml:"silentStartMode"`
+	EscapeQuotes                bool                      `xml:"escapeQuotes"`
+	NameAndEmailParameterMode   ParameterMode             `xml:"nameAndEmailParameterMode"`
+	DependencyJobsNames         string                    `xml:"dependencyJobsNames"`
+	CommitMessageParameterMode  ParameterMode             `xml:"commitMessageParameterMode"`
+	ChangeSubjectParameterMode  ParameterMode             `xml:"changeSubjectParameterMode"`
+	CommentTextParameterMode    ParameterMode             `xml:"commentTextParameterMode"`
+	BuildStartMessage           string                    `xml:"buildStartMessage"`
+	BuildFailureMessage         string                    `xml:"buildFailureMessage"`
+	BuildSuccessfulMessage      string                    `xml:"buildSuccessfulMessage"`
+	BuildUnstableMessage        string                    `xml:"buildUnstableMessage"`
+	BuildNotBuiltMessage        string                    `xml:"buildNotBuiltMessage"`
+	BuildUnsuccessfulFilepath   string                    `xml:"buildUnsuccessfulFilepath"`
+	CustomUrl                   string                    `xml:"customUrl"`
 	ServerName                  string                    `xml:"serverName"`
 	TriggerOnEvents             *JobGerritTriggerOnEvents `xml:"triggerOnEvents"`
 	DynamicTriggerConfiguration bool                      `xml:"dynamicTriggerConfiguration"`
-	// triggerConfigURL
-	// triggerInformationAction
+	TriggerConfigURL            string                    `xml:"triggerConfigURL"`
+	TriggerInformationAction    string                    `xml:"triggerInformationAction"`
 }
 
 func NewJobGerritTrigger() *JobGerritTrigger {

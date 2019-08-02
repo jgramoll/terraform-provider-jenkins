@@ -12,7 +12,7 @@ func TestCpsScmFlowDefinitionSerialize(t *testing.T) {
 		t.Fatalf("failed to serialize xml %s", err)
 	}
 	result := string(resultBytes)
-	expected := `<CpsScmFlowDefinition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" id="">
+	expected := `<CpsScmFlowDefinition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition">
 	<scriptPath></scriptPath>
 	<lightweight>false</lightweight>
 </CpsScmFlowDefinition>`

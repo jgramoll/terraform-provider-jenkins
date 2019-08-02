@@ -9,6 +9,7 @@ import (
 
 func TestJobConfigSerialize(t *testing.T) {
 	job := NewJob()
+	job.Plugin = "flow-plugin"
 	job.Description = "my-desc"
 	job.Actions = job.Actions.Append(NewJobDeclarativeJobAction())
 	job.Actions = job.Actions.Append(NewJobDeclarativeJobPropertyTrackerAction())
@@ -72,7 +73,7 @@ func TestJobConfigSerialize(t *testing.T) {
 		t.Fatalf("failed to serialize xml %s", err)
 	}
 	result := string(resultBytes)
-	expected := `<flow-definition>
+	expected := `<flow-definition plugin="flow-plugin">
 	<actions>
 		<org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction></org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction>
 		<org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
@@ -112,12 +113,21 @@ func TestJobConfigSerialize(t *testing.T) {
 						<onNotBuilt>false</onNotBuilt>
 					</skipVote>
 					<silentMode>false</silentMode>
+					<notificationLevel></notificationLevel>
 					<silentStartMode>false</silentStartMode>
 					<escapeQuotes>true</escapeQuotes>
 					<nameAndEmailParameterMode>PLAIN</nameAndEmailParameterMode>
+					<dependencyJobsNames></dependencyJobsNames>
 					<commitMessageParameterMode>BASE64</commitMessageParameterMode>
 					<changeSubjectParameterMode>PLAIN</changeSubjectParameterMode>
 					<commentTextParameterMode>BASE64</commentTextParameterMode>
+					<buildStartMessage></buildStartMessage>
+					<buildFailureMessage></buildFailureMessage>
+					<buildSuccessfulMessage></buildSuccessfulMessage>
+					<buildUnstableMessage></buildUnstableMessage>
+					<buildNotBuiltMessage></buildNotBuiltMessage>
+					<buildUnsuccessfulFilepath></buildUnsuccessfulFilepath>
+					<customUrl></customUrl>
 					<serverName>__ANY__</serverName>
 					<triggerOnEvents class="linked-list">
 						<com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginPatchsetCreatedEvent>
@@ -130,6 +140,8 @@ func TestJobConfigSerialize(t *testing.T) {
 						<com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginDraftPublishedEvent></com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginDraftPublishedEvent>
 					</triggerOnEvents>
 					<dynamicTriggerConfiguration>false</dynamicTriggerConfiguration>
+					<triggerConfigURL></triggerConfigURL>
+					<triggerInformationAction></triggerInformationAction>
 				</com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger>
 			</triggers>
 		</org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
@@ -153,7 +165,7 @@ func TestJobConfigSerialize(t *testing.T) {
 				</hudson.plugins.git.UserRemoteConfig>
 			</userRemoteConfigs>
 			<branches>
-				<hudson.plugins.git.BranchSpec id="">
+				<hudson.plugins.git.BranchSpec>
 					<name>branchspec</name>
 				</hudson.plugins.git.BranchSpec>
 			</branches>
@@ -165,7 +177,7 @@ func TestJobConfigSerialize(t *testing.T) {
 		<scriptPath></scriptPath>
 		<lightweight>false</lightweight>
 	</definition>
-	<trigger></trigger>
+	<triggers></triggers>
 	<disabled>false</disabled>
 </flow-definition>`
 	if result != expected {

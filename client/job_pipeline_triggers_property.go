@@ -14,7 +14,7 @@ var ErrJobTriggerNotFound = errors.New("Could not find job pipeline trigger")
 
 type JobPipelineTriggersProperty struct {
 	XMLName  xml.Name     `xml:"org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty"`
-	Id       string       `xml:"id,attr"`
+	Id       string       `xml:"id,attr,omitempty"`
 	Triggers *JobTriggers `xml:"triggers"`
 }
 

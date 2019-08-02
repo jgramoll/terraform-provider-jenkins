@@ -32,6 +32,16 @@ func jobGitScmResource() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
+			"plugin": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Name and version of the plugin",
+				Optional:    true,
+			},
+			"git_plugin": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Name and version of the git plugin",
+				Optional:    true,
+			},
 			"config_version": &schema.Schema{
 				Type:        schema.TypeString,
 				Description: "Version",

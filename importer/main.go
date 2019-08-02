@@ -15,20 +15,17 @@ func main() {
 	if *jobName == "" {
 		log.Println("[ERROR] Job Name must be provided")
 		flag.PrintDefaults()
-		return
+		os.Exit(128)
 	}
-
-	c := initClient()
-	js := client.JobService{Client: c}
-	t, err := js.GetJobs(*jobName)
+	jenkinsClient := initJenkinsClient()
+	err := NewJobImportService(jenkinsClient).Import(*jobName)
 	if err != nil {
 		log.Println(err.Error())
-		return
+		os.Exit(1)
 	}
-	println("here", t)
 }
 
-func initClient() *client.Client {
+func initJenkinsClient() *client.Client {
 	log.Println("[INFO] Initializing jenkins client")
 
 	address := os.Getenv("JENKINS_ADDRESS")

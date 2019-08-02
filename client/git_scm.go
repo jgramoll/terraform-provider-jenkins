@@ -15,26 +15,27 @@ var ErrGitScmExtensionNotFound = errors.New("Could not find git scm extension")
 var ErrGitScmUserRemoteConfigNotFound = errors.New("Could not find git scm scm user remote config")
 
 type GitSCM struct {
-	XMLName           xml.Name              `xml:"scm"`
-	Class             string                `xml:"class,attr"`
+	XMLName xml.Name `xml:"scm"`
+	Class   string   `xml:"class,attr"`
+	Plugin  string   `xml:"plugin,attr,omitempty"`
+
 	ConfigVersion     string                `xml:"configVersion"`
 	UserRemoteConfigs *GitUserRemoteConfigs `xml:"userRemoteConfigs"`
 	Branches          *GitScmBranches       `xml:"branches"`
 
-	DoGenerateSubmoduleConfigurations bool `xml:"doGenerateSubmoduleConfigurations"`
-	// submoduleCfg
-	Extensions *GitScmExtensions `xml:"extensions"`
+	DoGenerateSubmoduleConfigurations bool                    `xml:"doGenerateSubmoduleConfigurations"`
+	SubmoduleCfg                      *GitScmSubmodulesConfig `xml:"submoduleCfg"`
+	Extensions                        *GitScmExtensions       `xml:"extensions"`
 }
 
 func NewGitScm() *GitSCM {
 	return &GitSCM{
-		Class:             "hudson.plugins.git.GitSCM",
-		UserRemoteConfigs: NewGitUserRemoteConfigs(),
-		Branches:          NewGitScmBranches(),
+		Class: "hudson.plugins.git.GitSCM",
 
+		UserRemoteConfigs:                 NewGitUserRemoteConfigs(),
+		Branches:                          NewGitScmBranches(),
 		DoGenerateSubmoduleConfigurations: false,
-
-		Extensions: NewGitScmExtensions(),
+		Extensions:                        NewGitScmExtensions(),
 	}
 }
 

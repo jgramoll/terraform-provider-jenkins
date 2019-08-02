@@ -8,6 +8,7 @@ import (
 // Job in jenkins
 type job struct {
 	Name     string `mapstructure:"name"`
+	Plugin   string `mapstructure:"plugin"`
 	Disabled bool   `mapstructure:"disabled"`
 }
 
@@ -18,6 +19,7 @@ func newJob() *job {
 func (j *job) toClientJob(jobId string) *client.Job {
 	job := client.NewJob()
 	job.Id = jobId
+	job.Plugin = j.Plugin
 	job.Name = j.Name
 	job.Disabled = j.Disabled
 	return job
@@ -25,6 +27,7 @@ func (j *job) toClientJob(jobId string) *client.Job {
 
 func JobfromClientJob(clientJob *client.Job) *job {
 	j := job{}
+	j.Plugin = clientJob.Plugin
 	j.Name = clientJob.Name
 	j.Disabled = clientJob.Disabled
 	return &j
@@ -32,12 +35,13 @@ func JobfromClientJob(clientJob *client.Job) *job {
 
 func (j *job) setResourceData(d *schema.ResourceData) error {
 	d.SetId(j.Name)
-	err := d.Set("name", j.Name)
-	if err != nil {
+	if err := d.Set("plugin", j.Plugin); err != nil {
 		return err
 	}
-	err = d.Set("disabled", j.Disabled)
-	if err != nil {
+	if err := d.Set("name", j.Name); err != nil {
+		return err
+	}
+	if err := d.Set("disabled", j.Disabled); err != nil {
 		return err
 	}
 	return nil

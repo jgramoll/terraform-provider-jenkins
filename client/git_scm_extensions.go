@@ -31,7 +31,7 @@ func (extensions *GitScmExtensions) Append(extension GitScmExtension) *GitScmExt
 func (extensions *GitScmExtensions) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var tok xml.Token
 	var err error
-	extensions.Items = &[]GitScmExtension{}
+	*extensions = *NewGitScmExtensions()
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
 			if unmarshalXML, ok := scmExtensionUnmarshalFunc[elem.Name.Local]; ok {

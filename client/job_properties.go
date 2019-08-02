@@ -32,7 +32,7 @@ func (properties *JobProperties) Append(property JobProperty) *JobProperties {
 func (properties *JobProperties) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	var tok xml.Token
 	var err error
-	properties.Items = &[]JobProperty{}
+	*properties = *NewJobProperties()
 	for tok, err = d.Token(); err == nil; tok, err = d.Token() {
 		if elem, ok := tok.(xml.StartElement); ok {
 			if unmarshalXML, ok := propertyUnmarshalFunc[elem.Name.Local]; ok {

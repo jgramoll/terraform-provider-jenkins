@@ -1,9 +1,10 @@
 package client
 
 type CpsScmFlowDefinition struct {
-	Class string `xml:"class,attr"`
+	Class  string `xml:"class,attr"`
+	Id     string `xml:"id,attr,omitempty"`
+	Plugin string `xml:"plugin,attr,omitempty"`
 
-	Id          string  `xml:"id,attr"`
 	SCM         *GitSCM `xml:"scm"`
 	ScriptPath  string  `xml:"scriptPath"`
 	Lightweight bool    `xml:"lightweight"`
