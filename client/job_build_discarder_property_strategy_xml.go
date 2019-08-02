@@ -5,6 +5,10 @@ import (
 	"log"
 )
 
+type jobBuildDiscarderPropertyStrategyUnmarshaler func(*xml.Decoder, xml.StartElement) (JobBuildDiscarderPropertyStrategy, error)
+
+var jobBuildDiscarderPropertyStrategyUnmarshalFunc = map[string]jobBuildDiscarderPropertyStrategyUnmarshaler{}
+
 type JobBuildDiscarderPropertyStrategyXml struct {
 	Item JobBuildDiscarderPropertyStrategy `xml:",any"`
 }
@@ -19,15 +23,15 @@ func (strategy *JobBuildDiscarderPropertyStrategyXml) MarshalXML(e *xml.Encoder,
 
 func (strategy *JobBuildDiscarderPropertyStrategyXml) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	for _, attr := range start.Attr {
-		// TODO use map
 		switch attr.Name.Local {
 		case "class":
-			switch attr.Value {
-			default:
-			case "hudson.tasks.LogRotator":
-				newStrategy := NewJobBuildDiscarderPropertyStrategyLogRotator()
-				strategy.Item = newStrategy
-				return d.DecodeElement(newStrategy, &start)
+			if unmarshalXML, ok := jobBuildDiscarderPropertyStrategyUnmarshalFunc[attr.Value]; ok {
+				newStrategyItem, err := unmarshalXML(d, start)
+				if err != nil {
+					return err
+				}
+				strategy.Item = newStrategyItem
+				return nil
 			}
 		}
 	}

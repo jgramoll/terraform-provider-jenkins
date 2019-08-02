@@ -5,6 +5,10 @@ import (
 	"log"
 )
 
+type jobDefinitionUnmarshaler func(*xml.Decoder, xml.StartElement) (JobDefinition, error)
+
+var jobDefinitionUnmarshalFunc = map[string]jobDefinitionUnmarshaler{}
+
 type JobDefinitionXml struct {
 	Item JobDefinition
 }
@@ -20,15 +24,15 @@ func (jobDefinition *JobDefinitionXml) MarshalXML(e *xml.Encoder, start xml.Star
 
 func (jobDefinition *JobDefinitionXml) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	for _, attr := range start.Attr {
-		// TODO use map
 		switch attr.Name.Local {
 		case "class":
-			switch attr.Value {
-			default:
-			case "org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition":
-				newDef := NewCpsScmFlowDefinition()
-				jobDefinition.Item = newDef
-				return d.DecodeElement(newDef, &start)
+			if unmarshalXML, ok := jobDefinitionUnmarshalFunc[attr.Value]; ok {
+				newDefItem, err := unmarshalXML(d, start)
+				if err != nil {
+					return err
+				}
+				jobDefinition.Item = newDefItem
+				return nil
 			}
 		}
 	}

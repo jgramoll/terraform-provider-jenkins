@@ -1,5 +1,11 @@
 package client
 
+import "encoding/xml"
+
+func init() {
+	jobBuildDiscarderPropertyStrategyUnmarshalFunc["hudson.tasks.LogRotator"] = unmarshalJobBuildDiscarderPropertyStrategyLogRotator
+}
+
 type JobBuildDiscarderPropertyStrategyLogRotator struct {
 	Id    string `xml:"id,attr,omitempty"`
 	Class string `xml:"class,attr"`
@@ -27,4 +33,13 @@ func (s *JobBuildDiscarderPropertyStrategyLogRotator) GetId() string {
 
 func (s *JobBuildDiscarderPropertyStrategyLogRotator) SetId(id string) {
 	s.Id = id
+}
+
+func unmarshalJobBuildDiscarderPropertyStrategyLogRotator(d *xml.Decoder, start xml.StartElement) (JobBuildDiscarderPropertyStrategy, error) {
+	strategy := NewJobBuildDiscarderPropertyStrategyLogRotator()
+	err := d.DecodeElement(strategy, &start)
+	if err != nil {
+		return nil, err
+	}
+	return strategy, nil
 }
