@@ -11,6 +11,7 @@ type JobDefinitionXml struct {
 
 type JobDefinition interface {
 	GetId() string
+	SetId(string)
 }
 
 func (jobDefinition *JobDefinitionXml) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
@@ -19,6 +20,7 @@ func (jobDefinition *JobDefinitionXml) MarshalXML(e *xml.Encoder, start xml.Star
 
 func (jobDefinition *JobDefinitionXml) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	for _, attr := range start.Attr {
+		// TODO use map
 		switch attr.Name.Local {
 		case "class":
 			switch attr.Value {

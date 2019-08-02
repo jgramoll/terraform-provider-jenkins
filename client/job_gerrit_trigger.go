@@ -68,6 +68,10 @@ func (trigger *JobGerritTrigger) GetId() string {
 	return trigger.Id
 }
 
+func (t *JobGerritTrigger) SetId(id string) {
+	t.Id = id
+}
+
 func unmarshalJobGerritTrigger(d *xml.Decoder, start xml.StartElement) (JobTrigger, error) {
 	trigger := NewJobGerritTrigger()
 	err := d.DecodeElement(trigger, &start)

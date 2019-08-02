@@ -26,6 +26,10 @@ func (property *JobDatadogJobProperty) GetId() string {
 	return property.Id
 }
 
+func (p *JobDatadogJobProperty) SetId(id string) {
+	p.Id = id
+}
+
 func unmarshalJobDatadogJobProperty(d *xml.Decoder, start xml.StartElement) (JobProperty, error) {
 	property := NewJobDatadogJobProperty()
 	err := d.DecodeElement(property, &start)

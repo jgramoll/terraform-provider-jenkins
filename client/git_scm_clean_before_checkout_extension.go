@@ -19,6 +19,10 @@ func (e *GitScmCleanBeforeCheckoutExtension) GetId() string {
 	return e.Id
 }
 
+func (e *GitScmCleanBeforeCheckoutExtension) SetId(id string) {
+	e.Id = id
+}
+
 func unmarshalScmExtension(d *xml.Decoder, start xml.StartElement) (GitScmExtension, error) {
 	extension := NewGitScmCleanBeforeCheckoutExtension()
 	err := d.DecodeElement(extension, &start)

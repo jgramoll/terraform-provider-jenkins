@@ -28,6 +28,10 @@ func (property *JobPipelineTriggersProperty) GetId() string {
 	return property.Id
 }
 
+func (p *JobPipelineTriggersProperty) SetId(id string) {
+	p.Id = id
+}
+
 func unmarshalPipelineTriggersProperty(d *xml.Decoder, start xml.StartElement) (JobProperty, error) {
 	property := NewJobPipelineTriggersProperty()
 	err := d.DecodeElement(property, &start)

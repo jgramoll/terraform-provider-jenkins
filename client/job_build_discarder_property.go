@@ -19,8 +19,12 @@ func NewJobBuildDiscarderProperty() *JobBuildDiscarderProperty {
 	}
 }
 
-func (property *JobBuildDiscarderProperty) GetId() string {
-	return property.Id
+func (p *JobBuildDiscarderProperty) GetId() string {
+	return p.Id
+}
+
+func (p *JobBuildDiscarderProperty) SetId(id string) {
+	p.Id = id
 }
 
 func unmarshalBuildDiscarderProperty(d *xml.Decoder, start xml.StartElement) (JobProperty, error) {

@@ -19,6 +19,7 @@ func (strategy *JobBuildDiscarderPropertyStrategyXml) MarshalXML(e *xml.Encoder,
 
 func (strategy *JobBuildDiscarderPropertyStrategyXml) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	for _, attr := range start.Attr {
+		// TODO use map
 		switch attr.Name.Local {
 		case "class":
 			switch attr.Value {

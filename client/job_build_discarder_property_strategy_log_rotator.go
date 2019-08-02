@@ -24,3 +24,7 @@ func NewJobBuildDiscarderPropertyStrategyLogRotator() *JobBuildDiscarderProperty
 func (s *JobBuildDiscarderPropertyStrategyLogRotator) GetId() string {
 	return s.Id
 }
+
+func (s *JobBuildDiscarderPropertyStrategyLogRotator) SetId(id string) {
+	s.Id = id
+}

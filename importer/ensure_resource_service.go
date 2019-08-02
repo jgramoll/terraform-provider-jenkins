@@ -23,32 +23,15 @@ func (s *EnsureJobResourceService) EnsureResourceIds(job *client.Job) error {
 		}
 		job.Id = id.String()
 	}
-	if err := ensureJobConfig(); err != nil {
+	if err := ensureJobActions(job.Actions); err != nil {
 		return err
 	}
-	if err := ensureJobActions(); err != nil {
+	if err := ensureJobProperties(job.Properties); err != nil {
 		return err
 	}
-	if err := ensureJobProperties(); err != nil {
-		return err
-	}
-	if err := ensureJobDefinition(); err != nil {
+	if err := ensureJobDefinition(job.Definition); err != nil {
 		return err
 	}
 
 	return s.jobService.UpdateJob(job)
-	// return nil
-}
-
-func ensureJobConfig() error {
-	return nil
-}
-func ensureJobActions() error {
-	return nil
-}
-func ensureJobProperties() error {
-	return nil
-}
-func ensureJobDefinition() error {
-	return nil
 }

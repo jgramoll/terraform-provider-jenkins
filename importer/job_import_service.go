@@ -19,7 +19,9 @@ func (s *JobImportService) Import(jobName string) error {
 	if err != nil {
 		return err
 	}
-	NewEnsureJobResourceService(s.jobService).EnsureResourceIds(job)
+	if err := NewEnsureJobResourceService(s.jobService).EnsureResourceIds(job); err != nil {
+		return err
+	}
 	// GenerateTerraformCodeService(s.jobService).Generate(job)
 	// GenerateTerraformImportScriptService(s.jobService).Generate(job)
 	return nil

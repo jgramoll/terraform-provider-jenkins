@@ -31,6 +31,10 @@ func (event *JobGerritTriggerPluginPatchsetCreatedEvent) GetId() string {
 	return event.Id
 }
 
+func (e *JobGerritTriggerPluginPatchsetCreatedEvent) SetId(id string) {
+	e.Id = id
+}
+
 func unmarshalJobGerritTriggerPluginPatchsetCreatedEvent(d *xml.Decoder, start xml.StartElement) (JobGerritTriggerOnEvent, error) {
 	event := NewJobGerritTriggerPluginPatchsetCreatedEvent()
 	err := d.DecodeElement(event, &start)

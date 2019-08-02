@@ -19,6 +19,10 @@ func (event *JobGerritTriggerPluginDraftPublishedEvent) GetId() string {
 	return event.Id
 }
 
+func (e *JobGerritTriggerPluginDraftPublishedEvent) SetId(id string) {
+	e.Id = id
+}
+
 func unmarshalJobGerritTriggerPluginDraftPublishedEvent(d *xml.Decoder, start xml.StartElement) (JobGerritTriggerOnEvent, error) {
 	event := NewJobGerritTriggerPluginDraftPublishedEvent()
 	err := d.DecodeElement(event, &start)

@@ -22,6 +22,10 @@ func (property *JobJiraProjectProperty) GetId() string {
 	return property.Id
 }
 
+func (p *JobJiraProjectProperty) SetId(id string) {
+	p.Id = id
+}
+
 func unmarshalJobJiraProjectProperty(d *xml.Decoder, start xml.StartElement) (JobProperty, error) {
 	property := NewJobJiraProjectProperty()
 	err := d.DecodeElement(property, &start)

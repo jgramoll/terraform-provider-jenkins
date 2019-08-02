@@ -19,3 +19,7 @@ func NewCpsScmFlowDefinition() *CpsScmFlowDefinition {
 func (d *CpsScmFlowDefinition) GetId() string {
 	return d.Id
 }
+
+func (d *CpsScmFlowDefinition) SetId(id string) {
+	d.Id = id
+}
