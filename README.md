@@ -26,6 +26,14 @@ curl -s https://raw.githubusercontent.com/jgramoll/terraform-provider-jenkins/ma
 
 $jenkins_url/user/$username/configure
 
+### Importer ###
+
+go run ./importer -job="Name of your Job"
+
+1. Ensures each resource has a valid id
+1. Outputs terraform code to match the job
+1. Outputs script that will import the resources to tf state
+
 ### resources ###
 
 ```terraform
@@ -138,7 +146,7 @@ resource "jenkins_job_gerrit_branch" "main" {
 }
 
 resource "jenkins_job_datadog_job_property" "main" {
-	job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.id}"
 }
 
 ```

@@ -37,10 +37,11 @@ func (service *JobService) GetJobs(folder string) (*[]*Job, error) {
 	}
 
 	var jobs []*Job
-	for _, job := range *response.Jobs {
-		jobs = append(jobs, newJobFromConfigAndDetails(nil, job))
+	if response.Jobs != nil {
+		for _, job := range *response.Jobs {
+			jobs = append(jobs, newJobFromConfigAndDetails(nil, job))
+		}
 	}
-
 	return &jobs, nil
 }
 
