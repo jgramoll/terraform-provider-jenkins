@@ -70,5 +70,5 @@ func ensureTriggerEvent(
 		return nil, err
 	}
 
-	return property, nil
+	return event, nil
 }

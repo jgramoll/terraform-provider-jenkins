@@ -2,9 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"reflect"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"reflect"
 )
 
 type jobGitScm struct {
@@ -33,8 +34,14 @@ func (scm *jobGitScm) fromClientJobDefintion(clientDefinitionInterface client.Jo
 	return definition, nil
 }
 
-func (scm *jobGitScm) setResourceData(*schema.ResourceData) error {
-	return nil
+func (scm *jobGitScm) setResourceData(d *schema.ResourceData) error {
+	if err := d.Set("config_version", scm.ConfigVersion); err != nil {
+		return err
+	}
+	if err := d.Set("script_path", scm.ScriptPath); err != nil {
+		return err
+	}
+	return d.Set("lightweight", scm.Lightweight)
 }
 
 func (scm *jobGitScm) toClientDefinition(definitionId string) client.JobDefinition {
@@ -43,7 +50,7 @@ func (scm *jobGitScm) toClientDefinition(definitionId string) client.JobDefiniti
 	definition.SCM = scm.toClientSCM()
 	definition.ScriptPath = scm.ScriptPath
 	definition.Lightweight = scm.Lightweight
-	return &definition
+	return definition
 }
 
 func (scm *jobGitScm) toClientSCM() *client.GitSCM {

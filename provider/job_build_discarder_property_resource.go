@@ -18,6 +18,9 @@ func jobBuildDiscarderPropertyResource() *schema.Resource {
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobPropertyDelete(d, m, newPropertyInterface)
 		},
+		Importer: &schema.ResourceImporter{
+			State: resourceJobPropertyImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"job": &schema.Schema{

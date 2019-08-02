@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -29,6 +31,23 @@ func TestAccJobDeclarativeJobActionBasic(t *testing.T) {
 						actionResourceName,
 					}, &actions, ensureJobDeclarativeJobAction),
 				),
+			},
+			{
+				ResourceName:  actionResourceName,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid action id"),
+			},
+			{
+				ResourceName: actionResourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(actions) == 0 {
+						return "", fmt.Errorf("no actions to import")
+					}
+					return strings.Join([]string{jobName, actions[0].GetId()}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobConfigBasic(jobName),

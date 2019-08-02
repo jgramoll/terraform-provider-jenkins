@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -31,6 +33,34 @@ func TestAccJobDatadogJobPropertyBasic(t *testing.T) {
 						property2,
 					}, &properties, ensureJobDatadogJobProperty),
 				),
+			},
+			{
+				ResourceName:  property1,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid property id"),
+			},
+			{
+				ResourceName: property1,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(properties) == 0 {
+						return "", fmt.Errorf("no properties to import")
+					}
+					return strings.Join([]string{jobName, properties[0].GetId()}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName: property2,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(properties) == 0 {
+						return "", fmt.Errorf("no properties to import")
+					}
+					return strings.Join([]string{jobName, properties[0].GetId()}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobDatadogJobPropertyConfigBasic(jobName, 1),

@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -42,6 +44,26 @@ func TestAccJobGerritBranchBasic(t *testing.T) {
 						branchResourceName,
 					}, &branches),
 				),
+			},
+			{
+				ResourceName:  branchResourceName,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid gerrit branch id"),
+			},
+			{
+				ResourceName: branchResourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(branches) == 0 {
+						return "", fmt.Errorf("no branches to import")
+					}
+					property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
+					trigger := (*property.Triggers.Items)[0].(*client.JobGerritTrigger)
+					project := (*trigger.Projects.Items)[0]
+					return strings.Join([]string{jobName, property.GetId(), trigger.GetId(), project.Id, branches[0].Id}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobGerritProjectConfigBasic(jobName),

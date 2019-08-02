@@ -11,8 +11,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// ErrInvalidTriggerGerritProjectId
-var ErrInvalidTriggerGerritProjectId = errors.New("Invalid trigger gerrit project id, must be jobName_propertyId_triggerId_projectId")
+// ErrInvalidGerritProjectId
+var ErrInvalidGerritProjectId = errors.New("Invalid gerrit project id, must be jobName_propertyId_triggerId_projectId")
 
 func jobGerritProjectResource() *schema.Resource {
 	return &schema.Resource{
@@ -20,6 +20,9 @@ func jobGerritProjectResource() *schema.Resource {
 		Read:   resourceJobGerritProjectRead,
 		Update: resourceJobGerritProjectUpdate,
 		Delete: resourceJobGerritProjectDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceJobGerritProjectImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"trigger": &schema.Schema{
@@ -45,7 +48,7 @@ func jobGerritProjectResource() *schema.Resource {
 func resourceJobGerritProjectId(input string) (jobName string, propertyId string, triggerId string, projectId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 4 {
-		err = ErrInvalidTriggerGerritProjectId
+		err = ErrInvalidGerritProjectId
 		return
 	}
 	jobName = parts[0]
@@ -53,6 +56,18 @@ func resourceJobGerritProjectId(input string) (jobName string, propertyId string
 	triggerId = parts[2]
 	projectId = parts[3]
 	return
+}
+
+func resourceJobGerritProjectImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, propertyId, triggerId, _, err := resourceJobGerritProjectId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("trigger", strings.Join([]string{jobName, propertyId, triggerId}, IdDelimiter))
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceJobGerritProjectCreate(d *schema.ResourceData, m interface{}) error {

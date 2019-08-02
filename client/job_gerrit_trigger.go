@@ -22,7 +22,7 @@ type JobGerritTrigger struct {
 
 	Spec                  string                    `xml:"spec"`
 	Projects              *JobGerritTriggerProjects `xml:"gerritProjects"`
-	dynamicGerritProjects *DynamicGerritProjects    `xml:"dynamicGerritProjects"`
+	DynamicGerritProjects *DynamicGerritProjects    `xml:"dynamicGerritProjects"`
 	SkipVote              *JobGerritTriggerSkipVote `xml:"skipVote"`
 	SilentMode            bool                      `xml:"silentMode"`
 	// notificationLevel

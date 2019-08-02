@@ -26,6 +26,18 @@ func resourceJobTriggerId(input string) (jobName string, propertyId string, trig
 	return
 }
 
+func resourceJobTriggerImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, propertyId, _, err := resourceJobTriggerId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("property", strings.Join([]string{jobName, propertyId}, IdDelimiter))
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceJobTriggerCreate(d *schema.ResourceData, m interface{}, createJobTrigger func() jobTrigger) error {
 	jobName, propertyId, err := resourceJobPropertyId(d.Get("property").(string))
 	if err != nil {

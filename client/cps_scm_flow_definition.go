@@ -14,3 +14,7 @@ func NewCpsScmFlowDefinition() *CpsScmFlowDefinition {
 		Class: "org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition",
 	}
 }
+
+func (d *CpsScmFlowDefinition) GetId() string {
+	return d.Id
+}

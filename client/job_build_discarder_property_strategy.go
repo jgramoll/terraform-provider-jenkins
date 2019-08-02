@@ -1,3 +1,5 @@
 package client
 
-type JobBuildDiscarderPropertyStrategy interface{}
+type JobBuildDiscarderPropertyStrategy interface {
+	GetId() string
+}

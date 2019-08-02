@@ -24,6 +24,18 @@ func resourceJobDefinitionId(input string) (jobName string, definitionId string,
 	return
 }
 
+func resourceJobDefinitionImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, _, err := resourceJobDefinitionId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("job", jobName)
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceJobDefinitionCreate(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
 	jobName := d.Get("job").(string)
 	definition := createJobDefinition()

@@ -18,6 +18,9 @@ func jobGitScmCleanBeforeCheckoutExtensionResource() *schema.Resource {
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobGitScmExtensionDelete(d, m, newExtensionInterface)
 		},
+		Importer: &schema.ResourceImporter{
+			State: resourceJobGitScmExtensionImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"scm": &schema.Schema{

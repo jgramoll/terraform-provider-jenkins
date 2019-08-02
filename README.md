@@ -145,5 +145,5 @@ resource "jenkins_job_datadog_job_property" "main" {
 
 ## TODO
 
-1. import resources
+1. importer project
 1. Fragile TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic test

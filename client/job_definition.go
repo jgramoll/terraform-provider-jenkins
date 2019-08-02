@@ -9,7 +9,9 @@ type JobDefinitionXml struct {
 	Item JobDefinition
 }
 
-type JobDefinition interface{}
+type JobDefinition interface {
+	GetId() string
+}
 
 func (jobDefinition *JobDefinitionXml) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeElement(jobDefinition.Item, start)

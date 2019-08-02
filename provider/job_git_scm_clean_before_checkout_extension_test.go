@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -29,6 +31,24 @@ func TestAccJobGitScmCleanBeforeCheckoutExtensionBasic(t *testing.T) {
 						extensionResourceName,
 					}, &extensions, ensureJobGitScmCleanBeforeCheckoutExtension),
 				),
+			},
+			{
+				ResourceName:  extensionResourceName,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid git scm extension id"),
+			},
+			{
+				ResourceName: extensionResourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(extensions) == 0 {
+						return "", fmt.Errorf("no extensions to import")
+					}
+					definitionId := jobRef.Definition.GetId()
+					return strings.Join([]string{jobName, definitionId, extensions[0].GetId()}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobGitScmConfigBasic(jobName),

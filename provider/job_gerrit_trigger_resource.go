@@ -21,6 +21,9 @@ func jobGerritTriggerResource() *schema.Resource {
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobTriggerDelete(d, m, newJobTriggerInterface)
 		},
+		Importer: &schema.ResourceImporter{
+			State: resourceJobTriggerImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"property": &schema.Schema{

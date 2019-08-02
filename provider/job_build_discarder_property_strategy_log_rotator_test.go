@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -42,6 +44,24 @@ func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 						strategyResourceName,
 					}, &strategyRefs, ensureJobBuildDiscarderPropertyStrategyLogRotator),
 				),
+			},
+			{
+				ResourceName:  strategyResourceName,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid property strategy id"),
+			},
+			{
+				ResourceName: strategyResourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(strategyRefs) == 0 {
+						return "", fmt.Errorf("no strategies to import")
+					}
+					propertyId := (*jobRef.Properties.Items)[0].GetId()
+					return strings.Join([]string{jobName, propertyId, strategyRefs[0].GetId()}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobBuildDiscarderPropertyConfigBasic(jobName, 1),

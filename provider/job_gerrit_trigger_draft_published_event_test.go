@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -29,6 +31,25 @@ func TestAccJobGerritTriggerDraftPublishedEventBasic(t *testing.T) {
 						eventResourceName,
 					}, &events, ensureJobGerritTriggerDraftPublishedEvent),
 				),
+			},
+			{
+				ResourceName:  eventResourceName,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid trigger event id"),
+			},
+			{
+				ResourceName: eventResourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(events) == 0 {
+						return "", fmt.Errorf("no gerrit trigger event to import")
+					}
+					property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
+					trigger := (*property.Triggers.Items)[0].(*client.JobGerritTrigger)
+					return strings.Join([]string{jobName, property.Id, trigger.Id, events[0].GetId()}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobGerritTriggerConfigBasic(jobName),

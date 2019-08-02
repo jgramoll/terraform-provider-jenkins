@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -38,7 +40,28 @@ func TestAccJobGitBranchBasic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(branchResourceName, "name", newBranchName),
 					testAccCheckJobExists(jobResourceName, &jobRef),
+					testAccCheckJobGitScmBranches(&jobRef, []string{
+						branchResourceName,
+					}, &branches),
 				),
+			},
+			{
+				ResourceName:  branchResourceName,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid git scm branch id"),
+			},
+			{
+				ResourceName: branchResourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(branches) == 0 {
+						return "", fmt.Errorf("no branches to import")
+					}
+					definitionId := jobRef.Definition.GetId()
+					return strings.Join([]string{jobName, definitionId, branches[0].Id}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobGitScmConfigBasic(jobName),

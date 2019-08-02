@@ -24,6 +24,18 @@ func resourceJobPropertyId(input string) (jobName string, propertyId string, err
 	return
 }
 
+func resourceJobPropertyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, _, err := resourceJobPropertyId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("job", jobName)
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceJobPropertyCreate(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
 	jobName := d.Get("job").(string)
 	property := createJobProperty()

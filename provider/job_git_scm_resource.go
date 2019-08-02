@@ -21,6 +21,9 @@ func jobGitScmResource() *schema.Resource {
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobDefinitionDelete(d, m, newJobGitScmInterface)
 		},
+		Importer: &schema.ResourceImporter{
+			State: resourceJobDefinitionImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"job": &schema.Schema{

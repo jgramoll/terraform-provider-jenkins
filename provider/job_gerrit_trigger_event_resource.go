@@ -27,6 +27,18 @@ func resourceJobTriggerEventId(input string) (jobName string, propertyId string,
 	return
 }
 
+func resourceJobTriggerEventImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, propertyId, triggerId, _, err := resourceJobTriggerEventId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("trigger", strings.Join([]string{jobName, propertyId, triggerId}, IdDelimiter))
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceJobTriggerEventCreate(d *schema.ResourceData, m interface{}, createJobTriggerEvent func() jobGerritTriggerEvent) error {
 	jobName, propertyId, triggerId, err := resourceJobTriggerId(d.Get("trigger").(string))
 	if err != nil {
@@ -153,6 +165,7 @@ func resourceJobTriggerEventUpdate(d *schema.ResourceData, m interface{}, create
 	property := propertyInterface.(*client.JobPipelineTriggersProperty)
 	trigger, err := property.GetTrigger(triggerId)
 	if err != nil {
+		jobLock.Unlock(jobName)
 		return err
 	}
 	gerritTrigger := trigger.(*client.JobGerritTrigger)

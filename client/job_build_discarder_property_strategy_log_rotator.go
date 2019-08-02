@@ -20,3 +20,7 @@ func NewJobBuildDiscarderPropertyStrategyLogRotator() *JobBuildDiscarderProperty
 		ArtifactNumToKeep:  -1,
 	}
 }
+
+func (s *JobBuildDiscarderPropertyStrategyLogRotator) GetId() string {
+	return s.Id
+}

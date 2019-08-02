@@ -10,16 +10,19 @@ func jobBuildDiscarderPropertyStrategyLogRotatorResource() *schema.Resource {
 	}
 	return &schema.Resource{
 		Create: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobBuildDiscarderPropertyStrategyCreate(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
+			return resourceJobPropertyStrategyCreate(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
 		},
 		Update: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobBuildDiscarderPropertyStrategyUpdate(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
+			return resourceJobPropertyStrategyUpdate(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
 		},
 		Read: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobBuildDiscarderPropertyStrategyRead(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
+			return resourceJobPropertyStrategyRead(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
 		},
 		Delete: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobBuildDiscarderPropertyStrategyDelete(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
+			return resourceJobPropertyStrategyDelete(d, m, newJobBuildDiscarderPropertyStrategyLogRotatorInterface)
+		},
+		Importer: &schema.ResourceImporter{
+			State: resourceJobPropertyStrategyImporter,
 		},
 
 		Schema: map[string]*schema.Schema{

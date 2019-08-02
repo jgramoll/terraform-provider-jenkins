@@ -18,6 +18,9 @@ func jobDeclarativeJobActionResource() *schema.Resource {
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobActionDelete(d, m, newJobActionInterface)
 		},
+		Importer: &schema.ResourceImporter{
+			State: resourceJobActionImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"job": &schema.Schema{

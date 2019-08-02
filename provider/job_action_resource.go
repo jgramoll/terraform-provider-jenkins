@@ -11,7 +11,7 @@ import (
 )
 
 // ErrInvalidJobActionId
-var ErrInvalidJobActionId = errors.New("Invalid action id, must be jobName\xactionId")
+var ErrInvalidJobActionId = errors.New("Invalid action id, must be jobName\\xactionId")
 
 func resourceJobActionId(input string) (jobName string, actionId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
@@ -22,6 +22,18 @@ func resourceJobActionId(input string) (jobName string, actionId string, err err
 	jobName = parts[0]
 	actionId = parts[1]
 	return
+}
+
+func resourceJobActionImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, _, err := resourceJobActionId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("job", jobName)
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceJobActionCreate(d *schema.ResourceData, m interface{}, createJobAction func() jobAction) error {

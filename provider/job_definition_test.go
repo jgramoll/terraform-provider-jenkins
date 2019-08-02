@@ -9,13 +9,14 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-func testAccCheckJobDefinition(jobRef *client.Job, expectedDefinitionResourceName string, ensureJobDefinitionFunc func(client.JobDefinition, *terraform.ResourceState) error) resource.TestCheckFunc {
+func testAccCheckJobDefinition(jobRef *client.Job, expectedDefinitionResourceName string, returnDefinition *client.JobDefinition, ensureJobDefinitionFunc func(client.JobDefinition, *terraform.ResourceState) error) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		definitionResource, ok := s.RootModule().Resources[expectedDefinitionResourceName]
 		if !ok {
 			return fmt.Errorf("Job Defintion Resource not found: %s", expectedDefinitionResourceName)
 		}
 
+		*returnDefinition = jobRef.Definition
 		return ensureJobDefinitionFunc(jobRef.Definition, definitionResource)
 	}
 }

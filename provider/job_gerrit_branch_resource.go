@@ -20,6 +20,9 @@ func jobGerritBranchResource() *schema.Resource {
 		Read:   resourceJobGerritBranchRead,
 		Update: resourceJobGerritBranchUpdate,
 		Delete: resourceJobGerritBranchDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceJobGerritBranchImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"project": &schema.Schema{
@@ -54,6 +57,18 @@ func resourceJobGerritBranchId(input string) (jobName string, propertyId string,
 	projectId = parts[3]
 	branchId = parts[4]
 	return
+}
+
+func resourceJobGerritBranchImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, propertyId, triggerId, projectId, _, err := resourceJobGerritBranchId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("project", strings.Join([]string{jobName, propertyId, triggerId, projectId}, IdDelimiter))
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error {

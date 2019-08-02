@@ -18,6 +18,9 @@ func jobGerritTriggerDraftPublishedEventResource() *schema.Resource {
 		Delete: func(d *schema.ResourceData, m interface{}) error {
 			return resourceJobTriggerEventDelete(d, m, newTriggerEventInterface)
 		},
+		Importer: &schema.ResourceImporter{
+			State: resourceJobTriggerEventImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"trigger": &schema.Schema{

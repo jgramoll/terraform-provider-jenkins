@@ -107,9 +107,10 @@ func resourceJobDelete(d *schema.ResourceData, m interface{}) error {
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
-	defer jobLock.Unlock(jobName)
+	err := jobService.DeleteJob(jobName)
+	jobLock.Unlock(jobName)
 
-	log.Println("[DEBUG] Deleting job:", d.Id())
+	log.Println("[DEBUG] Deleted job:", d.Id())
 	d.SetId("")
-	return jobService.DeleteJob(jobName)
+	return err
 }

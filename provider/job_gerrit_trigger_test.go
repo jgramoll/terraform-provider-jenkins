@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -55,6 +57,36 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 						trigger2,
 					}, &triggers, ensureJobGerritTrigger),
 				),
+			},
+			{
+				ResourceName:  trigger1,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid trigger id"),
+			},
+			{
+				ResourceName: trigger1,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(triggers) == 0 {
+						return "", fmt.Errorf("no triggers to import")
+					}
+					propertyId := (*jobRef.Properties.Items)[0].GetId()
+					return strings.Join([]string{jobName, propertyId, triggers[0].GetId()}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName: trigger2,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(triggers) == 0 {
+						return "", fmt.Errorf("no triggers to import")
+					}
+					propertyId := (*jobRef.Properties.Items)[0].GetId()
+					return strings.Join([]string{jobName, propertyId, triggers[1].GetId()}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobGerritTriggerConfigServerName(jobName, serverName, 1),

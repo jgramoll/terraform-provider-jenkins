@@ -2,7 +2,9 @@ package provider
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"reflect"
 	"strings"
 
 	"github.com/google/uuid"
@@ -15,7 +17,7 @@ import (
 var ErrGitScmBranchMissingDefinition = errors.New("definition must be provided for jenkins_git_scm_branch")
 
 // ErrInvalidJobGitScmBranchId
-var ErrInvalidJobGitScmBranchId = errors.New("Invalid git scm id, must be jobName_scmId_branchId")
+var ErrInvalidJobGitScmBranchId = errors.New("Invalid git scm branch id, must be jobName_scmId_branchId")
 
 func jobGitScmBranchResource() *schema.Resource {
 	return &schema.Resource{
@@ -23,6 +25,9 @@ func jobGitScmBranchResource() *schema.Resource {
 		Read:   resourceJobGitScmBranchRead,
 		Update: resourceJobGitScmBranchUpdate,
 		Delete: resourceJobGitScmBranchDelete,
+		Importer: &schema.ResourceImporter{
+			State: resourceJobGitScmBranchImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"scm": &schema.Schema{
@@ -51,6 +56,18 @@ func resourceJobGitScmBranchId(input string) (jobName string, scmId string, bran
 	scmId = parts[1]
 	branchId = parts[2]
 	return
+}
+
+func resourceJobGitScmBranchImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, scmId, _, err := resourceJobGitScmBranchId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("scm", strings.Join([]string{jobName, scmId}, IdDelimiter))
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceJobGitScmBranchCreate(d *schema.ResourceData, m interface{}) error {
@@ -85,7 +102,12 @@ func resourceJobGitScmBranchCreate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	// TODO better place for this cast?
-	definition := j.Definition.(*client.CpsScmFlowDefinition)
+	definition, ok := j.Definition.(*client.CpsScmFlowDefinition)
+	if !ok {
+		jobLock.Unlock(jobName)
+		return fmt.Errorf("Failed to create job git scm branch, invalid definition %s found",
+			reflect.TypeOf(j.Definition).String())
+	}
 	definition.SCM.Branches = definition.SCM.Branches.Append(branch.toClientBranch(branchId))
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
@@ -169,8 +191,8 @@ func resourceJobGitScmBranchDelete(d *schema.ResourceData, m interface{}) error 
 		jobLock.Unlock(jobName)
 		return err
 	}
-
 	if j.Definition == nil {
+		jobLock.Unlock(jobName)
 		return ErrGitScmBranchMissingDefinition
 	}
 	definition := j.Definition.(*client.CpsScmFlowDefinition)

@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -12,6 +14,7 @@ import (
 
 func TestAccJobGitScmBasic(t *testing.T) {
 	var jobRef client.Job
+	var jobDefinition client.JobDefinition
 	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	jobResourceName := "jenkins_job.main"
 	definitionResourceName := "jenkins_job_git_scm.main"
@@ -27,7 +30,7 @@ func TestAccJobGitScmBasic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(definitionResourceName, "script_path", scriptPath),
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobDefinition(&jobRef, definitionResourceName, testAccJobGitScmEnsureDefinition),
+					testAccCheckJobDefinition(&jobRef, definitionResourceName, &jobDefinition, testAccJobGitScmEnsureDefinition),
 				),
 			},
 			{
@@ -35,8 +38,26 @@ func TestAccJobGitScmBasic(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr(definitionResourceName, "script_path", newScriptPath),
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobDefinition(&jobRef, definitionResourceName, testAccJobGitScmEnsureDefinition),
+					testAccCheckJobDefinition(&jobRef, definitionResourceName, &jobDefinition, testAccJobGitScmEnsureDefinition),
 				),
+			},
+			{
+				ResourceName:  definitionResourceName,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid definition id"),
+			},
+			{
+				ResourceName: definitionResourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if jobDefinition == nil {
+						return "", fmt.Errorf("no definition to import")
+					}
+					definitionId := jobRef.Definition.GetId()
+					return strings.Join([]string{jobName, definitionId}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobConfigBasic(jobName),

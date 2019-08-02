@@ -2,6 +2,8 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -46,6 +48,24 @@ func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 						configResourceName,
 					}, &configs),
 				),
+			},
+			{
+				ResourceName:  configResourceName,
+				ImportStateId: "invalid",
+				ImportState:   true,
+				ExpectError:   regexp.MustCompile("Invalid git scm user remote config id"),
+			},
+			{
+				ResourceName: configResourceName,
+				ImportState:  true,
+				ImportStateIdFunc: func(*terraform.State) (string, error) {
+					if len(configs) == 0 {
+						return "", fmt.Errorf("no configs to import")
+					}
+					definitionId := jobRef.Definition.GetId()
+					return strings.Join([]string{jobName, definitionId, configs[0].Id}, IdDelimiter), nil
+				},
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccJobGitScmConfigBasic(jobName),

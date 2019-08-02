@@ -26,6 +26,18 @@ func resourceJobGitScmExtensionId(input string) (jobName string, definitionId st
 	return
 }
 
+func resourceJobGitScmExtensionImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, definitionId, _, err := resourceJobGitScmExtensionId(d.Id())
+	if err != nil {
+		return nil, err
+	}
+	err = d.Set("scm", strings.Join([]string{jobName, definitionId}, IdDelimiter))
+	if err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceJobGitScmExtensionCreate(d *schema.ResourceData, m interface{}, createGitScmExtension func() jobGitScmExtension) error {
 	jobName, definitionId, err := resourceJobDefinitionId(d.Get("scm").(string))
 	if err != nil {
