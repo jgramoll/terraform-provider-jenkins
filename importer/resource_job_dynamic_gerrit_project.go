@@ -7,3 +7,7 @@ import (
 func ensureJobDynamicGerritProjects(projects *client.DynamicGerritProjects) error {
 	return nil
 }
+
+func jobDynamicGerritProjectsCode(projects *client.DynamicGerritProjects) string {
+	return ""
+}

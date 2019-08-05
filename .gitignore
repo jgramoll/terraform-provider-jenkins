@@ -5,6 +5,6 @@ sonar/
 
 .envrc
 terraform-provider-jenkins
-importer
+/importer/importer
 report.json
 coverage.out

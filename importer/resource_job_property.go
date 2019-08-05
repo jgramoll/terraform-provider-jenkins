@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"reflect"
 
 	"github.com/google/uuid"
@@ -8,8 +9,10 @@ import (
 )
 
 type ensureJobPropertyFunc func(client.JobProperty) error
+type jobPropertyCodeFunc func(client.JobProperty) string
 
 var ensureJobPropertyFuncs = map[string]ensureJobPropertyFunc{}
+var jobPropertyCodeFuncs = map[string]jobPropertyCodeFunc{}
 
 func ensureJobProperties(properties *client.JobProperties) error {
 	if properties == nil || properties.Items == nil {
@@ -31,4 +34,19 @@ func ensureJobProperties(properties *client.JobProperties) error {
 		}
 	}
 	return nil
+}
+
+func jobPropertiesCode(properties *client.JobProperties) string {
+	code := ""
+
+	for _, item := range *properties.Items {
+		reflectType := reflect.TypeOf(item).String()
+		if codeFunc, ok := jobPropertyCodeFuncs[reflectType]; ok {
+			code += codeFunc(item)
+		} else {
+			log.Println("[WARNING] Unknown property type:", reflectType)
+		}
+	}
+
+	return code
 }

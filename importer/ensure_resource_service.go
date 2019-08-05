@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -16,20 +15,7 @@ func NewEnsureJobResourceService(jobService *client.JobService) *EnsureJobResour
 }
 
 func (s *EnsureJobResourceService) EnsureResourceIds(job *client.Job) error {
-	if job.Id == "" {
-		id, err := uuid.NewRandom()
-		if err != nil {
-			return err
-		}
-		job.Id = id.String()
-	}
-	if err := ensureJobActions(job.Actions); err != nil {
-		return err
-	}
-	if err := ensureJobProperties(job.Properties); err != nil {
-		return err
-	}
-	if err := ensureJobDefinition(job.Definition); err != nil {
+	if err := ensureJob(job); err != nil {
 		return err
 	}
 

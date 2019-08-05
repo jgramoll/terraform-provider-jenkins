@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 
 	"github.com/google/uuid"
@@ -10,7 +11,11 @@ import (
 
 type ensureDefinitionFunc func(client.JobDefinition) error
 
+type definitionCodeFunc func(client.JobDefinition) string
+
 var ensureDefinitionFuncs = map[string]ensureDefinitionFunc{}
+
+var definitionCodeFuncs = map[string]definitionCodeFunc{}
 
 func ensureJobDefinition(definition client.JobDefinition) error {
 	if definition == nil {
@@ -29,4 +34,14 @@ func ensureJobDefinition(definition client.JobDefinition) error {
 		return fmt.Errorf("Unknown Definition Type %s", reflectType)
 	}
 	return ensureFunc(definition)
+}
+
+func jobDefinitionCode(definition client.JobDefinition) string {
+	reflectType := reflect.TypeOf(definition).String()
+	if codeFunc, ok := definitionCodeFuncs[reflectType]; ok {
+		return codeFunc(definition)
+	} else {
+		log.Println("[WARNING] Unkown Job Definition:", reflectType)
+	}
+	return ""
 }

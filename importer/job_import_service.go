@@ -14,15 +14,20 @@ func NewJobImportService(jenkinsClient *client.Client) *JobImportService {
 	}
 }
 
-func (s *JobImportService) Import(jobName string) error {
+func (s *JobImportService) Import(jobName string, skipEnsure bool, outputDir string) error {
 	job, err := s.jobService.GetJob(jobName)
 	if err != nil {
 		return err
 	}
-	if err := NewEnsureJobResourceService(s.jobService).EnsureResourceIds(job); err != nil {
+	if !skipEnsure {
+		if err := NewEnsureJobResourceService(s.jobService).EnsureResourceIds(job); err != nil {
+			return err
+		}
+	}
+
+	if err := NewGenerateTerraformCodeService(s.jobService).GenerateCode(job, outputDir); err != nil {
 		return err
 	}
-	// GenerateTerraformCodeService(s.jobService).Generate(job)
 	// GenerateTerraformImportScriptService(s.jobService).Generate(job)
 	return nil
 }
