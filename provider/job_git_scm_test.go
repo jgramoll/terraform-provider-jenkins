@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -55,7 +54,7 @@ func TestAccJobGitScmBasic(t *testing.T) {
 						return "", fmt.Errorf("no definition to import")
 					}
 					definitionId := jobRef.Definition.GetId()
-					return strings.Join([]string{jobName, definitionId}, IdDelimiter), nil
+					return ResourceJobDefinitionId(jobName, definitionId), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -73,14 +72,14 @@ func TestAccJobGitScmBasic(t *testing.T) {
 func testAccJobGitScmConfigBasic(jobName string) string {
 	return testAccJobConfigBasic(jobName) + `
 resource "jenkins_job_git_scm" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
 }`
 }
 
 func testAccJobGitScmConfigScript(jobName string, scriptPath string) string {
 	return testAccJobConfigBasic(jobName) + fmt.Sprintf(`
 resource "jenkins_job_git_scm" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
 
 	script_path = "%s"
 }`, scriptPath)
@@ -89,7 +88,7 @@ resource "jenkins_job_git_scm" "main" {
 func testAccJobGitScmEnsureDefinition(definitionInterface client.JobDefinition, rs *terraform.ResourceState) error {
 	definition := definitionInterface.(*client.CpsScmFlowDefinition)
 
-	_, definitionId, err := resourceJobDefinitionId(rs.Primary.Attributes["id"])
+	_, definitionId, err := resourceJobDefinitionParseId(rs.Primary.Attributes["id"])
 	if err != nil {
 		return err
 	}

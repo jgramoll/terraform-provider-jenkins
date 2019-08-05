@@ -14,7 +14,7 @@ import (
 // ErrInvalidJobTriggerEventId
 var ErrInvalidJobTriggerEventId = errors.New("Invalid trigger event id, must be jobName_propertyId_triggerId_eventId")
 
-func resourceJobTriggerEventId(input string) (jobName string, propertyId string, triggerId string, eventId string, err error) {
+func resourceJobGerritTriggerEventParseId(input string) (jobName string, propertyId string, triggerId string, eventId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 4 {
 		err = ErrInvalidJobTriggerEventId
@@ -27,12 +27,16 @@ func resourceJobTriggerEventId(input string) (jobName string, propertyId string,
 	return
 }
 
+func ResourceJobGerritTriggerEventId(jobName string, propertyId string, triggerId string, eventId string) string {
+	return joinWithIdDelimiter(jobName, propertyId, triggerId, eventId)
+}
+
 func resourceJobTriggerEventImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, propertyId, triggerId, _, err := resourceJobTriggerEventId(d.Id())
+	jobName, propertyId, triggerId, _, err := resourceJobGerritTriggerEventParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	err = d.Set("trigger", strings.Join([]string{jobName, propertyId, triggerId}, IdDelimiter))
+	err = d.Set("trigger", ResourceJobTriggerId(jobName, propertyId, triggerId))
 	if err != nil {
 		return nil, err
 	}
@@ -89,13 +93,13 @@ func resourceJobTriggerEventCreate(d *schema.ResourceData, m interface{}, create
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, propertyId, triggerId, eventId}, IdDelimiter))
+	d.SetId(ResourceJobGerritTriggerEventId(jobName, propertyId, triggerId, eventId))
 	log.Println("[DEBUG] Creating job trigger:", d.Id())
 	return resourceJobTriggerEventRead(d, m, createJobTriggerEvent)
 }
 
 func resourceJobTriggerEventRead(d *schema.ResourceData, m interface{}, createJobTriggerEvent func() jobGerritTriggerEvent) error {
-	jobName, propertyId, triggerId, eventId, err := resourceJobTriggerEventId(d.Id())
+	jobName, propertyId, triggerId, eventId, err := resourceJobGerritTriggerEventParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -134,7 +138,7 @@ func resourceJobTriggerEventRead(d *schema.ResourceData, m interface{}, createJo
 }
 
 func resourceJobTriggerEventUpdate(d *schema.ResourceData, m interface{}, createJobTriggerEvent func() jobGerritTriggerEvent) error {
-	jobName, propertyId, triggerId, eventId, err := resourceJobTriggerEventId(d.Id())
+	jobName, propertyId, triggerId, eventId, err := resourceJobGerritTriggerEventParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -185,7 +189,7 @@ func resourceJobTriggerEventUpdate(d *schema.ResourceData, m interface{}, create
 }
 
 func resourceJobTriggerEventDelete(d *schema.ResourceData, m interface{}, createJobTriggerEvent func() jobGerritTriggerEvent) error {
-	jobName, propertyId, triggerId, eventId, err := resourceJobTriggerEventId(d.Id())
+	jobName, propertyId, triggerId, eventId, err := resourceJobGerritTriggerEventParseId(d.Id())
 	if err != nil {
 		return err
 	}

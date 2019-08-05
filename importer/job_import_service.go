@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -25,9 +27,21 @@ func (s *JobImportService) Import(jobName string, skipEnsure bool, outputDir str
 		}
 	}
 
+	if err := ensureOutputDir(outputDir); err != nil {
+		return err
+	}
+
 	if err := NewGenerateTerraformCodeService(s.jobService).GenerateCode(job, outputDir); err != nil {
 		return err
 	}
-	// GenerateTerraformImportScriptService(s.jobService).Generate(job)
+	return NewGenerateTerraformImportService(s.jobService).GenerateScript(job, outputDir)
+}
+
+func ensureOutputDir(outputDir string) error {
+	if err := os.Mkdir(outputDir, os.ModePerm); err != nil {
+		if os.IsNotExist(err) {
+			return err
+		}
+	}
 	return nil
 }

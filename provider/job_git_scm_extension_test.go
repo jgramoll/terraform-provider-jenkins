@@ -27,7 +27,7 @@ func testAccCheckJobGitScmExtensions(
 				return fmt.Errorf("Job Trigger Event Resource not found: %s", resourceName)
 			}
 
-			_, _, extensionId, err := resourceJobGitScmExtensionId(resource.Primary.Attributes["id"])
+			_, _, extensionId, err := resourceJobGitScmExtensionParseId(resource.Primary.Attributes["id"])
 			extension, err := definition.SCM.GetExtension(extensionId)
 			if err != nil {
 				return err

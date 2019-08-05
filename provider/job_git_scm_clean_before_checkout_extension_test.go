@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -46,7 +45,7 @@ func TestAccJobGitScmCleanBeforeCheckoutExtensionBasic(t *testing.T) {
 						return "", fmt.Errorf("no extensions to import")
 					}
 					definitionId := jobRef.Definition.GetId()
-					return strings.Join([]string{jobName, definitionId, extensions[0].GetId()}, IdDelimiter), nil
+					return ResourceJobGitScmExtensionId(jobName, definitionId, extensions[0].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},

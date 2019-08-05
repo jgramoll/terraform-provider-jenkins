@@ -55,7 +55,7 @@ func jobGitScmUserRemoteConfigResource() *schema.Resource {
 	}
 }
 
-func resourceJobGitScmUserRemoteConfigId(input string) (jobName string, definitionId string, configId string, err error) {
+func resourceJobGitScmUserRemoteConfigParseId(input string) (jobName string, definitionId string, configId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
 		err = ErrInvalidJobGitScmUserRemoteConfigId
@@ -67,12 +67,16 @@ func resourceJobGitScmUserRemoteConfigId(input string) (jobName string, definiti
 	return
 }
 
+func ResourceJobGitScmUserRemoteConfigId(jobName string, definitionId string, configId string) string {
+	return joinWithIdDelimiter(jobName, definitionId, configId)
+}
+
 func resourceJobGitScmUserRemoteConfigImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, definitionId, _, err := resourceJobGitScmUserRemoteConfigId(d.Id())
+	jobName, definitionId, _, err := resourceJobGitScmUserRemoteConfigParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	err = d.Set("scm", strings.Join([]string{jobName, definitionId}, IdDelimiter))
+	err = d.Set("scm", ResourceJobDefinitionId(jobName, definitionId))
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +84,7 @@ func resourceJobGitScmUserRemoteConfigImporter(d *schema.ResourceData, meta inte
 }
 
 func resourceJobGitScmUserRemoteConfigCreate(d *schema.ResourceData, m interface{}) error {
-	jobName, definitionId, err := resourceJobDefinitionId(d.Get("scm").(string))
+	jobName, definitionId, err := resourceJobDefinitionParseId(d.Get("scm").(string))
 
 	c := newJobGitScmUserRemoteConfig()
 	configRaw := d.Get("").(map[string]interface{})
@@ -121,13 +125,13 @@ func resourceJobGitScmUserRemoteConfigCreate(d *schema.ResourceData, m interface
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, definitionId, configId}, IdDelimiter))
+	d.SetId(ResourceJobGitScmUserRemoteConfigId(jobName, definitionId, configId))
 	log.Println("[DEBUG] Creating job git scm user remote config:", d.Id())
 	return resourceJobGitScmUserRemoteConfigRead(d, m)
 }
 
 func resourceJobGitScmUserRemoteConfigUpdate(d *schema.ResourceData, m interface{}) error {
-	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigId(d.Id())
+	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigParseId(d.Id())
 
 	c := newJobGitScmUserRemoteConfig()
 	configRaw := d.Get("").(map[string]interface{})
@@ -166,7 +170,7 @@ func resourceJobGitScmUserRemoteConfigUpdate(d *schema.ResourceData, m interface
 }
 
 func resourceJobGitScmUserRemoteConfigRead(d *schema.ResourceData, m interface{}) error {
-	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigId(d.Id())
+	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.RLock(jobName)
@@ -196,7 +200,7 @@ func resourceJobGitScmUserRemoteConfigRead(d *schema.ResourceData, m interface{}
 }
 
 func resourceJobGitScmUserRemoteConfigDelete(d *schema.ResourceData, m interface{}) error {
-	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigId(d.Id())
+	jobName, _, configId, err := resourceJobGitScmUserRemoteConfigParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)

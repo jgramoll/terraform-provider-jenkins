@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -72,7 +71,7 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 						return "", fmt.Errorf("no triggers to import")
 					}
 					propertyId := (*jobRef.Properties.Items)[0].GetId()
-					return strings.Join([]string{jobName, propertyId, triggers[0].GetId()}, IdDelimiter), nil
+					return ResourceJobTriggerId(jobName, propertyId, triggers[0].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -84,7 +83,7 @@ func TestAccJobGerritTriggerBasic(t *testing.T) {
 						return "", fmt.Errorf("no triggers to import")
 					}
 					propertyId := (*jobRef.Properties.Items)[0].GetId()
-					return strings.Join([]string{jobName, propertyId, triggers[1].GetId()}, IdDelimiter), nil
+					return ResourceJobTriggerId(jobName, propertyId, triggers[1].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},

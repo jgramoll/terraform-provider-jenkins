@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -47,7 +46,7 @@ func TestAccJobJiraProjectPropertyBasic(t *testing.T) {
 					if len(properties) == 0 {
 						return "", fmt.Errorf("no properties to import")
 					}
-					return strings.Join([]string{jobName, properties[0].GetId()}, IdDelimiter), nil
+					return ResourceJobPropertyId(jobName, properties[0].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -58,7 +57,7 @@ func TestAccJobJiraProjectPropertyBasic(t *testing.T) {
 					if len(properties) == 0 {
 						return "", fmt.Errorf("no properties to import")
 					}
-					return strings.Join([]string{jobName, properties[0].GetId()}, IdDelimiter), nil
+					return ResourceJobPropertyId(jobName, properties[1].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -87,7 +86,7 @@ func testAccJobJiraProjectPropertyConfigBasic(jobName string, count int) string 
 	for i := 1; i <= count; i++ {
 		properties += fmt.Sprintf(`
 resource "jenkins_job_jira_project_property" "prop_%v" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
 }`, i)
 	}
 

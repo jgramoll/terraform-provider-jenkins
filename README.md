@@ -46,15 +46,15 @@ resource "jenkins_job" "main" {
 }
 
 resource "jenkins_job_declarative_job_action" "main" {
-  job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_declarative_job_property_tracker_action" "main" {
-  job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_git_scm" "main" {
-  job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.name}"
 
   config_version = "2"
   script_path    = "Jenkinsfile.api"
@@ -80,7 +80,7 @@ resource "jenkins_job_git_scm_clean_before_checkout_extension" "main" {
 }
 
 resource "jenkins_job_build_discarder_property" "main" {
-  job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
@@ -93,7 +93,7 @@ resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
 }
 
 resource "jenkins_job_pipeline_triggers_property" "main" {
-  job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_gerrit_trigger" "main" {
@@ -146,11 +146,11 @@ resource "jenkins_job_gerrit_branch" "main" {
 }
 
 resource "jenkins_job_datadog_job_property" "main" {
-  job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_jira_project_property" "main" {
-  job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.name}"
 }
 
 ```

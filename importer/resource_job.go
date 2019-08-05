@@ -37,3 +37,14 @@ resource "jenkins_job" "main" {
 		jobDefinitionCode(job.Definition)+
 		jobPropertiesCode(job.Properties)) + "\n"
 }
+
+func jobImportScript(job *client.Job) string {
+	return strings.TrimSpace(fmt.Sprintf(`
+terraform init
+
+terraform import jenkins_job.main "%v"
+`, job.Name)+
+		jobActionsImportScript(job.Name, job.Actions)+
+		jobDefinitionsImportScript(job.Name, job.Definition)+
+		jobPropertiesImportScript(job.Name, job.Properties)) + "\n"
+}

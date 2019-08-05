@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -59,7 +58,7 @@ func TestAccJobGitBranchBasic(t *testing.T) {
 						return "", fmt.Errorf("no branches to import")
 					}
 					definitionId := jobRef.Definition.GetId()
-					return strings.Join([]string{jobName, definitionId, branches[0].Id}, IdDelimiter), nil
+					return ResourceJobGitScmBranchId(jobName, definitionId, branches[0].Id), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -107,7 +106,7 @@ func testAccCheckJobGitScmBranches(jobRef *client.Job, expectedResourceNames []s
 }
 
 func ensureGitScmBranch(definition *client.CpsScmFlowDefinition, resource *terraform.ResourceState) (*client.GitScmBranchSpec, error) {
-	_, _, branchId, err := resourceJobGitScmBranchId(resource.Primary.Attributes["id"])
+	_, _, branchId, err := resourceJobGitScmBranchParseId(resource.Primary.Attributes["id"])
 	if err != nil {
 		return nil, err
 	}

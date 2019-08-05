@@ -31,6 +31,12 @@ func TestAccJobBasic(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      resourceName,
+				ImportStateId:     name,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccJobConfigBasic(newName),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(resourceName, &jobRef),

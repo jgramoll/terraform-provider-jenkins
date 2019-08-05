@@ -53,7 +53,7 @@ func ensureJobBuildDiscarderPropertyStrategy(
 	resource *terraform.ResourceState,
 	ensureStrategyFunc func(client.JobBuildDiscarderPropertyStrategy, *terraform.ResourceState) error,
 ) (client.JobBuildDiscarderPropertyStrategy, error) {
-	_, propertyId, _, err := resourceJobPropertyStrategyId(resource.Primary.Attributes["id"])
+	_, propertyId, _, err := resourceJobDiscarderPropertyStrategyParseId(resource.Primary.Attributes["id"])
 	if err != nil {
 		return nil, err
 	}

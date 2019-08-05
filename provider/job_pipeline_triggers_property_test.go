@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -47,7 +46,7 @@ func TestAccJobPipelineTriggersPropertyBasic(t *testing.T) {
 					if len(properties) == 0 {
 						return "", fmt.Errorf("no properties to import")
 					}
-					return strings.Join([]string{jobName, properties[0].GetId()}, IdDelimiter), nil
+					return ResourceJobPropertyId(jobName, properties[0].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -58,7 +57,7 @@ func TestAccJobPipelineTriggersPropertyBasic(t *testing.T) {
 					if len(properties) == 0 {
 						return "", fmt.Errorf("no properties to import")
 					}
-					return strings.Join([]string{jobName, properties[1].GetId()}, IdDelimiter), nil
+					return ResourceJobPropertyId(jobName, properties[1].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -87,7 +86,7 @@ func testAccJobPipelineTriggersPropertyConfigBasic(jobName string, count int) st
 	for i := 1; i <= count; i++ {
 		properties += fmt.Sprintf(`
 resource "jenkins_job_pipeline_triggers_property" "prop_%v" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
 }`, i)
 	}
 

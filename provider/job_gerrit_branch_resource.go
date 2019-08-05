@@ -45,7 +45,7 @@ func jobGerritBranchResource() *schema.Resource {
 	}
 }
 
-func resourceJobGerritBranchId(input string) (jobName string, propertyId string, triggerId string, projectId string, branchId string, err error) {
+func resourceJobGerritBranchParseId(input string) (jobName string, propertyId string, triggerId string, projectId string, branchId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 5 {
 		err = ErrInvalidTriggerGerritBranchId
@@ -59,12 +59,16 @@ func resourceJobGerritBranchId(input string) (jobName string, propertyId string,
 	return
 }
 
+func ResourceJobGerritBranchId(jobName string, propertyId string, triggerId string, projectId string, branchId string) string {
+	return joinWithIdDelimiter(jobName, propertyId, triggerId, projectId, branchId)
+}
+
 func resourceJobGerritBranchImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, propertyId, triggerId, projectId, _, err := resourceJobGerritBranchId(d.Id())
+	jobName, propertyId, triggerId, projectId, _, err := resourceJobGerritBranchParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	err = d.Set("project", strings.Join([]string{jobName, propertyId, triggerId, projectId}, IdDelimiter))
+	err = d.Set("project", ResourceJobGerritProjectId(jobName, propertyId, triggerId, projectId))
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +76,7 @@ func resourceJobGerritBranchImporter(d *schema.ResourceData, meta interface{}) (
 }
 
 func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectId(d.Get("project").(string))
+	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectParseId(d.Get("project").(string))
 
 	branch := newJobGerritBranch()
 	configRaw := d.Get("").(map[string]interface{})
@@ -123,13 +127,13 @@ func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, propertyId, triggerId, projectId, branchId}, IdDelimiter))
+	d.SetId(ResourceJobGerritBranchId(jobName, propertyId, triggerId, projectId, branchId))
 	log.Println("[DEBUG] Creating job gerrit branch:", d.Id())
 	return resourceJobGerritBranchRead(d, m)
 }
 
 func resourceJobGerritBranchUpdate(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchId(d.Id())
+	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchParseId(d.Id())
 
 	branch := newJobGerritBranch()
 	configRaw := d.Get("").(map[string]interface{})
@@ -181,7 +185,7 @@ func resourceJobGerritBranchUpdate(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchId(d.Id())
+	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.RLock(jobName)
@@ -219,7 +223,7 @@ func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobGerritBranchDelete(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchId(d.Id())
+	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)

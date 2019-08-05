@@ -41,7 +41,7 @@ func ensureProperty(
 	resource *terraform.ResourceState,
 	ensurePropertyFunc func(client.JobProperty, *terraform.ResourceState) error,
 ) (client.JobProperty, error) {
-	jobName, propertyId, err := resourceJobPropertyId(resource.Primary.Attributes["id"])
+	jobName, propertyId, err := resourceJobPropertyParseId(resource.Primary.Attributes["id"])
 	if err != nil {
 		return nil, err
 	}

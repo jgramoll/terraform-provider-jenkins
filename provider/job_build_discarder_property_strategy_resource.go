@@ -12,12 +12,12 @@ import (
 )
 
 // ErrInvalidPropertyId
-var ErrInvalidPropertyStrategyId = errors.New("Invalid property strategy id, must be jobName_propertyId_strategyId")
+var ErrInvalidDiscarderPropertyStrategyId = errors.New("Invalid discarder property strategy id, must be jobName_propertyId_strategyId")
 
-func resourceJobPropertyStrategyId(input string) (jobName string, propertyId string, strategyId string, err error) {
+func resourceJobDiscarderPropertyStrategyParseId(input string) (jobName string, propertyId string, strategyId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
-		err = ErrInvalidPropertyStrategyId
+		err = ErrInvalidDiscarderPropertyStrategyId
 		return
 	}
 	jobName = parts[0]
@@ -26,12 +26,16 @@ func resourceJobPropertyStrategyId(input string) (jobName string, propertyId str
 	return
 }
 
+func ResourceJobDiscarderPropertyStrategyId(jobName string, propertyId string, strategyId string) string {
+	return joinWithIdDelimiter(jobName, propertyId, strategyId)
+}
+
 func resourceJobPropertyStrategyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, propertyId, _, err := resourceJobPropertyStrategyId(d.Id())
+	jobName, propertyId, _, err := resourceJobDiscarderPropertyStrategyParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	err = d.Set("property", strings.Join([]string{jobName, propertyId}, IdDelimiter))
+	err = d.Set("property", ResourceJobPropertyId(jobName, propertyId))
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +43,7 @@ func resourceJobPropertyStrategyImporter(d *schema.ResourceData, meta interface{
 }
 
 func resourceJobPropertyStrategyCreate(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
-	jobName, propertyId, err := resourceJobPropertyId(d.Get("property").(string))
+	jobName, propertyId, err := resourceJobPropertyParseId(d.Get("property").(string))
 	if err != nil {
 		return err
 	}
@@ -77,14 +81,14 @@ func resourceJobPropertyStrategyCreate(d *schema.ResourceData, m interface{}, cr
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, propertyId, strategyId}, IdDelimiter))
+	d.SetId(ResourceJobDiscarderPropertyStrategyId(jobName, propertyId, strategyId))
 	log.Println("[DEBUG] Creating build discarder propety strategy", d.Id())
 	return resourceJobPropertyStrategyRead(d, m, createJobBuildDiscarderPropertyStrategy)
 }
 
 func resourceJobPropertyStrategyRead(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
 	jobService := m.(*Services).JobService
-	jobName, propertyId, err := resourceJobPropertyId(d.Get("property").(string))
+	jobName, propertyId, err := resourceJobPropertyParseId(d.Get("property").(string))
 	if err != nil {
 		return err
 	}
@@ -116,7 +120,7 @@ func resourceJobPropertyStrategyRead(d *schema.ResourceData, m interface{}, crea
 }
 
 func resourceJobPropertyStrategyUpdate(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
-	jobName, propertyId, strategyId, err := resourceJobPropertyStrategyId(d.Id())
+	jobName, propertyId, strategyId, err := resourceJobDiscarderPropertyStrategyParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -154,7 +158,7 @@ func resourceJobPropertyStrategyUpdate(d *schema.ResourceData, m interface{}, cr
 }
 
 func resourceJobPropertyStrategyDelete(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
-	jobName, propertyId, err := resourceJobPropertyId(d.Get("property").(string))
+	jobName, propertyId, err := resourceJobPropertyParseId(d.Get("property").(string))
 	if err != nil {
 		return err
 	}

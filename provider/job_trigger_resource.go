@@ -26,12 +26,16 @@ func resourceJobTriggerId(input string) (jobName string, propertyId string, trig
 	return
 }
 
+func ResourceJobTriggerId(jobName string, propertyId string, triggerId string) string {
+	return joinWithIdDelimiter(jobName, propertyId, triggerId)
+}
+
 func resourceJobTriggerImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	jobName, propertyId, _, err := resourceJobTriggerId(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	err = d.Set("property", strings.Join([]string{jobName, propertyId}, IdDelimiter))
+	err = d.Set("property", ResourceJobPropertyId(jobName, propertyId))
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +43,7 @@ func resourceJobTriggerImporter(d *schema.ResourceData, meta interface{}) ([]*sc
 }
 
 func resourceJobTriggerCreate(d *schema.ResourceData, m interface{}, createJobTrigger func() jobTrigger) error {
-	jobName, propertyId, err := resourceJobPropertyId(d.Get("property").(string))
+	jobName, propertyId, err := resourceJobPropertyParseId(d.Get("property").(string))
 	if err != nil {
 		return err
 	}
@@ -82,7 +86,7 @@ func resourceJobTriggerCreate(d *schema.ResourceData, m interface{}, createJobTr
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, propertyId, triggerId}, IdDelimiter))
+	d.SetId(ResourceJobTriggerId(jobName, propertyId, triggerId))
 	log.Println("[DEBUG] Creating job trigger:", d.Id())
 	return resourceJobTriggerRead(d, m, createJobTrigger)
 }

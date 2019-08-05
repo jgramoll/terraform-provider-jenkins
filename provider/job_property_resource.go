@@ -13,7 +13,7 @@ import (
 // ErrInvalidPropertyId
 var ErrInvalidPropertyId = errors.New("Invalid property id, must be jobName_propertyId")
 
-func resourceJobPropertyId(input string) (jobName string, propertyId string, err error) {
+func resourceJobPropertyParseId(input string) (jobName string, propertyId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 2 {
 		err = ErrInvalidPropertyId
@@ -24,8 +24,12 @@ func resourceJobPropertyId(input string) (jobName string, propertyId string, err
 	return
 }
 
+func ResourceJobPropertyId(jobName string, propertyId string) string {
+	return joinWithIdDelimiter(jobName, propertyId)
+}
+
 func resourceJobPropertyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, _, err := resourceJobPropertyId(d.Id())
+	jobName, _, err := resourceJobPropertyParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +68,13 @@ func resourceJobPropertyCreate(d *schema.ResourceData, m interface{}, createJobP
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, propertyId}, IdDelimiter))
+	d.SetId(ResourceJobPropertyId(jobName, propertyId))
 	log.Println("[DEBUG] Creating job property:", d.Id())
 	return resourceJobPropertyRead(d, m, createJobProperty)
 }
 
 func resourceJobPropertyRead(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
-	jobName, propertyId, err := resourceJobPropertyId(d.Id())
+	jobName, propertyId, err := resourceJobPropertyParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -100,7 +104,7 @@ func resourceJobPropertyRead(d *schema.ResourceData, m interface{}, createJobPro
 }
 
 func resourceJobPropertyUpdate(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
-	jobName, propertyId, err := resourceJobPropertyId(d.Id())
+	jobName, propertyId, err := resourceJobPropertyParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -134,7 +138,7 @@ func resourceJobPropertyUpdate(d *schema.ResourceData, m interface{}, createJobP
 }
 
 func resourceJobPropertyDelete(d *schema.ResourceData, m interface{}, createJobProperty func() jobProperty) error {
-	jobName, propertyId, err := resourceJobPropertyId(d.Id())
+	jobName, propertyId, err := resourceJobPropertyParseId(d.Id())
 	if err != nil {
 		return err
 	}

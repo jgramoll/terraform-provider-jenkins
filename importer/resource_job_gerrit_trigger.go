@@ -5,11 +5,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
+	"github.com/jgramoll/terraform-provider-jenkins/provider"
 )
 
 func init() {
 	ensureJobTriggerFuncs["*client.JobGerritTrigger"] = ensureJobGerritTrigger
 	jobTriggerCodeFuncs["*client.JobGerritTrigger"] = jobGerritTriggerCode
+	jobTriggerImportScriptFuncs["*client.JobGerritTrigger"] = jobGerritTriggerImportScript
 }
 
 func ensureJobGerritTrigger(triggerInterface client.JobTrigger) error {
@@ -65,4 +67,15 @@ resource "jenkins_job_gerrit_trigger" "main" {
 		trigger.SkipVote.OnSuccessful, trigger.SkipVote.OnFailed,
 		trigger.SkipVote.OnUnstable, trigger.SkipVote.OnNotBuilt) +
 		triggerOnEvents + triggerProjects + dynamicGerritProjects
+}
+
+func jobGerritTriggerImportScript(jobName string, propertyId string, triggerInterface client.JobTrigger) string {
+	trigger := triggerInterface.(*client.JobGerritTrigger)
+
+	return fmt.Sprintf(`
+terraform import jenkins_job_gerrit_trigger.main "%v"
+`, provider.ResourceJobTriggerId(jobName, propertyId, trigger.Id)) +
+		jobGerritTriggerOnEventsImportScript(jobName, propertyId, trigger.Id, trigger.TriggerOnEvents) +
+		jobGerritTriggerProjectsImportScript(jobName, propertyId, trigger.Id, trigger.Projects) +
+		jobDynamicGerritProjectsImportScript(trigger.DynamicGerritProjects)
 }

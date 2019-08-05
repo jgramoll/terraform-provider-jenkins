@@ -34,7 +34,6 @@ func JobfromClientJob(clientJob *client.Job) *job {
 }
 
 func (j *job) setResourceData(d *schema.ResourceData) error {
-	d.SetId(j.Name)
 	if err := d.Set("plugin", j.Plugin); err != nil {
 		return err
 	}

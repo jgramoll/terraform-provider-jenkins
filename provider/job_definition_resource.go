@@ -13,7 +13,7 @@ import (
 // ErrInvalidDefinitionId
 var ErrInvalidDefinitionId = errors.New("Invalid definition id, must be jobName_definitionId")
 
-func resourceJobDefinitionId(input string) (jobName string, definitionId string, err error) {
+func resourceJobDefinitionParseId(input string) (jobName string, definitionId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 2 {
 		err = ErrInvalidDefinitionId
@@ -24,8 +24,12 @@ func resourceJobDefinitionId(input string) (jobName string, definitionId string,
 	return
 }
 
+func ResourceJobDefinitionId(jobName string, definitionId string) string {
+	return joinWithIdDelimiter(jobName, definitionId)
+}
+
 func resourceJobDefinitionImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, _, err := resourceJobDefinitionId(d.Id())
+	jobName, _, err := resourceJobDefinitionParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
@@ -65,14 +69,14 @@ func resourceJobDefinitionCreate(d *schema.ResourceData, m interface{}, createJo
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, definitionId}, IdDelimiter))
+	d.SetId(ResourceJobDefinitionId(jobName, definitionId))
 	log.Println("[DEBUG] Creating job definition:", d.Id())
 	return resourceJobDefinitionRead(d, m, createJobDefinition)
 }
 
 func resourceJobDefinitionRead(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
 	jobService := m.(*Services).JobService
-	jobName, _, err := resourceJobDefinitionId(d.Id())
+	jobName, _, err := resourceJobDefinitionParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -94,7 +98,7 @@ func resourceJobDefinitionRead(d *schema.ResourceData, m interface{}, createJobD
 }
 
 func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	jobName, definitionId, err := resourceJobDefinitionId(d.Id())
+	jobName, definitionId, err := resourceJobDefinitionParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -125,7 +129,7 @@ func resourceJobDefinitionUpdate(d *schema.ResourceData, m interface{}, createJo
 }
 
 func resourceJobDefinitionDelete(d *schema.ResourceData, m interface{}, createJobDefinition func() jobDefinition) error {
-	jobName, _, err := resourceJobDefinitionId(d.Id())
+	jobName, _, err := resourceJobDefinitionParseId(d.Id())
 	if err != nil {
 		return err
 	}
