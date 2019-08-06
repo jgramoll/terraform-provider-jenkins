@@ -1,8 +1,19 @@
 # terraform-provider-jenkins Change Log
 
+## 0.1.1
+
+[9083e51] make sure to return nil instead of error on read
+[352126c] make sure provider doesn't fail on read if property or action doesn't exit
+[5139baf] add local dev link info to readme
+[0515f40] update readme to have clearer install vs build
+[3747ae0] update readme dependencies to have clearer gomod command
+[b079ff7] Update readme with more about credentials and envvars
+[b6b812f] update importer usage to build using go get
+[1cc8c5f] clean up readme todo
+
 ## 0.1.0
 
-[10fa096] (HEAD -> master, origin/master) add import script to importer to get tf state (#1)
+[10fa096] add import script to importer to get tf state (#1)
 [e9d0d95] update importer to output .tf code files for job
 [d05d39a] refactor remaining client unmarshal switches
 [0b28faf] remove importer binary
