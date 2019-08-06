@@ -92,7 +92,7 @@ func resourceJobPropertyRead(d *schema.ResourceData, m interface{}, createJobPro
 	if err != nil {
 		log.Println("[WARN] No Property found:", err)
 		d.SetId("")
-		return err
+		return nil
 	}
 	property, err := createJobProperty().fromClientJobProperty(clientProperty)
 	if err != nil {
