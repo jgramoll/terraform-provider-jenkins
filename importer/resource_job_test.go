@@ -66,6 +66,9 @@ func testNewJob() *client.Job {
 	gerritTrigger.Id = "gerrit-trigger-id"
 	gerritTrigger.Plugin = "gerrit-trigger@2.29.0"
 	gerritTrigger.Projects = gerritTrigger.Projects.Append(gerritProject)
+	gerritTriggerChangeMergedEvent := client.NewJobGerritTriggerPluginChangeMergedEvent()
+	gerritTriggerChangeMergedEvent.Id = "gerritTriggerMergeEventId"
+	gerritTrigger.TriggerOnEvents = gerritTrigger.TriggerOnEvents.Append(gerritTriggerChangeMergedEvent)
 	gerritTriggerPatchsetEvent := client.NewJobGerritTriggerPluginPatchsetCreatedEvent()
 	gerritTriggerPatchsetEvent.Id = "gerritTriggerPatchsetEventId"
 	gerritTrigger.TriggerOnEvents = gerritTrigger.TriggerOnEvents.Append(gerritTriggerPatchsetEvent)
@@ -176,6 +179,10 @@ resource "jenkins_job_gerrit_trigger" "main" {
 	}
 }
 
+resource "jenkins_job_gerrit_trigger_change_merged_event" "main" {
+	trigger = "${jenkins_job_gerrit_trigger.main.id}"
+}
+
 resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
 	trigger = "${jenkins_job_gerrit_trigger.main.id}"
 
@@ -264,6 +271,8 @@ terraform import jenkins_job_git_scm_clean_before_checkout_extension.main "Preme
 terraform import jenkins_job_pipeline_triggers_property.main "Premerge checkstrigger-id"
 
 terraform import jenkins_job_gerrit_trigger.main "Premerge checkstrigger-idgerrit-trigger-id"
+
+terraform import jenkins_job_gerrit_trigger_change_merged_event.main "Premerge checkstrigger-idgerrit-trigger-idgerritTriggerMergeEventId"
 
 terraform import jenkins_job_gerrit_trigger_patchset_created_event.main "Premerge checkstrigger-idgerrit-trigger-idgerritTriggerPatchsetEventId"
 

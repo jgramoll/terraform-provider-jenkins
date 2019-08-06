@@ -113,6 +113,10 @@ resource "jenkins_job_gerrit_trigger" "main" {
   }
 }
 
+resource "jenkins_job_gerrit_trigger_change_merged_event" "main" {
+  trigger = "${jenkins_job_gerrit_trigger.main.id}"
+}
+
 resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
   trigger = "${jenkins_job_gerrit_trigger.main.id}"
 
@@ -139,6 +143,13 @@ resource "jenkins_job_gerrit_branch" "branch_1" {
 
   compare_type = "REG_EXP"
   pattern      = "^(?!refs/meta/config).*$"
+}
+
+resource "jenkins_job_gerrit_file_path" "file_path_1" {
+  project = "${jenkins_job_gerrit_project.project_1.id}"
+
+  compare_type = "ANT"
+  pattern      = "path/to/file"
 }
 
 resource "jenkins_job_datadog_job_property" "main" {

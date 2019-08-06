@@ -64,7 +64,8 @@ func Provider() terraform.ResourceProvider {
 
 			"jenkins_job_pipeline_triggers_property":            jobPipelineTriggersPropertyResource(),
 			"jenkins_job_gerrit_trigger":                        jobGerritTriggerResource(),
-			"jenkins_job_gerrit_trigger_patchset_created_event": jobGerritTriggerPatchSetCreatedEventResource(),
+			"jenkins_job_gerrit_trigger_change_merged_event":    jobGerritTriggerChangeMergedEventResource(),
+			"jenkins_job_gerrit_trigger_patchset_created_event": jobGerritTriggerPatchsetCreatedEventResource(),
 			"jenkins_job_gerrit_trigger_draft_published_event":  jobGerritTriggerDraftPublishedEventResource(),
 			"jenkins_job_gerrit_project":                        jobGerritProjectResource(),
 			"jenkins_job_gerrit_branch":                         jobGerritBranchResource(),

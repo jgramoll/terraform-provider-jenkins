@@ -4,9 +4,9 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func jobGerritTriggerPatchSetCreatedEventResource() *schema.Resource {
+func jobGerritTriggerPatchsetCreatedEventResource() *schema.Resource {
 	newTriggerEventInterface := func() jobGerritTriggerEvent {
-		return newJobGerritTriggerPatchSetCreatedEvent()
+		return newJobGerritTriggerPatchsetCreatedEvent()
 	}
 	return &schema.Resource{
 		Create: func(d *schema.ResourceData, m interface{}) error {
@@ -30,6 +30,7 @@ func jobGerritTriggerPatchSetCreatedEventResource() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "Id of the gerrit trigger",
 				Required:    true,
+				ForceNew:    true,
 			},
 			"exclude_drafts": &schema.Schema{
 				Type:        schema.TypeBool,

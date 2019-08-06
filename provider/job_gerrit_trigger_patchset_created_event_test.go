@@ -85,11 +85,11 @@ func ensureJobGerritTriggerPatchsetCreatedEvent(
 	clientEventInterface client.JobGerritTriggerOnEvent,
 	rs *terraform.ResourceState,
 ) error {
-	eventInterface, err := newJobGerritTriggerPatchSetCreatedEvent().fromClientJobTriggerEvent(clientEventInterface)
+	eventInterface, err := newJobGerritTriggerPatchsetCreatedEvent().fromClientJobTriggerEvent(clientEventInterface)
 	if err != nil {
 		return err
 	}
-	event := eventInterface.(*jobGerritTriggerPatchSetCreatedEvent)
+	event := eventInterface.(*jobGerritTriggerPatchsetCreatedEvent)
 	err = testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeDrafts", rs.Primary.Attributes["exclude_drafts"], event.ExcludeDrafts)
 	if err != nil {
 		return err

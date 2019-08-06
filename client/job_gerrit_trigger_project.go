@@ -8,7 +8,6 @@ import (
 // ErrJobGerritTriggerBranchNotFound job trigger gerrit branch not found
 var ErrJobGerritTriggerBranchNotFound = errors.New("Could not find job trigger gerrit branch")
 
-
 // ErrJobGerritTriggerFilePathNotFound job trigger gerrit file path not found
 var ErrJobGerritTriggerFilePathNotFound = errors.New("Could not find job trigger gerrit file path")
 
@@ -60,7 +59,6 @@ func (project *JobGerritTriggerProject) DeleteBranch(branchId string) error {
 	}
 	return ErrJobGerritTriggerBranchNotFound
 }
-
 
 func (project *JobGerritTriggerProject) GetFilePath(filePathId string) (*JobGerritTriggerFilePath, error) {
 	filePaths := *(project.FilePaths).Items

@@ -8,7 +8,7 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-type jobGerritTriggerPatchSetCreatedEvent struct {
+type jobGerritTriggerPatchsetCreatedEvent struct {
 	ExcludeDrafts        bool `mapstructure:"exclude_drafts"`
 	ExcludeTrivialRebase bool `mapstructure:"exclude_trivial_rebase"`
 	ExcludeNoCodeChange  bool `mapstructure:"exclude_no_code_change"`
@@ -16,17 +16,17 @@ type jobGerritTriggerPatchSetCreatedEvent struct {
 	ExcludeWipState      bool `mapstructure:"exclude_wip_state"`
 }
 
-func newJobGerritTriggerPatchSetCreatedEvent() *jobGerritTriggerPatchSetCreatedEvent {
-	return &jobGerritTriggerPatchSetCreatedEvent{}
+func newJobGerritTriggerPatchsetCreatedEvent() *jobGerritTriggerPatchsetCreatedEvent {
+	return &jobGerritTriggerPatchsetCreatedEvent{}
 }
 
-func (e *jobGerritTriggerPatchSetCreatedEvent) fromClientJobTriggerEvent(clientEventInterface client.JobGerritTriggerOnEvent) (jobGerritTriggerEvent, error) {
+func (e *jobGerritTriggerPatchsetCreatedEvent) fromClientJobTriggerEvent(clientEventInterface client.JobGerritTriggerOnEvent) (jobGerritTriggerEvent, error) {
 	clientEvent, ok := clientEventInterface.(*client.JobGerritTriggerPluginPatchsetCreatedEvent)
 	if !ok {
 		return nil, fmt.Errorf("Unexpected event type got %s, expected *client.JobGerritTriggerPluginPatchsetCreatedEvent",
 			reflect.TypeOf(clientEventInterface).String())
 	}
-	event := newJobGerritTriggerPatchSetCreatedEvent()
+	event := newJobGerritTriggerPatchsetCreatedEvent()
 	event.ExcludeDrafts = clientEvent.ExcludeDrafts
 	event.ExcludeTrivialRebase = clientEvent.ExcludeTrivialRebase
 	event.ExcludeNoCodeChange = clientEvent.ExcludeNoCodeChange
@@ -35,7 +35,7 @@ func (e *jobGerritTriggerPatchSetCreatedEvent) fromClientJobTriggerEvent(clientE
 	return event, nil
 }
 
-func (event *jobGerritTriggerPatchSetCreatedEvent) toClientJobTriggerEvent(eventId string) (client.JobGerritTriggerOnEvent, error) {
+func (event *jobGerritTriggerPatchsetCreatedEvent) toClientJobTriggerEvent(eventId string) (client.JobGerritTriggerOnEvent, error) {
 	clientEvent := client.NewJobGerritTriggerPluginPatchsetCreatedEvent()
 	clientEvent.Id = eventId
 	clientEvent.ExcludeDrafts = event.ExcludeDrafts
@@ -46,7 +46,7 @@ func (event *jobGerritTriggerPatchSetCreatedEvent) toClientJobTriggerEvent(event
 	return clientEvent, nil
 }
 
-func (event *jobGerritTriggerPatchSetCreatedEvent) setResourceData(d *schema.ResourceData) error {
+func (event *jobGerritTriggerPatchsetCreatedEvent) setResourceData(d *schema.ResourceData) error {
 	if err := d.Set("exclude_drafts", event.ExcludeDrafts); err != nil {
 		return err
 	}
