@@ -205,7 +205,9 @@ func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
 	}
 	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Trigger found:", err)
+		d.SetId("")
+		return nil
 	}
 	trigger := triggerInterface.(*client.JobGerritTrigger)
 	project, err := trigger.GetProject(projectId)

@@ -183,7 +183,9 @@ func resourceJobGitScmUserRemoteConfigRead(d *schema.ResourceData, m interface{}
 	}
 
 	if j.Definition == nil {
-		return ErrGitScmUserRemoteConfigMissingDefinition
+		log.Println("[WARN] No Job Definition found")
+		d.SetId("")
+		return nil
 	}
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
 

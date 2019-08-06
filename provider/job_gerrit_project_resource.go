@@ -194,12 +194,16 @@ func resourceJobGerritProjectRead(d *schema.ResourceData, m interface{}) error {
 	}
 	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Job Trigger found:", err)
+		d.SetId("")
+		return nil
 	}
 	trigger := triggerInterface.(*client.JobGerritTrigger)
 	clientProject, err := trigger.GetProject(projectId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Job Project found:", err)
+		d.SetId("")
+		return nil
 	}
 	project := newJobGerritProjectFromClient(clientProject)
 
