@@ -52,11 +52,16 @@ func testNewJob() *client.Job {
 	gerritBranch.Id = "gerritBranchId"
 	gerritBranch.CompareType = client.CompareTypeRegExp
 	gerritBranch.Pattern = "my-branch"
+	gerritFilePath := client.NewJobGerritTriggerFilePath()
+	gerritFilePath.Id = "gerritFilePathId"
+	gerritFilePath.CompareType = client.CompareTypeRegExp
+	gerritFilePath.Pattern = "my-file-path"
 	gerritProject := client.NewJobGerritTriggerProject()
 	gerritProject.Id = "gerritProjectId"
 	gerritProject.CompareType = client.CompareTypePlain
 	gerritProject.Pattern = "my-project"
 	gerritProject.Branches = gerritProject.Branches.Append(gerritBranch)
+	gerritProject.FilePaths = gerritProject.FilePaths.Append(gerritFilePath)
 	gerritTrigger := client.NewJobGerritTrigger()
 	gerritTrigger.Id = "gerrit-trigger-id"
 	gerritTrigger.Plugin = "gerrit-trigger@2.29.0"
@@ -199,6 +204,13 @@ resource "jenkins_job_gerrit_branch" "branch_1_1" {
 	pattern      = "my-branch"
 }
 
+resource "jenkins_job_gerrit_file_path" "file_path_1_1" {
+	project = "${jenkins_job_gerrit_project.project_1.id}"
+
+	compare_type = "REG_EXP"
+	pattern      = "my-file-path"
+}
+
 resource "jenkins_job_build_discarder_property" "main" {
 	job = "${jenkins_job.main.name}"
 }
@@ -260,6 +272,8 @@ terraform import jenkins_job_gerrit_trigger_draft_published_event.main "Premerge
 terraform import jenkins_job_gerrit_project.project_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectId"
 
 terraform import jenkins_job_gerrit_branch.branch_1_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritBranchId"
+
+terraform import jenkins_job_gerrit_file_path.file_path_1_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritFilePathId"
 
 terraform import jenkins_job_build_discarder_property.main "Premerge checksdiscard-id"
 
