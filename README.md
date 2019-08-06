@@ -42,34 +42,41 @@ provider "jenkins" {
 }
 
 resource "jenkins_job" "main" {
-  name = "Premerge checks"
+  name     = "Premerge checks"
+  plugin   = "workflow-job@2.33"
+  disabled = false
 }
 
 resource "jenkins_job_declarative_job_action" "main" {
-  job = "${jenkins_job.main.name}"
+  job    = "${jenkins_job.main.name}"
+  plugin = "pipeline-model-definition@1.3.9"
 }
 
 resource "jenkins_job_declarative_job_property_tracker_action" "main" {
-  job = "${jenkins_job.main.name}"
+  job    = "${jenkins_job.main.name}"
+  plugin = "pipeline-model-definition@1.3.9"
 }
 
 resource "jenkins_job_git_scm" "main" {
   job = "${jenkins_job.main.name}"
+
+  plugin     = "workflow-cps@2.70"
+  git_plugin = "git@3.10.0"
 
   config_version = "2"
   script_path    = "Jenkinsfile.api"
   lightweight    = false
 }
 
-resource "jenkins_job_git_scm_user_remote_config" "main" {
+resource "jenkins_job_git_scm_user_remote_config" "config_1" {
   scm = "${jenkins_job_git_scm.main.id}"
 
-  refspec        = "GERRIT_REFSPEC"
+  refspec        = "$${GERRIT_REFSPEC}"
   url            = "ssh://git.server/git-repo.git"
   credentials_id = "123-abc"
 }
 
-resource "jenkins_job_git_scm_branch" "main" {
+resource "jenkins_job_git_scm_branch" "branch_1" {
   scm = "${jenkins_job_git_scm.main.id}"
 
   name = "FETCH_HEAD"
@@ -79,19 +86,6 @@ resource "jenkins_job_git_scm_clean_before_checkout_extension" "main" {
   scm = "${jenkins_job_git_scm.main.id}"
 }
 
-resource "jenkins_job_build_discarder_property" "main" {
-  job = "${jenkins_job.main.name}"
-}
-
-resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
-  property = "${jenkins_job_build_discarder_property.main.id}"
-
-  days_to_keep          = "30"
-  num_to_keep           = "-1"
-  artifact_days_to_keep = "-1"
-  artifact_num_to_keep  = "-1"
-}
-
 resource "jenkins_job_pipeline_triggers_property" "main" {
   job = "${jenkins_job.main.name}"
 }
@@ -99,6 +93,7 @@ resource "jenkins_job_pipeline_triggers_property" "main" {
 resource "jenkins_job_gerrit_trigger" "main" {
   property = "${jenkins_job_pipeline_triggers_property.main.id}"
 
+  plugin            = "gerrit-trigger@2.29.0"
   server_name       = "__ANY__"
   silent_mode       = false
   silent_start_mode = false
@@ -108,6 +103,7 @@ resource "jenkins_job_gerrit_trigger" "main" {
   commit_message_parameter_mode = "BASE64"
   change_subject_parameter_mode = "PLAIN"
   comment_text_parameter_mode   = "BASE64"
+  dynamic_trigger_configuration = false
 
   skip_vote = {
     on_successful = false
@@ -131,15 +127,15 @@ resource "jenkins_job_gerrit_trigger_draft_published_event" "main" {
   trigger = "${jenkins_job_gerrit_trigger.main.id}"
 }
 
-resource "jenkins_job_gerrit_project" "main" {
+resource "jenkins_job_gerrit_project" "project_1" {
   trigger = "${jenkins_job_gerrit_trigger.main.id}"
 
   compare_type = "PLAIN"
   pattern      = "bridge-skills"
 }
 
-resource "jenkins_job_gerrit_branch" "main" {
-  project = "${jenkins_job_gerrit_project.main.id}"
+resource "jenkins_job_gerrit_branch" "branch_1" {
+  project = "${jenkins_job_gerrit_project.project_1.id}"
 
   compare_type = "REG_EXP"
   pattern      = "^(?!refs/meta/config).*$"
@@ -149,8 +145,27 @@ resource "jenkins_job_datadog_job_property" "main" {
   job = "${jenkins_job.main.name}"
 }
 
-resource "jenkins_job_jira_project_property" "main" {
+resource "jenkins_job_build_discarder_property" "main" {
   job = "${jenkins_job.main.name}"
+}
+
+resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
+  property = "${jenkins_job_build_discarder_property.main.id}"
+
+  days_to_keep          = "30"
+  num_to_keep           = "-1"
+  artifact_days_to_keep = "-1"
+  artifact_num_to_keep  = "-1"
+}
+
+resource "jenkins_job_datadog_job_property" "main" {
+	job = "${jenkins_job.main.name}"
+}
+
+resource "jenkins_job_jira_project_property" "main" {
+	job = "${jenkins_job.main.name}"
+
+	plugin = "jiraPlugin"
 }
 
 ```
