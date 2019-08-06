@@ -37,7 +37,7 @@ resource "jenkins_job_gerrit_file_path" "file_path_%v_%v" {
 	compare_type = "%v"
 	pattern      = "%v"
 }
-`, i+1, projectIndex, projectIndex, item.CompareType, item.Pattern)
+`, projectIndex, i+1, projectIndex, item.CompareType, item.Pattern)
 	}
 	return code
 }
@@ -55,7 +55,7 @@ func jobGerritTriggerFilePathsImportScript(
 			jobName, propertyId, triggerId, projectId, item.Id)
 		code += fmt.Sprintf(`
 terraform import jenkins_job_gerrit_file_path.file_path_%v_%v "%v"
-`, i+1, projectIndex, id)
+`, projectIndex, i+1, id)
 	}
 	return code
 }

@@ -49,7 +49,7 @@ func jobGerritTriggerBranchesImportScript(
 			jobName, propertyId, triggerId, projectId, item.Id)
 		code += fmt.Sprintf(`
 terraform import jenkins_job_gerrit_branch.branch_%v_%v "%v"
-`, i+1, projectIndex, id)
+`, projectIndex, i+1, id)
 	}
 	return code
 }
