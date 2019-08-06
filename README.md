@@ -34,7 +34,7 @@ go run ./importer --job "Name of your Job" --output my_tf_dir
 1. Outputs terraform code to match the job
 1. Outputs script that will import the resources to tf state
 
-### resources ###
+### Resources ###
 
 ```terraform
 provider "jenkins" {
@@ -159,17 +159,13 @@ resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
 }
 
 resource "jenkins_job_datadog_job_property" "main" {
-	job = "${jenkins_job.main.name}"
+  job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_jira_project_property" "main" {
-	job = "${jenkins_job.main.name}"
+  job = "${jenkins_job.main.name}"
 
-	plugin = "jiraPlugin"
+  plugin = "jiraPlugin"
 }
 
 ```
-
-## TODO
-
-1. Fragile TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic test
