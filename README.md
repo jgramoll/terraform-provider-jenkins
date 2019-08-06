@@ -28,7 +28,7 @@ $jenkins_url/user/$username/configure
 
 ### Importer ###
 
-go run ./importer -job="Name of your Job"
+go run ./importer --job "Name of your Job" --output my_tf_dir
 
 1. Ensures each resource has a valid id
 1. Outputs terraform code to match the job
@@ -157,5 +157,4 @@ resource "jenkins_job_jira_project_property" "main" {
 
 ## TODO
 
-1. importer project
 1. Fragile TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic test

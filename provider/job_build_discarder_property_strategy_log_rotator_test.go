@@ -48,7 +48,7 @@ func TestAccJobBuildDiscarderPropertyStrategyLogRotatorBasic(t *testing.T) {
 				ResourceName:  strategyResourceName,
 				ImportStateId: "invalid",
 				ImportState:   true,
-				ExpectError:   regexp.MustCompile("Invalid property strategy id"),
+				ExpectError:   regexp.MustCompile("Invalid discarder property strategy id"),
 			},
 			{
 				ResourceName: strategyResourceName,
