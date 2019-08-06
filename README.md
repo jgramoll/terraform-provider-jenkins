@@ -24,7 +24,15 @@ curl -s https://raw.githubusercontent.com/jgramoll/terraform-provider-jenkins/ma
 
 ### Credentials ###
 
-$jenkins_url/user/$username/configure
+go to $jenkins_url/user/$username/configure
+
+Add to .bash_profile
+
+```sh
+export JENKINS_ADDRESS=https://your.jenkins.server
+export JENKINS_USERNAME=username
+export JENKINS_TOKEN=jenkins_token_from_configure
+```
 
 ### Importer ###
 
