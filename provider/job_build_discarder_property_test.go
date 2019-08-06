@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -48,7 +47,7 @@ func TestAccJobBuildDiscarderPropertyBasic(t *testing.T) {
 					if len(properties) == 0 {
 						return "", fmt.Errorf("no properties to import")
 					}
-					return strings.Join([]string{jobName, properties[0].GetId()}, IdDelimiter), nil
+					return ResourceJobPropertyId(jobName, properties[0].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -59,7 +58,7 @@ func TestAccJobBuildDiscarderPropertyBasic(t *testing.T) {
 					if len(properties) == 0 {
 						return "", fmt.Errorf("no properties to import")
 					}
-					return strings.Join([]string{jobName, properties[1].GetId()}, IdDelimiter), nil
+					return ResourceJobPropertyId(jobName, properties[1].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -88,7 +87,7 @@ func testAccJobBuildDiscarderPropertyConfigBasic(jobName string, count int) stri
 	for i := 1; i <= count; i++ {
 		properties += fmt.Sprintf(`
 resource "jenkins_job_build_discarder_property" "prop_%v" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
 }`, i)
 	}
 

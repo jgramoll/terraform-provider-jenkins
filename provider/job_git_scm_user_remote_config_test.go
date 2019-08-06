@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -63,7 +62,7 @@ func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 						return "", fmt.Errorf("no configs to import")
 					}
 					definitionId := jobRef.Definition.GetId()
-					return strings.Join([]string{jobName, definitionId, configs[0].Id}, IdDelimiter), nil
+					return ResourceJobGitScmUserRemoteConfigId(jobName, definitionId, configs[0].Id), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -114,7 +113,7 @@ func testAccCheckJobGitScmUserRemoteConfigs(
 				return fmt.Errorf("Job Git Scm User Remote Config Resource not found: %s", resourceName)
 			}
 
-			_, _, configId, err := resourceJobGitScmUserRemoteConfigId(resource.Primary.Attributes["id"])
+			_, _, configId, err := resourceJobGitScmUserRemoteConfigParseId(resource.Primary.Attributes["id"])
 			config, err := definition.SCM.GetUserRemoteConfig(configId)
 			if err != nil {
 				return err

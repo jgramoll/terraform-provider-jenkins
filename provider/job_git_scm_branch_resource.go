@@ -46,7 +46,7 @@ func jobGitScmBranchResource() *schema.Resource {
 	}
 }
 
-func resourceJobGitScmBranchId(input string) (jobName string, scmId string, branchId string, err error) {
+func resourceJobGitScmBranchParseId(input string) (jobName string, scmId string, branchId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
 		err = ErrInvalidJobGitScmBranchId
@@ -58,12 +58,16 @@ func resourceJobGitScmBranchId(input string) (jobName string, scmId string, bran
 	return
 }
 
+func ResourceJobGitScmBranchId(jobName string, scmId string, branchId string) string {
+	return joinWithIdDelimiter(jobName, scmId, branchId)
+}
+
 func resourceJobGitScmBranchImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, scmId, _, err := resourceJobGitScmBranchId(d.Id())
+	jobName, scmId, _, err := resourceJobGitScmBranchParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	err = d.Set("scm", strings.Join([]string{jobName, scmId}, IdDelimiter))
+	err = d.Set("scm", ResourceJobDefinitionId(jobName, scmId))
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +75,7 @@ func resourceJobGitScmBranchImporter(d *schema.ResourceData, meta interface{}) (
 }
 
 func resourceJobGitScmBranchCreate(d *schema.ResourceData, m interface{}) error {
-	jobName, scmId, err := resourceJobDefinitionId(d.Get("scm").(string))
+	jobName, scmId, err := resourceJobDefinitionParseId(d.Get("scm").(string))
 	if err != nil {
 		return err
 	}
@@ -115,13 +119,13 @@ func resourceJobGitScmBranchCreate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, scmId, branchId}, IdDelimiter))
+	d.SetId(ResourceJobGitScmBranchId(jobName, scmId, branchId))
 	log.Println("[DEBUG] Creating job git scm branch:", d.Id())
 	return resourceJobGitScmBranchRead(d, m)
 }
 
 func resourceJobGitScmBranchUpdate(d *schema.ResourceData, m interface{}) error {
-	jobName, _, branchId, err := resourceJobGitScmBranchId(d.Id())
+	jobName, _, branchId, err := resourceJobGitScmBranchParseId(d.Id())
 
 	branch := newJobGitScmBranch()
 	configRaw := d.Get("").(map[string]interface{})
@@ -150,7 +154,7 @@ func resourceJobGitScmBranchUpdate(d *schema.ResourceData, m interface{}) error 
 }
 
 func resourceJobGitScmBranchRead(d *schema.ResourceData, m interface{}) error {
-	jobName, _, branchId, err := resourceJobGitScmBranchId(d.Id())
+	jobName, _, branchId, err := resourceJobGitScmBranchParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -182,7 +186,7 @@ func resourceJobGitScmBranchRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobGitScmBranchDelete(d *schema.ResourceData, m interface{}) error {
-	jobName, _, branchId, err := resourceJobGitScmBranchId(d.Id())
+	jobName, _, branchId, err := resourceJobGitScmBranchParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)

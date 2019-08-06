@@ -18,19 +18,11 @@ func NewGenerateTerraformCodeService(jobService *client.JobService) *GenerateTer
 }
 
 func (s *GenerateTerraformCodeService) GenerateCode(job *client.Job, outputDir string) error {
-	if err := ensureOutputDir(outputDir); err != nil {
-		return err
-	}
-
 	if err := s.generateProviderCode(outputDir); err != nil {
 		return err
 	}
 
-	if err := s.generatePipelineCode(outputDir, job); err != nil {
-		return err
-	}
-
-	return nil
+	return s.generatePipelineCode(outputDir, job)
 }
 
 func (s *GenerateTerraformCodeService) generateProviderCode(outputDir string) error {
@@ -53,13 +45,4 @@ func (s *GenerateTerraformCodeService) generatePipelineCode(outputDir string, jo
 
 	_, err = tfCodeFile.Write([]byte(jobCode(job)))
 	return err
-}
-
-func ensureOutputDir(outputDir string) error {
-	if err := os.Mkdir(outputDir, os.ModePerm); err != nil {
-		if os.IsNotExist(err) {
-			return err
-		}
-	}
-	return nil
 }

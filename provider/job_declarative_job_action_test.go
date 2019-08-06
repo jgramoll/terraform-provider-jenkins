@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -45,7 +44,7 @@ func TestAccJobDeclarativeJobActionBasic(t *testing.T) {
 					if len(actions) == 0 {
 						return "", fmt.Errorf("no actions to import")
 					}
-					return strings.Join([]string{jobName, actions[0].GetId()}, IdDelimiter), nil
+					return ResourceJobActionId(jobName, actions[0].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -63,7 +62,7 @@ func TestAccJobDeclarativeJobActionBasic(t *testing.T) {
 func testAccJobDeclarativeJobActionConfig(jobName string) string {
 	return testAccJobConfigBasic(jobName) + `
 resource "jenkins_job_declarative_job_action" "main" {
-  job = "${jenkins_job.main.id}"
+  job = "${jenkins_job.main.name}"
 }
 `
 }

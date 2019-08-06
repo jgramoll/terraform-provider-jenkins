@@ -7,48 +7,65 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
-func TestJobCode(t *testing.T) {
+func testNewJob() *client.Job {
 	job := client.NewJob()
+	job.Id = "jobId"
 	job.Name = "Premerge checks"
 	job.Plugin = "flow-plugin"
 	job.Description = "my-desc"
-	job.Actions = job.Actions.Append(client.NewJobDeclarativeJobAction())
-	job.Actions = job.Actions.Append(client.NewJobDeclarativeJobPropertyTrackerAction())
+	declarativeJobAction := client.NewJobDeclarativeJobAction()
+	declarativeJobAction.Id = "declarativeJobActionId"
+	declarativeJobAction.Plugin = "DeclarativeJobPlugin"
+	job.Actions = job.Actions.Append(declarativeJobAction)
+	declarativeJobPropertyTrackerAction := client.NewJobDeclarativeJobPropertyTrackerAction()
+	declarativeJobPropertyTrackerAction.Id = "declarativeJobPropertyTrackerActionId"
+	declarativeJobPropertyTrackerAction.Plugin = "DeclarativeJobTrackerPlugin"
+	job.Actions = job.Actions.Append(declarativeJobPropertyTrackerAction)
 
 	definition := client.NewCpsScmFlowDefinition()
+	definition.Id = "definitionId"
+	definition.Plugin = "gitPlugin"
 	definition.ScriptPath = "my-Jenkinsfile"
 	definition.SCM = client.NewGitScm()
+	definition.SCM.Plugin = "gitScmPlugin"
 	definition.SCM.ConfigVersion = "my-version"
 
 	remoteConfig := client.NewGitUserRemoteConfig()
-	remoteConfig.Refspec = "refspec"
+	remoteConfig.Id = "remoteConfigId"
+	remoteConfig.Refspec = "${GERRIT_REFSPEC}"
 	remoteConfig.Url = "url.to.server"
 	remoteConfig.CredentialsId = "creds"
 	definition.SCM.UserRemoteConfigs = definition.SCM.UserRemoteConfigs.Append(remoteConfig)
 
 	scmExtension := client.NewGitScmCleanBeforeCheckoutExtension()
+	scmExtension.Id = "scmExtensionId"
 	scmExtension.Id = "extension-id"
 	definition.SCM.Extensions = definition.SCM.Extensions.Append(scmExtension)
 
 	branchSpec := client.NewGitScmBranchSpec()
+	branchSpec.Id = "branchspecId"
 	branchSpec.Name = "branchspec"
-	definition.Id = "definition-id"
 	definition.SCM.Branches = definition.SCM.Branches.Append(branchSpec)
 	job.Definition = definition
 
 	gerritBranch := client.NewJobGerritTriggerBranch()
+	gerritBranch.Id = "gerritBranchId"
 	gerritBranch.CompareType = client.CompareTypeRegExp
 	gerritBranch.Pattern = "my-branch"
 	gerritProject := client.NewJobGerritTriggerProject()
+	gerritProject.Id = "gerritProjectId"
 	gerritProject.CompareType = client.CompareTypePlain
 	gerritProject.Pattern = "my-project"
 	gerritProject.Branches = gerritProject.Branches.Append(gerritBranch)
 	gerritTrigger := client.NewJobGerritTrigger()
+	gerritTrigger.Id = "gerrit-trigger-id"
 	gerritTrigger.Plugin = "gerrit-trigger@2.29.0"
 	gerritTrigger.Projects = gerritTrigger.Projects.Append(gerritProject)
 	gerritTriggerPatchsetEvent := client.NewJobGerritTriggerPluginPatchsetCreatedEvent()
+	gerritTriggerPatchsetEvent.Id = "gerritTriggerPatchsetEventId"
 	gerritTrigger.TriggerOnEvents = gerritTrigger.TriggerOnEvents.Append(gerritTriggerPatchsetEvent)
 	gerritTriggerDraftEvent := client.NewJobGerritTriggerPluginDraftPublishedEvent()
+	gerritTriggerDraftEvent.Id = "gerritTriggerDraftEventId"
 	gerritTrigger.TriggerOnEvents = gerritTrigger.TriggerOnEvents.Append(gerritTriggerDraftEvent)
 	triggerJobProperty := client.NewJobPipelineTriggersProperty()
 	triggerJobProperty.Id = "trigger-id"
@@ -56,6 +73,7 @@ func TestJobCode(t *testing.T) {
 	job.Properties = job.Properties.Append(triggerJobProperty)
 
 	discardPropertyStrategy := client.NewJobBuildDiscarderPropertyStrategyLogRotator()
+	discardPropertyStrategy.Id = "discardPropertyStrategyId"
 	discardPropertyStrategy.DaysToKeep = 1
 	discardPropertyStrategy.NumToKeep = 2
 	discardPropertyStrategy.ArtifactDaysToKeep = 3
@@ -66,11 +84,19 @@ func TestJobCode(t *testing.T) {
 	job.Properties = job.Properties.Append(discardProperty)
 
 	datadogJobProperty := client.NewJobDatadogJobProperty()
+	datadogJobProperty.Id = "datadogJobPropertyId"
 	datadogJobProperty.Plugin = "datadog@0.7.1"
 	job.Properties = job.Properties.Append(datadogJobProperty)
 
 	jiraProjectProperty := client.NewJobJiraProjectProperty()
+	jiraProjectProperty.Id = "jiraProjectPropertyId"
+	jiraProjectProperty.Plugin = "jiraPlugin"
 	job.Properties = job.Properties.Append(jiraProjectProperty)
+	return job
+}
+
+func TestJobCode(t *testing.T) {
+	job := testNewJob()
 
 	result := jobCode(job)
 	expected := `resource "jenkins_job" "main" {
@@ -80,15 +106,20 @@ func TestJobCode(t *testing.T) {
 }
 
 resource "jenkins_job_declarative_job_action" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
+	plugin = "DeclarativeJobPlugin"
 }
 
 resource "jenkins_job_declarative_job_property_tracker_action" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
+	plugin = "DeclarativeJobTrackerPlugin"
 }
 
 resource "jenkins_job_git_scm" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
+
+	plugin     = "gitPlugin"
+	git_plugin = "gitScmPlugin"
 
 	config_version = "my-version"
 	script_path    = "my-Jenkinsfile"
@@ -98,7 +129,7 @@ resource "jenkins_job_git_scm" "main" {
 resource "jenkins_job_git_scm_user_remote_config" "config_1" {
 	scm = "${jenkins_job_git_scm.main.id}"
 
-	refspec        = "refspec"
+	refspec        = "$${GERRIT_REFSPEC}"
 	url            = "url.to.server"
 	credentials_id = "creds"
 }
@@ -114,7 +145,7 @@ resource "jenkins_job_git_scm_clean_before_checkout_extension" "main" {
 }
 
 resource "jenkins_job_pipeline_triggers_property" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_gerrit_trigger" "main" {
@@ -162,14 +193,14 @@ resource "jenkins_job_gerrit_project" "project_1" {
 }
 
 resource "jenkins_job_gerrit_branch" "branch_1" {
-	project = "${jenkins_job_gerrit_project.main.id}"
+	project = "${jenkins_job_gerrit_project.project_1.id}"
 
 	compare_type = "REG_EXP"
 	pattern      = "my-branch"
 }
 
 resource "jenkins_job_build_discarder_property" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
@@ -182,19 +213,65 @@ resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
 }
 
 resource "jenkins_job_datadog_job_property" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_jira_project_property" "main" {
-	job = "${jenkins_job.main.id}"
+	job = "${jenkins_job.main.name}"
+
+	plugin = "jiraPlugin"
 }
 `
 	if result != expected {
 		dmp := diffmatchpatch.New()
 		diffs := dmp.DiffMain(expected, result, false)
-		for _, d := range diffs {
-			println("DIFF", d.Text)
-		}
-		t.Fatalf("job definition not expected: %s", "SDF")
+		t.Fatalf("job terraform code not as expected: %s", dmp.DiffPrettyText(diffs))
+	}
+}
+
+func TestJobImportScript(t *testing.T) {
+	job := testNewJob()
+
+	result := jobImportScript(job)
+	expected := `terraform init
+
+terraform import jenkins_job.main "Premerge checks"
+
+terraform import jenkins_job_declarative_job_action.main "Premerge checksdeclarativeJobActionId"
+
+terraform import jenkins_job_declarative_job_property_tracker_action.main "Premerge checksdeclarativeJobPropertyTrackerActionId"
+
+terraform import jenkins_job_git_scm.main "Premerge checksdefinitionId"
+
+terraform import jenkins_job_git_scm_user_remote_config.config_1 "Premerge checksdefinitionIdremoteConfigId"
+
+terraform import jenkins_job_git_scm_branch.branch_1 "Premerge checksdefinitionIdbranchspecId"
+
+terraform import jenkins_job_git_scm_clean_before_checkout_extension.main "Premerge checksdefinitionIdextension-id"
+
+terraform import jenkins_job_pipeline_triggers_property.main "Premerge checkstrigger-id"
+
+terraform import jenkins_job_gerrit_trigger.main "Premerge checkstrigger-idgerrit-trigger-id"
+
+terraform import jenkins_job_gerrit_trigger_patchset_created_event.main "Premerge checkstrigger-idgerrit-trigger-idgerritTriggerPatchsetEventId"
+
+terraform import jenkins_job_gerrit_trigger_draft_published_event.main "Premerge checkstrigger-idgerrit-trigger-idgerritTriggerDraftEventId"
+
+terraform import jenkins_job_gerrit_project.project_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectId"
+
+terraform import jenkins_job_gerrit_branch.branch_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritBranchId"
+
+terraform import jenkins_job_build_discarder_property.main "Premerge checksdiscard-id"
+
+terraform import jenkins_job_build_discarder_property_log_rotator_strategy.main "Premerge checksdiscard-iddiscardPropertyStrategyId"
+
+terraform import jenkins_job_datadog_job_property.main "Premerge checksdatadogJobPropertyId"
+
+terraform import jenkins_job_jira_project_property.main "Premerge checksjiraProjectPropertyId"
+`
+	if result != expected {
+		dmp := diffmatchpatch.New()
+		diffs := dmp.DiffMain(expected, result, false)
+		t.Fatalf("job terraform import script not as expected: %s", dmp.DiffPrettyText(diffs))
 	}
 }

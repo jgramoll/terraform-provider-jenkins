@@ -14,7 +14,7 @@ import (
 // ErrInvalidJobGitScmExtensionId
 var ErrInvalidJobGitScmExtensionId = errors.New("Invalid git scm extension id, must be jobName_definitionId_extensionId")
 
-func resourceJobGitScmExtensionId(input string) (jobName string, definitionId string, extensionId string, err error) {
+func resourceJobGitScmExtensionParseId(input string) (jobName string, definitionId string, extensionId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 3 {
 		err = ErrInvalidJobGitScmExtensionId
@@ -26,12 +26,16 @@ func resourceJobGitScmExtensionId(input string) (jobName string, definitionId st
 	return
 }
 
+func ResourceJobGitScmExtensionId(jobName string, definitionId string, extensionId string) string {
+	return joinWithIdDelimiter(jobName, definitionId, extensionId)
+}
+
 func resourceJobGitScmExtensionImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, definitionId, _, err := resourceJobGitScmExtensionId(d.Id())
+	jobName, definitionId, _, err := resourceJobGitScmExtensionParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	err = d.Set("scm", strings.Join([]string{jobName, definitionId}, IdDelimiter))
+	err = d.Set("scm", ResourceJobDefinitionId(jobName, definitionId))
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +43,7 @@ func resourceJobGitScmExtensionImporter(d *schema.ResourceData, meta interface{}
 }
 
 func resourceJobGitScmExtensionCreate(d *schema.ResourceData, m interface{}, createGitScmExtension func() jobGitScmExtension) error {
-	jobName, definitionId, err := resourceJobDefinitionId(d.Get("scm").(string))
+	jobName, definitionId, err := resourceJobDefinitionParseId(d.Get("scm").(string))
 	if err != nil {
 		return err
 	}
@@ -77,13 +81,13 @@ func resourceJobGitScmExtensionCreate(d *schema.ResourceData, m interface{}, cre
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, definitionId, extensionId}, IdDelimiter))
+	d.SetId(ResourceJobGitScmExtensionId(jobName, definitionId, extensionId))
 	log.Println("[DEBUG] Creating job git scm extension:", d.Id())
 	return resourceJobGitScmExtensionRead(d, m, createGitScmExtension)
 }
 
 func resourceJobGitScmExtensionRead(d *schema.ResourceData, m interface{}, createGitScmExtension func() jobGitScmExtension) error {
-	jobName, _, extensionId, err := resourceJobGitScmExtensionId(d.Id())
+	jobName, _, extensionId, err := resourceJobGitScmExtensionParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -113,7 +117,7 @@ func resourceJobGitScmExtensionRead(d *schema.ResourceData, m interface{}, creat
 }
 
 func resourceJobGitScmExtensionUpdate(d *schema.ResourceData, m interface{}, createGitScmExtension func() jobGitScmExtension) error {
-	jobName, _, extensionId, err := resourceJobGitScmExtensionId(d.Id())
+	jobName, _, extensionId, err := resourceJobGitScmExtensionParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -153,7 +157,7 @@ func resourceJobGitScmExtensionUpdate(d *schema.ResourceData, m interface{}, cre
 }
 
 func resourceJobGitScmExtensionDelete(d *schema.ResourceData, m interface{}, createGitScmExtension func() jobGitScmExtension) error {
-	jobName, _, extensionId, err := resourceJobGitScmExtensionId(d.Id())
+	jobName, _, extensionId, err := resourceJobGitScmExtensionParseId(d.Id())
 	if err != nil {
 		return err
 	}

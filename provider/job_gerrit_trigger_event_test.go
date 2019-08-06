@@ -45,7 +45,7 @@ func ensureTriggerEvent(
 	resource *terraform.ResourceState,
 	ensureTriggerEventFunc func(client.JobGerritTriggerOnEvent, *terraform.ResourceState) error,
 ) (client.JobTrigger, error) {
-	_, propertyId, triggerId, eventId, err := resourceJobTriggerEventId(resource.Primary.Attributes["id"])
+	_, propertyId, triggerId, eventId, err := resourceJobGerritTriggerEventParseId(resource.Primary.Attributes["id"])
 	if err != nil {
 		return nil, err
 	}

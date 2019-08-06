@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
+	"github.com/jgramoll/terraform-provider-jenkins/provider"
 )
 
 func ensureJobGerritTriggerBranches(branches *client.JobGerritTriggerBranches) error {
@@ -23,17 +24,32 @@ func ensureJobGerritTriggerBranches(branches *client.JobGerritTriggerBranches) e
 	return nil
 }
 
-func jobGerritTriggerBranchesCode(branches *client.JobGerritTriggerBranches) string {
+func jobGerritTriggerBranchesCode(projectIndex int, branches *client.JobGerritTriggerBranches) string {
 	code := ""
 	for i, item := range *branches.Items {
 		code += fmt.Sprintf(`
 resource "jenkins_job_gerrit_branch" "branch_%v" {
-	project = "${jenkins_job_gerrit_project.main.id}"
+	project = "${jenkins_job_gerrit_project.project_%v.id}"
 
 	compare_type = "%v"
 	pattern      = "%v"
 }
-`, i+1, item.CompareType, item.Pattern)
+`, i+1, projectIndex, item.CompareType, item.Pattern)
+	}
+	return code
+}
+
+func jobGerritTriggerBranchesImportScript(
+	jobName string, propertyId string, triggerId string,
+	projectId string, branches *client.JobGerritTriggerBranches,
+) string {
+	code := ""
+	for i, item := range *branches.Items {
+		id := provider.ResourceJobGerritBranchId(
+			jobName, propertyId, triggerId, projectId, item.Id)
+		code += fmt.Sprintf(`
+terraform import jenkins_job_gerrit_branch.branch_%v "%v"
+`, i+1, id)
 	}
 	return code
 }

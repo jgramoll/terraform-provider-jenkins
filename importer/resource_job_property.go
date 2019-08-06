@@ -10,9 +10,11 @@ import (
 
 type ensureJobPropertyFunc func(client.JobProperty) error
 type jobPropertyCodeFunc func(client.JobProperty) string
+type jobPropertyImportScriptFunc func(string, client.JobProperty) string
 
 var ensureJobPropertyFuncs = map[string]ensureJobPropertyFunc{}
 var jobPropertyCodeFuncs = map[string]jobPropertyCodeFunc{}
+var jobPropertyImportScriptFuncs = map[string]jobPropertyImportScriptFunc{}
 
 func ensureJobProperties(properties *client.JobProperties) error {
 	if properties == nil || properties.Items == nil {
@@ -43,6 +45,21 @@ func jobPropertiesCode(properties *client.JobProperties) string {
 		reflectType := reflect.TypeOf(item).String()
 		if codeFunc, ok := jobPropertyCodeFuncs[reflectType]; ok {
 			code += codeFunc(item)
+		} else {
+			log.Println("[WARNING] Unknown property type:", reflectType)
+		}
+	}
+
+	return code
+}
+
+func jobPropertiesImportScript(jobName string, properties *client.JobProperties) string {
+	code := ""
+
+	for _, item := range *properties.Items {
+		reflectType := reflect.TypeOf(item).String()
+		if codeFunc, ok := jobPropertyImportScriptFuncs[reflectType]; ok {
+			code += codeFunc(jobName, item)
 		} else {
 			log.Println("[WARNING] Unknown property type:", reflectType)
 		}

@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -60,7 +59,7 @@ func TestAccJobGerritProjectBasic(t *testing.T) {
 					}
 					property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
 					trigger := (*property.Triggers.Items)[0].(*client.JobGerritTrigger)
-					return strings.Join([]string{jobName, property.Id, trigger.Id, projects[0].Id}, IdDelimiter), nil
+					return ResourceJobGerritProjectId(jobName, property.Id, trigger.Id, projects[0].Id), nil
 				},
 				ImportStateVerify: true,
 			},
@@ -117,7 +116,7 @@ func testAccCheckJobGerritProjects(jobRef *client.Job, expectedResourceNames []s
 }
 
 func ensureProject(trigger *client.JobGerritTrigger, resource *terraform.ResourceState) (*client.JobGerritTriggerProject, error) {
-	_, _, _, projectId, err := resourceJobGerritProjectId(resource.Primary.Attributes["id"])
+	_, _, _, projectId, err := resourceJobGerritProjectParseId(resource.Primary.Attributes["id"])
 	if err != nil {
 		return nil, err
 	}

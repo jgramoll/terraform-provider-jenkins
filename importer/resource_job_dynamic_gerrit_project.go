@@ -11,3 +11,7 @@ func ensureJobDynamicGerritProjects(projects *client.DynamicGerritProjects) erro
 func jobDynamicGerritProjectsCode(projects *client.DynamicGerritProjects) string {
 	return ""
 }
+
+func jobDynamicGerritProjectsImportScript(projects *client.DynamicGerritProjects) string {
+	return ""
+}

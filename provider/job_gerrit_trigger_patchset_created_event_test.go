@@ -3,7 +3,6 @@ package provider
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -58,7 +57,7 @@ func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 					}
 					property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
 					trigger := (*property.Triggers.Items)[0].(*client.JobGerritTrigger)
-					return strings.Join([]string{jobName, property.Id, trigger.Id, events[0].GetId()}, IdDelimiter), nil
+					return ResourceJobGerritTriggerEventId(jobName, property.Id, trigger.Id, events[0].GetId()), nil
 				},
 				ImportStateVerify: true,
 			},

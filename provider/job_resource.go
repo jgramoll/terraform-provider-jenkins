@@ -22,7 +22,7 @@ func jobResource() *schema.Resource {
 		Update: resourceJobUpdate,
 		Delete: resourceJobDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceJobImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -45,6 +45,20 @@ func jobResource() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceJobImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	jobName := d.Id()
+	if err := d.Set("name", jobName); err != nil {
+		return nil, err
+	}
+	jobService := m.(*Services).JobService
+	j, err := jobService.GetJob(jobName)
+	if err != nil {
+		return nil, err
+	}
+	d.SetId(j.Id)
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceJobCreate(d *schema.ResourceData, m interface{}) error {

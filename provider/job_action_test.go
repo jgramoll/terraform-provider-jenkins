@@ -25,7 +25,7 @@ func testAccCheckJobActions(
 				return fmt.Errorf("Job Action Resource not found: %s", resourceName)
 			}
 
-			_, actionId, err := resourceJobActionId(resource.Primary.Attributes["id"])
+			_, actionId, err := resourceJobActionParseId(resource.Primary.Attributes["id"])
 			if err != nil {
 				return err
 			}

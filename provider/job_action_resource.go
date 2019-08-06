@@ -11,9 +11,9 @@ import (
 )
 
 // ErrInvalidJobActionId
-var ErrInvalidJobActionId = errors.New("Invalid action id, must be jobName\\xactionId")
+var ErrInvalidJobActionId = errors.New("Invalid action id, must be jobName" + IdDelimiter + "actionId")
 
-func resourceJobActionId(input string) (jobName string, actionId string, err error) {
+func resourceJobActionParseId(input string) (jobName string, actionId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 2 {
 		err = ErrInvalidJobActionId
@@ -24,8 +24,12 @@ func resourceJobActionId(input string) (jobName string, actionId string, err err
 	return
 }
 
+func ResourceJobActionId(jobName string, actionId string) string {
+	return joinWithIdDelimiter(jobName, actionId)
+}
+
 func resourceJobActionImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, _, err := resourceJobActionId(d.Id())
+	jobName, _, err := resourceJobActionParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
@@ -71,13 +75,13 @@ func resourceJobActionCreate(d *schema.ResourceData, m interface{}, createJobAct
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, actionId}, IdDelimiter))
+	d.SetId(ResourceJobActionId(jobName, actionId))
 	log.Println("[DEBUG] Creating job action:", d.Id())
 	return resourceJobActionRead(d, m, createJobAction)
 }
 
 func resourceJobActionRead(d *schema.ResourceData, m interface{}, createJobAction func() jobAction) error {
-	jobName, actionId, err := resourceJobActionId(d.Id())
+	jobName, actionId, err := resourceJobActionParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -105,7 +109,7 @@ func resourceJobActionRead(d *schema.ResourceData, m interface{}, createJobActio
 }
 
 func resourceJobActionUpdate(d *schema.ResourceData, m interface{}, createJobAction func() jobAction) error {
-	jobName, actionId, err := resourceJobActionId(d.Id())
+	jobName, actionId, err := resourceJobActionParseId(d.Id())
 	if err != nil {
 		return err
 	}
@@ -145,7 +149,7 @@ func resourceJobActionUpdate(d *schema.ResourceData, m interface{}, createJobAct
 }
 
 func resourceJobActionDelete(d *schema.ResourceData, m interface{}, createJobAction func() jobAction) error {
-	jobName, actionId, err := resourceJobActionId(d.Id())
+	jobName, actionId, err := resourceJobActionParseId(d.Id())
 	if err != nil {
 		return err
 	}

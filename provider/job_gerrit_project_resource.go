@@ -45,7 +45,7 @@ func jobGerritProjectResource() *schema.Resource {
 	}
 }
 
-func resourceJobGerritProjectId(input string) (jobName string, propertyId string, triggerId string, projectId string, err error) {
+func resourceJobGerritProjectParseId(input string) (jobName string, propertyId string, triggerId string, projectId string, err error) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 4 {
 		err = ErrInvalidGerritProjectId
@@ -58,12 +58,16 @@ func resourceJobGerritProjectId(input string) (jobName string, propertyId string
 	return
 }
 
+func ResourceJobGerritProjectId(jobName string, propertyId string, triggerId string, projectId string) string {
+	return joinWithIdDelimiter(jobName, propertyId, triggerId, projectId)
+}
+
 func resourceJobGerritProjectImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, propertyId, triggerId, _, err := resourceJobGerritProjectId(d.Id())
+	jobName, propertyId, triggerId, _, err := resourceJobGerritProjectParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
-	err = d.Set("trigger", strings.Join([]string{jobName, propertyId, triggerId}, IdDelimiter))
+	err = d.Set("trigger", ResourceJobTriggerId(jobName, propertyId, triggerId))
 	if err != nil {
 		return nil, err
 	}
@@ -117,13 +121,13 @@ func resourceJobGerritProjectCreate(d *schema.ResourceData, m interface{}) error
 		return err
 	}
 
-	d.SetId(strings.Join([]string{jobName, propertyId, triggerId, projectId}, IdDelimiter))
+	d.SetId(ResourceJobGerritProjectId(jobName, propertyId, triggerId, projectId))
 	log.Println("[DEBUG] Creating job trigger gerrit project:", d.Id())
 	return resourceJobGerritProjectRead(d, m)
 }
 
 func resourceJobGerritProjectUpdate(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectId(d.Id())
+	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectParseId(d.Id())
 
 	project := newJobGerritProject()
 	configRaw := d.Get("").(map[string]interface{})
@@ -170,7 +174,7 @@ func resourceJobGerritProjectUpdate(d *schema.ResourceData, m interface{}) error
 }
 
 func resourceJobGerritProjectRead(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectId(d.Id())
+	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.RLock(jobName)
@@ -202,7 +206,7 @@ func resourceJobGerritProjectRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobGerritProjectDelete(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectId(d.Id())
+	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
