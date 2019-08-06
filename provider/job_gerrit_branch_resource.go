@@ -210,7 +210,9 @@ func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
 	trigger := triggerInterface.(*client.JobGerritTrigger)
 	project, err := trigger.GetProject(projectId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Project found:", err)
+		d.SetId("")
+		return nil
 	}
 	clientBranch, err := project.GetBranch(branchId)
 	if err != nil {
