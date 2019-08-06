@@ -1,20 +1,7 @@
 # terraform-provider-jenkins
 Terraform Provider to manage jenkins jobs
 
-## Build and install ##
-
-### Dependencies ###
-
-You should have a working Go environment setup.  If not check out the Go [getting started](http://golang.org/doc/install) guide.
-
-[Go modules](https://github.com/golang/go/wiki/Modules) are used for dependency management.  To install all dependencies run the following:
-
-```sh
-export GO111MODULE=on
-go mod vendor
-```
-
-### Install ###
+## Install ##
 
 You will need to install the binary as a [terraform third party plugin](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins).  Terraform will then pick up the binary from the local filesystem when you run `terraform init`.
 
@@ -181,4 +168,17 @@ resource "jenkins_job_jira_project_property" "main" {
   plugin = "jiraPlugin"
 }
 
+```
+
+## Development ##
+
+### Dependencies ###
+
+You should have a working Go environment setup.  If not check out the Go [getting started](http://golang.org/doc/install) guide.
+
+[Go modules](https://github.com/golang/go/wiki/Modules) are used for dependency management.  To install all dependencies run the following:
+
+```sh
+export GO111MODULE=on
+go mod vendor
 ```
