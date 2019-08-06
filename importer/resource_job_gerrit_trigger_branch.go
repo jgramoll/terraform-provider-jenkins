@@ -34,7 +34,7 @@ resource "jenkins_job_gerrit_branch" "branch_%v_%v" {
 	compare_type = "%v"
 	pattern      = "%v"
 }
-`, i+1, projectIndex, projectIndex, item.CompareType, item.Pattern)
+`, projectIndex, i+1, projectIndex, item.CompareType, item.Pattern)
 	}
 	return code
 }
