@@ -41,9 +41,13 @@ func TestJobConfigSerialize(t *testing.T) {
 	gerritBranch := NewJobGerritTriggerBranch()
 	gerritBranch.CompareType = CompareTypeRegExp
 	gerritBranch.Pattern = "my-branch"
+	gerritFilePath := NewJobGerritTriggerFilePath()
+	gerritFilePath.CompareType = CompareTypeAnt
+	gerritFilePath.Pattern = "my-file"
 	gerritProject := NewJobGerritTriggerProject()
 	gerritProject.CompareType = CompareTypePlain
 	gerritProject.Pattern = "my-project"
+	gerritProject.FilePaths = gerritProject.FilePaths.Append(gerritFilePath)
 	gerritProject.Branches = gerritProject.Branches.Append(gerritBranch)
 	gerritTrigger := NewJobGerritTrigger()
 	gerritTrigger.Plugin = "gerrit-trigger@2.29.0"
@@ -103,6 +107,12 @@ func TestJobConfigSerialize(t *testing.T) {
 									<pattern>my-branch</pattern>
 								</com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.Branch>
 							</branches>
+							<filePaths>
+								<com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.FilePath>
+									<compareType>ANT</compareType>
+									<pattern>my-file</pattern>
+								</com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.FilePath>
+							</filePaths>
 							<disableStrictForbiddenFileVerification>false</disableStrictForbiddenFileVerification>
 						</com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritProject>
 					</gerritProjects>

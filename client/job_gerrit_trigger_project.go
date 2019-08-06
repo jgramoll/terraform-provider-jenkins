@@ -12,16 +12,18 @@ type JobGerritTriggerProject struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.data.GerritProject"`
 	Id      string   `xml:"id,attr,omitempty"`
 
-	CompareType CompareType               `xml:"compareType"`
-	Pattern     string                    `xml:"pattern"`
-	Branches    *JobGerritTriggerBranches `xml:"branches"`
+	CompareType CompareType                `xml:"compareType"`
+	Pattern     string                     `xml:"pattern"`
+	Branches    *JobGerritTriggerBranches  `xml:"branches"`
+	FilePaths   *JobGerritTriggerFilePaths `xml:"filePaths"`
 
 	DisableStrictForbiddenFileVerification bool `xml:"disableStrictForbiddenFileVerification"`
 }
 
 func NewJobGerritTriggerProject() *JobGerritTriggerProject {
 	return &JobGerritTriggerProject{
-		Branches: NewJobGerritTriggerBranches(),
+		Branches:  NewJobGerritTriggerBranches(),
+		FilePaths: NewJobGerritTriggerFilePaths(),
 	}
 }
 

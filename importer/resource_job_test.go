@@ -192,7 +192,7 @@ resource "jenkins_job_gerrit_project" "project_1" {
 	pattern      = "my-project"
 }
 
-resource "jenkins_job_gerrit_branch" "branch_1" {
+resource "jenkins_job_gerrit_branch" "branch_1_1" {
 	project = "${jenkins_job_gerrit_project.project_1.id}"
 
 	compare_type = "REG_EXP"
@@ -259,7 +259,7 @@ terraform import jenkins_job_gerrit_trigger_draft_published_event.main "Premerge
 
 terraform import jenkins_job_gerrit_project.project_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectId"
 
-terraform import jenkins_job_gerrit_branch.branch_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritBranchId"
+terraform import jenkins_job_gerrit_branch.branch_1_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritBranchId"
 
 terraform import jenkins_job_build_discarder_property.main "Premerge checksdiscard-id"
 
