@@ -1,5 +1,24 @@
 # terraform-provider-jenkins Change Log
 
+## 0.1.0
+
+[10fa096] (HEAD -> master, origin/master) add import script to importer to get tf state (#1)
+[e9d0d95] update importer to output .tf code files for job
+[d05d39a] refactor remaining client unmarshal switches
+[0b28faf] remove importer binary
+[c1ef766] add ensure id functionality to importer
+[e80be59] add jira project property
+[d88ee11] initial importer
+[76854a7] allow for resource import
+[bd0c1d3] refactor type checks on dynamics to better handle errors
+[fb503f0] refactor unmarshal to use map instead of switch
+[2c46df9] add job_datadog_job_property
+[3b009a4] fix job config serialize test
+[6f8a8d1] allow for  gerrit trigger plugin attr
+[9588a33] fix losing git scm resource
+[5b54ec1] add job declarative actions to provider
+[995ac14] add job config actions to client
+
 ## 0.0.3
 
 [fabf3bd] fix id delimiter to be less command character
