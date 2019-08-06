@@ -26,6 +26,9 @@ func ensureJobGerritTriggerFilePaths(filePaths *client.JobGerritTriggerFilePaths
 
 func jobGerritTriggerFilePathsCode(projectIndex int, filePaths *client.JobGerritTriggerFilePaths) string {
 	code := ""
+	if filePaths == nil || filePaths.Items == nil {
+		return code
+	}
 	for i, item := range *filePaths.Items {
 		code += fmt.Sprintf(`
 resource "jenkins_job_gerrit_file_path" "file_path_%v_%v" {
@@ -44,6 +47,9 @@ func jobGerritTriggerFilePathsImportScript(
 	projectId string, filePaths *client.JobGerritTriggerFilePaths,
 ) string {
 	code := ""
+	if filePaths == nil || filePaths.Items == nil {
+		return code
+	}
 	for i, item := range *filePaths.Items {
 		id := provider.ResourceJobGerritFilePathId(
 			jobName, propertyId, triggerId, projectId, item.Id)
