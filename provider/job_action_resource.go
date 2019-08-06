@@ -97,7 +97,9 @@ func resourceJobActionRead(d *schema.ResourceData, m interface{}, createJobActio
 	}
 	clientAction, err := j.GetAction(actionId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Job Action found:", err)
+		d.SetId("")
+		return nil
 	}
 	action, err := createJobAction().fromClientAction(clientAction)
 	if err != nil {

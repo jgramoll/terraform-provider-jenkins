@@ -103,7 +103,9 @@ func resourceJobPropertyStrategyRead(d *schema.ResourceData, m interface{}, crea
 
 	property, err := j.GetProperty(propertyId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Job Property found:", err)
+		d.SetId("")
+		return nil
 	}
 	discardProperty := property.(*client.JobBuildDiscarderProperty)
 	if discardProperty.Strategy.Item == nil {

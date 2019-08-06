@@ -108,7 +108,7 @@ func resourceJobTriggerRead(d *schema.ResourceData, m interface{}, createJobTrig
 	}
 	clientProperty, err := j.GetProperty(propertyId)
 	if err != nil {
-		log.Println("[WARN] No Property found:", err)
+		log.Println("[WARN] No Job Property found:", err)
 		d.SetId("")
 		return err
 	}

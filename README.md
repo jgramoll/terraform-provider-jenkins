@@ -189,5 +189,5 @@ go mod vendor
 go clean
 go build
 rm ~/.terraform.d/plugins/$(uname | tr '[:upper:]' '[:lower:]')_amd64/terraform-provider-jenkins_v1.0.0
-ln  ./terraform-provider-jenkins ~/.terraform.d/plugins/$(uname | tr '[:upper:]' '[:lower:]')_amd64/terraform-provider-jenkins_v1.0.0 
+ln  ./terraform-provider-jenkins ~/.terraform.d/plugins/$(uname | tr '[:upper:]' '[:lower:]')_amd64/terraform-provider-jenkins_v1.0.0
 ```

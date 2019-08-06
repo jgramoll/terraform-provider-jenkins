@@ -199,7 +199,9 @@ func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
 
 	property, err := j.GetProperty(propertyId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Job Property found:", err)
+		d.SetId("")
+		return nil
 	}
 	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
 	if err != nil {
