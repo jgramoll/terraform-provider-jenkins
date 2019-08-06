@@ -68,6 +68,7 @@ func Provider() terraform.ResourceProvider {
 			"jenkins_job_gerrit_trigger_draft_published_event":  jobGerritTriggerDraftPublishedEventResource(),
 			"jenkins_job_gerrit_project":                        jobGerritProjectResource(),
 			"jenkins_job_gerrit_branch":                         jobGerritBranchResource(),
+			"jenkins_job_gerrit_file_path":                      jobGerritFilePathResource(),
 
 			"jenkins_job_datadog_job_property":  jobDatadogJobPropertyResource(),
 			"jenkins_job_jira_project_property": jobJiraProjectPropertyResource(),
