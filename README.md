@@ -9,8 +9,10 @@ You should have a working Go environment setup.  If not check out the Go [gettin
 
 [Go modules](https://github.com/golang/go/wiki/Modules) are used for dependency management.  To install all dependencies run the following:
 
-`export GO111MODULE=on`
-`go mod vendor`
+```sh
+export GO111MODULE=on
+go mod vendor
+```
 
 ### Install ###
 
