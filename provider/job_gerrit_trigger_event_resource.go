@@ -199,25 +199,33 @@ func resourceJobTriggerEventDelete(d *schema.ResourceData, m interface{}, create
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Gerrit Trigger Event:", err)
+		d.SetId("")
+		return nil
 	}
 
 	propertyInterface, err := j.GetProperty(propertyId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Gerrit Trigger Event:", err)
+		d.SetId("")
+		return nil
 	}
 	property := propertyInterface.(*client.JobPipelineTriggersProperty)
 	trigger, err := property.GetTrigger(triggerId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Gerrit Trigger Event:", err)
+		d.SetId("")
+		return nil
 	}
 	gerritTrigger := trigger.(*client.JobGerritTrigger)
 	err = gerritTrigger.DeleteEvent(eventId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Gerrit Trigger Event:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = jobService.UpdateJob(j)

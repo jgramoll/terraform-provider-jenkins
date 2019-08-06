@@ -167,14 +167,18 @@ func resourceJobGitScmExtensionDelete(d *schema.ResourceData, m interface{}, cre
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Git Extension:", err)
+		d.SetId("")
+		return nil
 	}
 
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
 	err = definition.SCM.DeleteExtension(extensionId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Git Extension:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = jobService.UpdateJob(j)

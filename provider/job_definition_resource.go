@@ -138,7 +138,9 @@ func resourceJobDefinitionDelete(d *schema.ResourceData, m interface{}, createJo
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Definition:", err)
+		d.SetId("")
+		return nil
 	}
 
 	j.Definition = nil

@@ -169,13 +169,17 @@ func resourceJobPropertyStrategyDelete(d *schema.ResourceData, m interface{}, cr
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete property:", err)
+		d.SetId("")
+		return nil
 	}
 
 	property, err := j.GetProperty(propertyId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete property:", err)
+		d.SetId("")
+		return nil
 	}
 	discardProperty := property.(*client.JobBuildDiscarderProperty)
 	discardProperty.Strategy.Item = nil

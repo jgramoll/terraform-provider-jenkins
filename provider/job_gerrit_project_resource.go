@@ -215,24 +215,32 @@ func resourceJobGerritProjectDelete(d *schema.ResourceData, m interface{}) error
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Gerrit Project:", err)
+		d.SetId("")
+		return nil
 	}
 
 	property, err := j.GetProperty(propertyId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Gerrit Project:", err)
+		d.SetId("")
+		return nil
 	}
 	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Gerrit Project:", err)
+		d.SetId("")
+		return nil
 	}
 	trigger := triggerInterface.(*client.JobGerritTrigger)
 	err = trigger.DeleteProject(projectId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Gerrit Project:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = jobService.UpdateJob(j)
