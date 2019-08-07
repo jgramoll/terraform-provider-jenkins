@@ -148,13 +148,17 @@ func resourceJobPropertyDelete(d *schema.ResourceData, m interface{}, createJobP
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Job Property:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = j.DeleteProperty(propertyId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Job Property:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = jobService.UpdateJob(j)

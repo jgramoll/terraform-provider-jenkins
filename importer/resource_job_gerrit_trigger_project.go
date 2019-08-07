@@ -42,7 +42,9 @@ resource "jenkins_job_gerrit_project" "project_%v" {
 	compare_type = "%v"
 	pattern      = "%v"
 }
-`, projectIndex, item.CompareType, item.Pattern) + jobGerritTriggerBranchesCode(projectIndex, item.Branches)
+`, projectIndex, item.CompareType, item.Pattern) +
+			jobGerritTriggerBranchesCode(projectIndex, item.Branches) +
+			jobGerritTriggerFilePathsCode(projectIndex, item.FilePaths)
 	}
 	return code
 }
@@ -53,11 +55,14 @@ func jobGerritTriggerProjectsImportScript(
 ) string {
 	code := ""
 	for i, item := range *projects.Items {
+		projectIndex := i + 1
 		code += fmt.Sprintf(`
 terraform import jenkins_job_gerrit_project.project_%v "%v"
-`, i+1, provider.ResourceJobGerritProjectId(jobName, propertyId, triggerId, item.Id)) +
+`, projectIndex, provider.ResourceJobGerritProjectId(jobName, propertyId, triggerId, item.Id)) +
 			jobGerritTriggerBranchesImportScript(
-				jobName, propertyId, triggerId, item.Id, item.Branches)
+				projectIndex, jobName, propertyId, triggerId, item.Id, item.Branches) +
+			jobGerritTriggerFilePathsImportScript(
+				projectIndex, jobName, propertyId, triggerId, item.Id, item.FilePaths)
 	}
 	return code
 }

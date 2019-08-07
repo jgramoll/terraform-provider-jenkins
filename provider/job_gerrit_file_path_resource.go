@@ -11,17 +11,17 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// ErrInvalidTriggerGerritBranchId
-var ErrInvalidTriggerGerritBranchId = errors.New("Invalid gerrit branch id, must be jobName_propertyId_triggerId_projectId_branchId")
+// ErrInvalidTriggerGerritFilePathId
+var ErrInvalidTriggerGerritFilePathId = errors.New("Invalid gerrit file path id, must be jobName_propertyId_triggerId_projectId_filePathId")
 
-func jobGerritBranchResource() *schema.Resource {
+func jobGerritFilePathResource() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceJobGerritBranchCreate,
-		Read:   resourceJobGerritBranchRead,
-		Update: resourceJobGerritBranchUpdate,
-		Delete: resourceJobGerritBranchDelete,
+		Create: resourceJobGerritFilePathCreate,
+		Read:   resourceJobGerritFilePathRead,
+		Update: resourceJobGerritFilePathUpdate,
+		Delete: resourceJobGerritFilePathDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceJobGerritBranchImporter,
+			State: resourceJobGerritFilePathImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -33,38 +33,41 @@ func jobGerritBranchResource() *schema.Resource {
 			},
 			"compare_type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Type of strategy to use for matching gerrit branch",
+				Description: "Type of strategy to use for matching changes based on files",
 				Required:    true,
 			},
 			"pattern": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Pattern to use for matching gerrit branch",
+				Description: "Pattern to use for matching changes based on files",
 				Required:    true,
 			},
 		},
 	}
 }
 
-func resourceJobGerritBranchParseId(input string) (jobName string, propertyId string, triggerId string, projectId string, branchId string, err error) {
+func resourceJobGerritFilePathParseId(input string) (
+	jobName string, propertyId string, triggerId string,
+	projectId string, filePathId string, err error,
+) {
 	parts := strings.Split(input, IdDelimiter)
 	if len(parts) != 5 {
-		err = ErrInvalidTriggerGerritBranchId
+		err = ErrInvalidTriggerGerritFilePathId
 		return
 	}
 	jobName = parts[0]
 	propertyId = parts[1]
 	triggerId = parts[2]
 	projectId = parts[3]
-	branchId = parts[4]
+	filePathId = parts[4]
 	return
 }
 
-func ResourceJobGerritBranchId(jobName string, propertyId string, triggerId string, projectId string, branchId string) string {
-	return joinWithIdDelimiter(jobName, propertyId, triggerId, projectId, branchId)
+func ResourceJobGerritFilePathId(jobName string, propertyId string, triggerId string, projectId string, filePathId string) string {
+	return joinWithIdDelimiter(jobName, propertyId, triggerId, projectId, filePathId)
 }
 
-func resourceJobGerritBranchImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, propertyId, triggerId, projectId, _, err := resourceJobGerritBranchParseId(d.Id())
+func resourceJobGerritFilePathImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	jobName, propertyId, triggerId, projectId, _, err := resourceJobGerritFilePathParseId(d.Id())
 	if err != nil {
 		return nil, err
 	}
@@ -75,12 +78,12 @@ func resourceJobGerritBranchImporter(d *schema.ResourceData, meta interface{}) (
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error {
+func resourceJobGerritFilePathCreate(d *schema.ResourceData, m interface{}) error {
 	jobName, propertyId, triggerId, projectId, err := resourceJobGerritProjectParseId(d.Get("project").(string))
 
-	branch := newJobGerritBranch()
+	filePath := newJobGerritFilePath()
 	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &branch); err != nil {
+	if err := mapstructure.Decode(configRaw, &filePath); err != nil {
 		return err
 	}
 
@@ -88,7 +91,7 @@ func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error 
 	if err != nil {
 		return err
 	}
-	branchId := id.String()
+	filePathId := id.String()
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
@@ -114,12 +117,12 @@ func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error 
 		jobLock.Unlock(jobName)
 		return err
 	}
-	clientBranch, err := branch.toClientBranch(branchId)
+	clientFilePath, err := filePath.toClientFilePath(filePathId)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err
 	}
-	project.Branches = project.Branches.Append(clientBranch)
+	project.FilePaths = project.FilePaths.Append(clientFilePath)
 
 	err = jobService.UpdateJob(j)
 	jobLock.Unlock(jobName)
@@ -127,20 +130,20 @@ func resourceJobGerritBranchCreate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	d.SetId(ResourceJobGerritBranchId(jobName, propertyId, triggerId, projectId, branchId))
-	log.Println("[DEBUG] Creating job gerrit branch:", d.Id())
-	return resourceJobGerritBranchRead(d, m)
+	d.SetId(ResourceJobGerritFilePathId(jobName, propertyId, triggerId, projectId, filePathId))
+	log.Println("[DEBUG] Creating job gerrit filePath:", d.Id())
+	return resourceJobGerritFilePathRead(d, m)
 }
 
-func resourceJobGerritBranchUpdate(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchParseId(d.Id())
+func resourceJobGerritFilePathUpdate(d *schema.ResourceData, m interface{}) error {
+	jobName, propertyId, triggerId, projectId, filePathId, err := resourceJobGerritFilePathParseId(d.Id())
 
-	branch := newJobGerritBranch()
+	filePath := newJobGerritFilePath()
 	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &branch); err != nil {
+	if err := mapstructure.Decode(configRaw, &filePath); err != nil {
 		return err
 	}
-	clientBranch, err := branch.toClientBranch(branchId)
+	clientFilePath, err := filePath.toClientFilePath(filePathId)
 	if err != nil {
 		return err
 	}
@@ -169,7 +172,7 @@ func resourceJobGerritBranchUpdate(d *schema.ResourceData, m interface{}) error 
 		jobLock.Unlock(jobName)
 		return err
 	}
-	err = project.UpdateBranch(clientBranch)
+	err = project.UpdateFilePath(clientFilePath)
 	if err != nil {
 		jobLock.Unlock(jobName)
 		return err
@@ -181,11 +184,11 @@ func resourceJobGerritBranchUpdate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	return resourceJobGerritBranchRead(d, m)
+	return resourceJobGerritFilePathRead(d, m)
 }
 
-func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchParseId(d.Id())
+func resourceJobGerritFilePathRead(d *schema.ResourceData, m interface{}) error {
+	jobName, propertyId, triggerId, projectId, filePathId, err := resourceJobGerritFilePathParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.RLock(jobName)
@@ -205,38 +208,38 @@ func resourceJobGerritBranchRead(d *schema.ResourceData, m interface{}) error {
 	}
 	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
 	if err != nil {
-		log.Println("[WARN] No Trigger found:", err)
+		log.Println("[WARN] No Job Trigger found:", err)
 		d.SetId("")
 		return nil
 	}
 	trigger := triggerInterface.(*client.JobGerritTrigger)
 	project, err := trigger.GetProject(projectId)
 	if err != nil {
-		log.Println("[WARN] No Project found:", err)
+		log.Println("[WARN] No Job Property found:", err)
 		d.SetId("")
 		return nil
 	}
-	clientBranch, err := project.GetBranch(branchId)
+	clientFilePath, err := project.GetFilePath(filePathId)
 	if err != nil {
-		log.Println("[WARN] No Gerrit Branch found:", err)
+		log.Println("[WARN] No Gerrit File Path found:", err)
 		d.SetId("")
 		return nil
 	}
-	branch := newJobGerritBranchFromClient(clientBranch)
+	filePath := newJobGerritFilePathFromClient(clientFilePath)
 
-	log.Println("[INFO] Updating gerrit branch state from client", d.Id())
-	return branch.setResourceData(d)
+	log.Println("[INFO] Updating gerrit filePath state from client", d.Id())
+	return filePath.setResourceData(d)
 }
 
-func resourceJobGerritBranchDelete(d *schema.ResourceData, m interface{}) error {
-	jobName, propertyId, triggerId, projectId, branchId, err := resourceJobGerritBranchParseId(d.Id())
+func resourceJobGerritFilePathDelete(d *schema.ResourceData, m interface{}) error {
+	jobName, propertyId, triggerId, projectId, filePathId, err := resourceJobGerritFilePathParseId(d.Id())
 
 	jobService := m.(*Services).JobService
 	jobLock.Lock(jobName)
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		log.Println("[WARN] Could not delete Gerrit Branch:", err)
+		log.Println("[WARN] Could not delete Gerrit File Path:", err)
 		d.SetId("")
 		return nil
 	}
@@ -244,14 +247,14 @@ func resourceJobGerritBranchDelete(d *schema.ResourceData, m interface{}) error 
 	property, err := j.GetProperty(propertyId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		log.Println("[WARN] Could not delete Gerrit Branch:", err)
+		log.Println("[WARN] Could not delete Gerrit File Path:", err)
 		d.SetId("")
 		return nil
 	}
 	triggerInterface, err := property.(*client.JobPipelineTriggersProperty).GetTrigger(triggerId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		log.Println("[WARN] Could not delete Gerrit Branch:", err)
+		log.Println("[WARN] Could not delete Gerrit File Path:", err)
 		d.SetId("")
 		return nil
 	}
@@ -259,14 +262,14 @@ func resourceJobGerritBranchDelete(d *schema.ResourceData, m interface{}) error 
 	project, err := trigger.GetProject(projectId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		log.Println("[WARN] Could not delete Gerrit Branch:", err)
+		log.Println("[WARN] Could not delete Gerrit File Path:", err)
 		d.SetId("")
 		return nil
 	}
-	err = project.DeleteBranch(branchId)
+	err = project.DeleteFilePath(filePathId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		log.Println("[WARN] Could not delete Gerrit Branch:", err)
+		log.Println("[WARN] Could not delete Gerrit File Path:", err)
 		d.SetId("")
 		return nil
 	}

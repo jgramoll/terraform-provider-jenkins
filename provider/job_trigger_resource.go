@@ -115,7 +115,9 @@ func resourceJobTriggerRead(d *schema.ResourceData, m interface{}, createJobTrig
 	property := clientProperty.(*client.JobPipelineTriggersProperty)
 	clientTrigger, err := property.GetTrigger(triggerId)
 	if err != nil {
-		return err
+		log.Println("[WARN] No Job Trigger found:", err)
+		d.SetId("")
+		return nil
 	}
 	trigger, err := createJobTrigger().fromClientJobTrigger(clientTrigger)
 	if err != nil {
@@ -182,19 +184,25 @@ func resourceJobTriggerDelete(d *schema.ResourceData, m interface{}, createJobTr
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Job Trigger:", err)
+		d.SetId("")
+		return nil
 	}
 
 	propertyInterface, err := j.GetProperty(propertyId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Job Trigger:", err)
+		d.SetId("")
+		return nil
 	}
 	property := propertyInterface.(*client.JobPipelineTriggersProperty)
 	err = property.DeleteTrigger(triggerId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Job Trigger:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = jobService.UpdateJob(j)

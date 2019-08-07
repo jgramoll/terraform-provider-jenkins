@@ -12,10 +12,11 @@ const (
 	CompareTypeUnknown CompareType = iota
 	CompareTypePlain
 	CompareTypeRegExp
+	CompareTypeAnt
 )
 
 func (t CompareType) String() string {
-	return [...]string{"UNKNOWN", "PLAIN", "REG_EXP"}[t]
+	return [...]string{"UNKNOWN", "PLAIN", "REG_EXP", "ANT"}[t]
 }
 
 func ParseCompareType(s string) (CompareType, error) {
@@ -26,6 +27,8 @@ func ParseCompareType(s string) (CompareType, error) {
 		return CompareTypePlain, nil
 	case "REG_EXP":
 		return CompareTypeRegExp, nil
+	case "ANT":
+		return CompareTypeAnt, nil
 	}
 }
 

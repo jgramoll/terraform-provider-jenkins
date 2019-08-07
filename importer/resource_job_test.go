@@ -52,15 +52,23 @@ func testNewJob() *client.Job {
 	gerritBranch.Id = "gerritBranchId"
 	gerritBranch.CompareType = client.CompareTypeRegExp
 	gerritBranch.Pattern = "my-branch"
+	gerritFilePath := client.NewJobGerritTriggerFilePath()
+	gerritFilePath.Id = "gerritFilePathId"
+	gerritFilePath.CompareType = client.CompareTypeRegExp
+	gerritFilePath.Pattern = "my-file-path"
 	gerritProject := client.NewJobGerritTriggerProject()
 	gerritProject.Id = "gerritProjectId"
 	gerritProject.CompareType = client.CompareTypePlain
 	gerritProject.Pattern = "my-project"
 	gerritProject.Branches = gerritProject.Branches.Append(gerritBranch)
+	gerritProject.FilePaths = gerritProject.FilePaths.Append(gerritFilePath)
 	gerritTrigger := client.NewJobGerritTrigger()
 	gerritTrigger.Id = "gerrit-trigger-id"
 	gerritTrigger.Plugin = "gerrit-trigger@2.29.0"
 	gerritTrigger.Projects = gerritTrigger.Projects.Append(gerritProject)
+	gerritTriggerChangeMergedEvent := client.NewJobGerritTriggerPluginChangeMergedEvent()
+	gerritTriggerChangeMergedEvent.Id = "gerritTriggerMergeEventId"
+	gerritTrigger.TriggerOnEvents = gerritTrigger.TriggerOnEvents.Append(gerritTriggerChangeMergedEvent)
 	gerritTriggerPatchsetEvent := client.NewJobGerritTriggerPluginPatchsetCreatedEvent()
 	gerritTriggerPatchsetEvent.Id = "gerritTriggerPatchsetEventId"
 	gerritTrigger.TriggerOnEvents = gerritTrigger.TriggerOnEvents.Append(gerritTriggerPatchsetEvent)
@@ -171,6 +179,10 @@ resource "jenkins_job_gerrit_trigger" "main" {
 	}
 }
 
+resource "jenkins_job_gerrit_trigger_change_merged_event" "main" {
+	trigger = "${jenkins_job_gerrit_trigger.main.id}"
+}
+
 resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
 	trigger = "${jenkins_job_gerrit_trigger.main.id}"
 
@@ -192,11 +204,18 @@ resource "jenkins_job_gerrit_project" "project_1" {
 	pattern      = "my-project"
 }
 
-resource "jenkins_job_gerrit_branch" "branch_1" {
+resource "jenkins_job_gerrit_branch" "branch_1_1" {
 	project = "${jenkins_job_gerrit_project.project_1.id}"
 
 	compare_type = "REG_EXP"
 	pattern      = "my-branch"
+}
+
+resource "jenkins_job_gerrit_file_path" "file_path_1_1" {
+	project = "${jenkins_job_gerrit_project.project_1.id}"
+
+	compare_type = "REG_EXP"
+	pattern      = "my-file-path"
 }
 
 resource "jenkins_job_build_discarder_property" "main" {
@@ -253,13 +272,17 @@ terraform import jenkins_job_pipeline_triggers_property.main "Premerge checkstr
 
 terraform import jenkins_job_gerrit_trigger.main "Premerge checkstrigger-idgerrit-trigger-id"
 
+terraform import jenkins_job_gerrit_trigger_change_merged_event.main "Premerge checkstrigger-idgerrit-trigger-idgerritTriggerMergeEventId"
+
 terraform import jenkins_job_gerrit_trigger_patchset_created_event.main "Premerge checkstrigger-idgerrit-trigger-idgerritTriggerPatchsetEventId"
 
 terraform import jenkins_job_gerrit_trigger_draft_published_event.main "Premerge checkstrigger-idgerrit-trigger-idgerritTriggerDraftEventId"
 
 terraform import jenkins_job_gerrit_project.project_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectId"
 
-terraform import jenkins_job_gerrit_branch.branch_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritBranchId"
+terraform import jenkins_job_gerrit_branch.branch_1_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritBranchId"
+
+terraform import jenkins_job_gerrit_file_path.file_path_1_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritFilePathId"
 
 terraform import jenkins_job_build_discarder_property.main "Premerge checksdiscard-id"
 

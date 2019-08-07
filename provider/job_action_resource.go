@@ -161,13 +161,17 @@ func resourceJobActionDelete(d *schema.ResourceData, m interface{}, createJobAct
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete action:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = j.DeleteAction(actionId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete action:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = jobService.UpdateJob(j)

@@ -193,11 +193,15 @@ func resourceJobGitScmBranchDelete(d *schema.ResourceData, m interface{}) error 
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Git Branch:", err)
+		d.SetId("")
+		return nil
 	}
 	if j.Definition == nil {
 		jobLock.Unlock(jobName)
-		return ErrGitScmBranchMissingDefinition
+		log.Println("[WARN] Could not delete Git Branch:", err)
+		d.SetId("")
+		return nil
 	}
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
 	definition.SCM.DeleteBranch(branchId)

@@ -183,7 +183,9 @@ func resourceJobGitScmUserRemoteConfigRead(d *schema.ResourceData, m interface{}
 	}
 
 	if j.Definition == nil {
-		return ErrGitScmUserRemoteConfigMissingDefinition
+		log.Println("[WARN] No Job Definition found")
+		d.SetId("")
+		return nil
 	}
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
 
@@ -207,18 +209,24 @@ func resourceJobGitScmUserRemoteConfigDelete(d *schema.ResourceData, m interface
 	j, err := jobService.GetJob(jobName)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Git User Remote Config:", err)
+		d.SetId("")
+		return nil
 	}
 
 	if j.Definition == nil {
 		jobLock.Unlock(jobName)
-		return ErrGitScmUserRemoteConfigMissingDefinition
+		log.Println("[WARN] Could not delete Git User Remote Config:", err)
+		d.SetId("")
+		return nil
 	}
 	definition := j.Definition.(*client.CpsScmFlowDefinition)
 	err = definition.SCM.DeleteUserRemoteConfig(configId)
 	if err != nil {
 		jobLock.Unlock(jobName)
-		return err
+		log.Println("[WARN] Could not delete Git User Remote Config:", err)
+		d.SetId("")
+		return nil
 	}
 
 	err = jobService.UpdateJob(j)
