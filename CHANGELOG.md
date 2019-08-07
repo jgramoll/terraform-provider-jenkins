@@ -1,5 +1,9 @@
 # terraform-provider-jenkins Change Log
 
+## 0.2.0
+
+[e62a9a3] File path (#2)
+
 ## 0.1.1
 
 [9083e51] make sure to return nil instead of error on read
