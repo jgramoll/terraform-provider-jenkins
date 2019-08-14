@@ -12,16 +12,16 @@ func init() {
 	jobPropertyImportScriptFuncs["*client.JobDatadogJobProperty"] = jobDatadogJobPropertyImportScript
 }
 
-func jobDatadogJobPropertyCode(client.JobProperty) string {
-	return `
-resource "jenkins_job_datadog_job_property" "main" {
+func jobDatadogJobPropertyCode(propertyIndex int, property client.JobProperty) string {
+	return fmt.Sprintf(`
+resource "jenkins_job_datadog_job_property" "property_%v" {
 	job = "${jenkins_job.main.name}"
 }
-`
+`, propertyIndex)
 }
 
-func jobDatadogJobPropertyImportScript(jobName string, p client.JobProperty) string {
+func jobDatadogJobPropertyImportScript(propertyIndex int, jobName string, p client.JobProperty) string {
 	return fmt.Sprintf(`
-terraform import jenkins_job_datadog_job_property.main "%v"
-`, provider.ResourceJobPropertyId(jobName, p.GetId()))
+terraform import jenkins_job_datadog_job_property.property_%v "%v"
+`, propertyIndex, provider.ResourceJobPropertyId(jobName, p.GetId()))
 }

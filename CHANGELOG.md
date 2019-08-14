@@ -1,4 +1,4 @@
-# terraform-provider-jenkins Change Log
+# terraform-provider-jenkins
 
 ## 0.2.0
 

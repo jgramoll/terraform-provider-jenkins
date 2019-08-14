@@ -7,16 +7,16 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-type jobBuildDiscarderPropertyStrategyCodeFunc func(client.JobBuildDiscarderPropertyStrategy) string
+type jobBuildDiscarderPropertyStrategyCodeFunc func(int, client.JobBuildDiscarderPropertyStrategy) string
 type jobBuildDiscarderPropertyStrategyImportScriptFunc func(string, string, client.JobBuildDiscarderPropertyStrategy) string
 
 var jobBuildDiscarderPropertyStrategyCodeFuncs = map[string]jobBuildDiscarderPropertyStrategyCodeFunc{}
 var jobBuildDiscarderPropertyStrategyImportScriptFuncs = map[string]jobBuildDiscarderPropertyStrategyImportScriptFunc{}
 
-func jobBuildDiscarderPropertyStrategyCode(strategy client.JobBuildDiscarderPropertyStrategy) string {
+func jobBuildDiscarderPropertyStrategyCode(propertyIndex int, strategy client.JobBuildDiscarderPropertyStrategy) string {
 	reflectType := reflect.TypeOf(strategy).String()
 	if codeFunc, ok := jobBuildDiscarderPropertyStrategyCodeFuncs[reflectType]; ok {
-		return codeFunc(strategy)
+		return codeFunc(propertyIndex, strategy)
 	} else {
 		log.Println("[WARNING] Unkown Job Build Discarder Property Strategy:", reflectType)
 	}
