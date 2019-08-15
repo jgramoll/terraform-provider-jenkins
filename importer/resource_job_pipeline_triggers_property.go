@@ -16,8 +16,8 @@ func init() {
 }
 
 type ensureJobTriggerFunc func(client.JobTrigger) error
-type jobTriggerCodeFunc func(client.JobTrigger) string
-type jobTriggerImportScriptFunc func(string, string, client.JobTrigger) string
+type jobTriggerCodeFunc func(int, int, client.JobTrigger) string
+type jobTriggerImportScriptFunc func(int, int, string, string, client.JobTrigger) string
 
 var ensureJobTriggerFuncs = map[string]ensureJobTriggerFunc{}
 var jobTriggerCodeFuncs = map[string]jobTriggerCodeFunc{}
@@ -38,38 +38,38 @@ func ensureJobPipelineTriggersProperty(propertyInterface client.JobProperty) err
 	return nil
 }
 
-func jobPipelineTriggersPropertyCode(propertyInterface client.JobProperty) string {
+func jobPipelineTriggersPropertyCode(propertyIndex int, propertyInterface client.JobProperty) string {
 	property := propertyInterface.(*client.JobPipelineTriggersProperty)
 
 	triggersCode := ""
-	for _, trigger := range *property.Triggers.Items {
+	for i, trigger := range *property.Triggers.Items {
 		reflectType := reflect.TypeOf(trigger).String()
 		if triggerCodeFunc, ok := jobTriggerCodeFuncs[reflectType]; ok {
-			triggersCode += triggerCodeFunc(trigger)
-		} else {
-			log.Println("[WARNING] Unknown Job Trigger Type", reflectType)
-		}
-	}
-	return `
-resource "jenkins_job_pipeline_triggers_property" "main" {
-	job = "${jenkins_job.main.name}"
-}
-` + triggersCode
-}
-
-func jobPipelineTriggersPropertyImportScript(jobName string, propertyInterface client.JobProperty) string {
-	property := propertyInterface.(*client.JobPipelineTriggersProperty)
-
-	triggersCode := ""
-	for _, trigger := range *property.Triggers.Items {
-		reflectType := reflect.TypeOf(trigger).String()
-		if triggerCodeFunc, ok := jobTriggerImportScriptFuncs[reflectType]; ok {
-			triggersCode += triggerCodeFunc(jobName, property.Id, trigger)
+			triggersCode += triggerCodeFunc(propertyIndex, i+1, trigger)
 		} else {
 			log.Println("[WARNING] Unknown Job Trigger Type", reflectType)
 		}
 	}
 	return fmt.Sprintf(`
-terraform import jenkins_job_pipeline_triggers_property.main "%v"
-`, provider.ResourceJobPropertyId(jobName, property.Id)) + triggersCode
+resource "jenkins_job_pipeline_triggers_property" "property_%v" {
+	job = "${jenkins_job.main.name}"
+}
+`, propertyIndex) + triggersCode
+}
+
+func jobPipelineTriggersPropertyImportScript(propertyIndex int, jobName string, propertyInterface client.JobProperty) string {
+	property := propertyInterface.(*client.JobPipelineTriggersProperty)
+
+	triggersCode := ""
+	for i, trigger := range *property.Triggers.Items {
+		reflectType := reflect.TypeOf(trigger).String()
+		if triggerCodeFunc, ok := jobTriggerImportScriptFuncs[reflectType]; ok {
+			triggersCode += triggerCodeFunc(propertyIndex, i+1, jobName, property.Id, trigger)
+		} else {
+			log.Println("[WARNING] Unknown Job Trigger Type", reflectType)
+		}
+	}
+	return fmt.Sprintf(`
+terraform import jenkins_job_pipeline_triggers_property.property_%v "%v"
+`, propertyIndex, provider.ResourceJobPropertyId(jobName, property.Id)) + triggersCode
 }

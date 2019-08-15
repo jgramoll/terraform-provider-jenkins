@@ -32,15 +32,15 @@ func ensureJobGerritTrigger(triggerInterface client.JobTrigger) error {
 	return ensureJobGerritTriggerOnEvents(trigger.TriggerOnEvents)
 }
 
-func jobGerritTriggerCode(triggerInterface client.JobTrigger) string {
+func jobGerritTriggerCode(propertyIndex int, triggerIndex int, triggerInterface client.JobTrigger) string {
 	trigger := triggerInterface.(*client.JobGerritTrigger)
 
 	triggerOnEvents := jobGerritTriggerOnEventsCode(trigger.TriggerOnEvents)
 	triggerProjects := jobGerritTriggerProjectsCode(trigger.Projects)
 	dynamicGerritProjects := jobDynamicGerritProjectsCode(trigger.DynamicGerritProjects)
 	return fmt.Sprintf(`
-resource "jenkins_job_gerrit_trigger" "main" {
-	property = "${jenkins_job_pipeline_triggers_property.main.id}"
+resource "jenkins_job_gerrit_trigger" "trigger_%v_%v" {
+	property = "${jenkins_job_pipeline_triggers_property.property_%v.id}"
 
 	plugin            = "%v"
 	server_name       = "%v"
@@ -61,7 +61,8 @@ resource "jenkins_job_gerrit_trigger" "main" {
 		on_not_built  = %v
 	}
 }
-`, trigger.Plugin, trigger.ServerName, trigger.SilentMode, trigger.SilentStartMode, trigger.EscapeQuotes,
+`, propertyIndex, triggerIndex, propertyIndex,
+		trigger.Plugin, trigger.ServerName, trigger.SilentMode, trigger.SilentStartMode, trigger.EscapeQuotes,
 		trigger.NameAndEmailParameterMode, trigger.CommitMessageParameterMode, trigger.ChangeSubjectParameterMode,
 		trigger.CommentTextParameterMode, trigger.DynamicTriggerConfiguration,
 		trigger.SkipVote.OnSuccessful, trigger.SkipVote.OnFailed,
@@ -69,12 +70,18 @@ resource "jenkins_job_gerrit_trigger" "main" {
 		triggerOnEvents + triggerProjects + dynamicGerritProjects
 }
 
-func jobGerritTriggerImportScript(jobName string, propertyId string, triggerInterface client.JobTrigger) string {
+func jobGerritTriggerImportScript(
+	propertyIndex int,
+	triggerIndex int,
+	jobName string,
+	propertyId string,
+	triggerInterface client.JobTrigger,
+) string {
 	trigger := triggerInterface.(*client.JobGerritTrigger)
 
 	return fmt.Sprintf(`
-terraform import jenkins_job_gerrit_trigger.main "%v"
-`, provider.ResourceJobTriggerId(jobName, propertyId, trigger.Id)) +
+terraform import jenkins_job_gerrit_trigger.trigger_%v_%v "%v"
+`, propertyIndex, triggerIndex, provider.ResourceJobTriggerId(jobName, propertyId, trigger.Id)) +
 		jobGerritTriggerOnEventsImportScript(jobName, propertyId, trigger.Id, trigger.TriggerOnEvents) +
 		jobGerritTriggerProjectsImportScript(jobName, propertyId, trigger.Id, trigger.Projects) +
 		jobDynamicGerritProjectsImportScript(trigger.DynamicGerritProjects)

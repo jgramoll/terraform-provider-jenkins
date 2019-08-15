@@ -12,19 +12,19 @@ func init() {
 	jobPropertyImportScriptFuncs["*client.JobJiraProjectProperty"] = jobJiraProjectPropertyImportScript
 }
 
-func jobJiraProjectPropertyCode(propertyInterface client.JobProperty) string {
+func jobJiraProjectPropertyCode(propertyIndex int, propertyInterface client.JobProperty) string {
 	property := propertyInterface.(*client.JobJiraProjectProperty)
 	return fmt.Sprintf(`
-resource "jenkins_job_jira_project_property" "main" {
+resource "jenkins_job_jira_project_property" "property_%v" {
 	job = "${jenkins_job.main.name}"
 
 	plugin = "%v"
 }
-`, property.Plugin)
+`, propertyIndex, property.Plugin)
 }
 
-func jobJiraProjectPropertyImportScript(jobName string, p client.JobProperty) string {
+func jobJiraProjectPropertyImportScript(propertyIndex int, jobName string, p client.JobProperty) string {
 	return fmt.Sprintf(`
-terraform import jenkins_job_jira_project_property.main "%v"
-`, provider.ResourceJobPropertyId(jobName, p.GetId()))
+terraform import jenkins_job_jira_project_property.property_%v "%v"
+`, propertyIndex, provider.ResourceJobPropertyId(jobName, p.GetId()))
 }

@@ -9,8 +9,8 @@ import (
 )
 
 type ensureJobPropertyFunc func(client.JobProperty) error
-type jobPropertyCodeFunc func(client.JobProperty) string
-type jobPropertyImportScriptFunc func(string, client.JobProperty) string
+type jobPropertyCodeFunc func(int, client.JobProperty) string
+type jobPropertyImportScriptFunc func(int, string, client.JobProperty) string
 
 var ensureJobPropertyFuncs = map[string]ensureJobPropertyFunc{}
 var jobPropertyCodeFuncs = map[string]jobPropertyCodeFunc{}
@@ -41,10 +41,10 @@ func ensureJobProperties(properties *client.JobProperties) error {
 func jobPropertiesCode(properties *client.JobProperties) string {
 	code := ""
 
-	for _, item := range *properties.Items {
+	for i, item := range *properties.Items {
 		reflectType := reflect.TypeOf(item).String()
 		if codeFunc, ok := jobPropertyCodeFuncs[reflectType]; ok {
-			code += codeFunc(item)
+			code += codeFunc(i+1, item)
 		} else {
 			log.Println("[WARNING] Unknown property type:", reflectType)
 		}
@@ -56,10 +56,10 @@ func jobPropertiesCode(properties *client.JobProperties) string {
 func jobPropertiesImportScript(jobName string, properties *client.JobProperties) string {
 	code := ""
 
-	for _, item := range *properties.Items {
+	for i, item := range *properties.Items {
 		reflectType := reflect.TypeOf(item).String()
 		if codeFunc, ok := jobPropertyImportScriptFuncs[reflectType]; ok {
-			code += codeFunc(jobName, item)
+			code += codeFunc(i+1, jobName, item)
 		} else {
 			log.Println("[WARNING] Unknown property type:", reflectType)
 		}

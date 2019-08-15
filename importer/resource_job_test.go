@@ -152,12 +152,12 @@ resource "jenkins_job_git_scm_clean_before_checkout_extension" "main" {
 	scm = "${jenkins_job_git_scm.main.id}"
 }
 
-resource "jenkins_job_pipeline_triggers_property" "main" {
+resource "jenkins_job_pipeline_triggers_property" "property_1" {
 	job = "${jenkins_job.main.name}"
 }
 
-resource "jenkins_job_gerrit_trigger" "main" {
-	property = "${jenkins_job_pipeline_triggers_property.main.id}"
+resource "jenkins_job_gerrit_trigger" "trigger_1_1" {
+	property = "${jenkins_job_pipeline_triggers_property.property_1.id}"
 
 	plugin            = "gerrit-trigger@2.29.0"
 	server_name       = "__ANY__"
@@ -218,12 +218,12 @@ resource "jenkins_job_gerrit_file_path" "file_path_1_1" {
 	pattern      = "my-file-path"
 }
 
-resource "jenkins_job_build_discarder_property" "main" {
+resource "jenkins_job_build_discarder_property" "property_2" {
 	job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
-	property = "${jenkins_job_build_discarder_property.main.id}"
+	property = "${jenkins_job_build_discarder_property.property_2.id}"
 
 	days_to_keep          = "1"
 	num_to_keep           = "2"
@@ -231,11 +231,11 @@ resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
 	artifact_num_to_keep  = "4"
 }
 
-resource "jenkins_job_datadog_job_property" "main" {
+resource "jenkins_job_datadog_job_property" "property_3" {
 	job = "${jenkins_job.main.name}"
 }
 
-resource "jenkins_job_jira_project_property" "main" {
+resource "jenkins_job_jira_project_property" "property_4" {
 	job = "${jenkins_job.main.name}"
 
 	plugin = "jiraPlugin"
@@ -268,9 +268,9 @@ terraform import jenkins_job_git_scm_branch.branch_1 "Premerge checksdefinition
 
 terraform import jenkins_job_git_scm_clean_before_checkout_extension.main "Premerge checksdefinitionIdextension-id"
 
-terraform import jenkins_job_pipeline_triggers_property.main "Premerge checkstrigger-id"
+terraform import jenkins_job_pipeline_triggers_property.property_1 "Premerge checkstrigger-id"
 
-terraform import jenkins_job_gerrit_trigger.main "Premerge checkstrigger-idgerrit-trigger-id"
+terraform import jenkins_job_gerrit_trigger.trigger_1_1 "Premerge checkstrigger-idgerrit-trigger-id"
 
 terraform import jenkins_job_gerrit_trigger_change_merged_event.main "Premerge checkstrigger-idgerrit-trigger-idgerritTriggerMergeEventId"
 
@@ -284,13 +284,13 @@ terraform import jenkins_job_gerrit_branch.branch_1_1 "Premerge checkstrigger-i
 
 terraform import jenkins_job_gerrit_file_path.file_path_1_1 "Premerge checkstrigger-idgerrit-trigger-idgerritProjectIdgerritFilePathId"
 
-terraform import jenkins_job_build_discarder_property.main "Premerge checksdiscard-id"
+terraform import jenkins_job_build_discarder_property.property_2 "Premerge checksdiscard-id"
 
 terraform import jenkins_job_build_discarder_property_log_rotator_strategy.main "Premerge checksdiscard-iddiscardPropertyStrategyId"
 
-terraform import jenkins_job_datadog_job_property.main "Premerge checksdatadogJobPropertyId"
+terraform import jenkins_job_datadog_job_property.property_3 "Premerge checksdatadogJobPropertyId"
 
-terraform import jenkins_job_jira_project_property.main "Premerge checksjiraProjectPropertyId"
+terraform import jenkins_job_jira_project_property.property_4 "Premerge checksjiraProjectPropertyId"
 `
 	if result != expected {
 		dmp := diffmatchpatch.New()
