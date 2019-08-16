@@ -1,3 +1,6 @@
 package client
 
-type JobParameterDefinition interface{}
+type JobParameterDefinition interface {
+	GetId() string
+	SetId(string)
+}

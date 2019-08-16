@@ -73,6 +73,9 @@ func Provider() terraform.ResourceProvider {
 
 			"jenkins_job_datadog_job_property":  jobDatadogJobPropertyResource(),
 			"jenkins_job_jira_project_property": jobJiraProjectPropertyResource(),
+
+			"jenkins_job_parameters_definition_property": jobParametersDefinitionPropertyResource(),
+			"jenkins_job_parameter_definition_choice":    jobParameterDefinitionChoiceResource(),
 		},
 
 		ConfigureFunc: providerConfigure,
