@@ -35,8 +35,8 @@ func ensureJobGerritTrigger(triggerInterface client.JobTrigger) error {
 func jobGerritTriggerCode(propertyIndex int, triggerIndex int, triggerInterface client.JobTrigger) string {
 	trigger := triggerInterface.(*client.JobGerritTrigger)
 
-	triggerOnEvents := jobGerritTriggerOnEventsCode(trigger.TriggerOnEvents)
-	triggerProjects := jobGerritTriggerProjectsCode(trigger.Projects)
+	triggerOnEvents := jobGerritTriggerOnEventsCode(propertyIndex, triggerIndex, trigger.TriggerOnEvents)
+	triggerProjects := jobGerritTriggerProjectsCode(propertyIndex, triggerIndex, trigger.Projects)
 	dynamicGerritProjects := jobDynamicGerritProjectsCode(trigger.DynamicGerritProjects)
 	return fmt.Sprintf(`
 resource "jenkins_job_gerrit_trigger" "trigger_%v_%v" {

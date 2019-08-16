@@ -31,18 +31,20 @@ func ensureJobGerritTriggerProjects(projects *client.JobGerritTriggerProjects) e
 	return nil
 }
 
-func jobGerritTriggerProjectsCode(projects *client.JobGerritTriggerProjects) string {
+func jobGerritTriggerProjectsCode(
+	propertyIndex int, triggerIndex int, projects *client.JobGerritTriggerProjects,
+) string {
 	code := ""
 	for i, item := range *projects.Items {
 		projectIndex := i + 1
 		code += fmt.Sprintf(`
 resource "jenkins_job_gerrit_project" "project_%v" {
-	trigger = "${jenkins_job_gerrit_trigger.main.id}"
+	trigger = "${jenkins_job_gerrit_trigger.trigger_%v_%v.id}"
 
 	compare_type = "%v"
 	pattern      = "%v"
 }
-`, projectIndex, item.CompareType, item.Pattern) +
+`, propertyIndex, triggerIndex, projectIndex, item.CompareType, item.Pattern) +
 			jobGerritTriggerBranchesCode(projectIndex, item.Branches) +
 			jobGerritTriggerFilePathsCode(projectIndex, item.FilePaths)
 	}

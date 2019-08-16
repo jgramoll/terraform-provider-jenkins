@@ -12,12 +12,14 @@ func init() {
 	jobGerritTriggerOnEventsImportScriptFuncs["*client.JobGerritTriggerPluginDraftPublishedEvent"] = jobGerritTriggerPluginDraftPublishedEventImportScript
 }
 
-func jobGerritTriggerPluginDraftPublishedEventCode(client.JobGerritTriggerOnEvent) string {
-	return `
+func jobGerritTriggerPluginDraftPublishedEventCode(
+	propertyIndex int, triggerIndex int, e client.JobGerritTriggerOnEvent,
+) string {
+	return fmt.Sprintf(`
 resource "jenkins_job_gerrit_trigger_draft_published_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.main.id}"
+	trigger = "${jenkins_job_gerrit_trigger.trigger_%v_%v.id}"
 }
-`
+`, propertyIndex, triggerIndex)
 }
 
 func jobGerritTriggerPluginDraftPublishedEventImportScript(

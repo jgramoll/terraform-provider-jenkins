@@ -180,11 +180,11 @@ resource "jenkins_job_gerrit_trigger" "trigger_1_1" {
 }
 
 resource "jenkins_job_gerrit_trigger_change_merged_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.main.id}"
+	trigger = "${jenkins_job_gerrit_trigger.trigger_1_1.id}"
 }
 
 resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.main.id}"
+	trigger = "${jenkins_job_gerrit_trigger.trigger_1_1.id}"
 
 	exclude_drafts         = false
 	exclude_trivial_rebase = false
@@ -194,11 +194,11 @@ resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
 }
 
 resource "jenkins_job_gerrit_trigger_draft_published_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.main.id}"
+	trigger = "${jenkins_job_gerrit_trigger.trigger_1_1.id}"
 }
 
 resource "jenkins_job_gerrit_project" "project_1" {
-	trigger = "${jenkins_job_gerrit_trigger.main.id}"
+	trigger = "${jenkins_job_gerrit_trigger.trigger_1_1.id}"
 
 	compare_type = "PLAIN"
 	pattern      = "my-project"
