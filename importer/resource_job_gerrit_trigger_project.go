@@ -32,19 +32,19 @@ func ensureJobGerritTriggerProjects(projects *client.JobGerritTriggerProjects) e
 }
 
 func jobGerritTriggerProjectsCode(
-	propertyIndex int, triggerIndex int, projects *client.JobGerritTriggerProjects,
+	propertyIndex string, triggerIndex string, projects *client.JobGerritTriggerProjects,
 ) string {
 	code := ""
 	for i, item := range *projects.Items {
-		projectIndex := i + 1
+		projectIndex := fmt.Sprintf("%v_%v", triggerIndex, i+1)
 		code += fmt.Sprintf(`
 resource "jenkins_job_gerrit_project" "project_%v" {
-	trigger = "${jenkins_job_gerrit_trigger.trigger_%v_%v.id}"
+	trigger = "${jenkins_job_gerrit_trigger.trigger_%v.id}"
 
 	compare_type = "%v"
 	pattern      = "%v"
 }
-`, propertyIndex, triggerIndex, projectIndex, item.CompareType, item.Pattern) +
+`, projectIndex, triggerIndex, item.CompareType, item.Pattern) +
 			jobGerritTriggerBranchesCode(projectIndex, item.Branches) +
 			jobGerritTriggerFilePathsCode(projectIndex, item.FilePaths)
 	}
@@ -52,12 +52,13 @@ resource "jenkins_job_gerrit_project" "project_%v" {
 }
 
 func jobGerritTriggerProjectsImportScript(
+	triggerIndex string,
 	jobName string, propertyId string, triggerId string,
 	projects *client.JobGerritTriggerProjects,
 ) string {
 	code := ""
 	for i, item := range *projects.Items {
-		projectIndex := i + 1
+		projectIndex := fmt.Sprintf("%v_%v", triggerIndex, i+1)
 		code += fmt.Sprintf(`
 terraform import jenkins_job_gerrit_project.project_%v "%v"
 `, projectIndex, provider.ResourceJobGerritProjectId(jobName, propertyId, triggerId, item.Id)) +

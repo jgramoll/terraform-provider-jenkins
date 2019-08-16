@@ -24,26 +24,27 @@ func ensureJobGerritTriggerFilePaths(filePaths *client.JobGerritTriggerFilePaths
 	return nil
 }
 
-func jobGerritTriggerFilePathsCode(projectIndex int, filePaths *client.JobGerritTriggerFilePaths) string {
+func jobGerritTriggerFilePathsCode(projectIndex string, filePaths *client.JobGerritTriggerFilePaths) string {
 	code := ""
 	if filePaths == nil || filePaths.Items == nil {
 		return code
 	}
 	for i, item := range *filePaths.Items {
+		filePathIndex := fmt.Sprintf("%v_%v", projectIndex, i+1)
 		code += fmt.Sprintf(`
-resource "jenkins_job_gerrit_file_path" "file_path_%v_%v" {
+resource "jenkins_job_gerrit_file_path" "file_path_%v" {
 	project = "${jenkins_job_gerrit_project.project_%v.id}"
 
 	compare_type = "%v"
 	pattern      = "%v"
 }
-`, projectIndex, i+1, projectIndex, item.CompareType, item.Pattern)
+`, filePathIndex, projectIndex, item.CompareType, item.Pattern)
 	}
 	return code
 }
 
 func jobGerritTriggerFilePathsImportScript(
-	projectIndex int, jobName string, propertyId string, triggerId string,
+	projectIndex string, jobName string, propertyId string, triggerId string,
 	projectId string, filePaths *client.JobGerritTriggerFilePaths,
 ) string {
 	code := ""
@@ -51,11 +52,12 @@ func jobGerritTriggerFilePathsImportScript(
 		return code
 	}
 	for i, item := range *filePaths.Items {
+		filePathIndex := fmt.Sprintf("%v_%v", projectIndex, i+1)
 		id := provider.ResourceJobGerritFilePathId(
 			jobName, propertyId, triggerId, projectId, item.Id)
 		code += fmt.Sprintf(`
-terraform import jenkins_job_gerrit_file_path.file_path_%v_%v "%v"
-`, projectIndex, i+1, id)
+terraform import jenkins_job_gerrit_file_path.file_path_%v "%v"
+`, filePathIndex, id)
 	}
 	return code
 }

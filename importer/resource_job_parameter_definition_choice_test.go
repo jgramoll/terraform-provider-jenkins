@@ -15,12 +15,12 @@ func testParametersDefinitionProperty() *client.JobParametersDefinitionProperty 
 	testParameter1.Name = "choic 1"
 	testParameter1.Description = "desc"
 	*testParameter1.Choices.Items.Items = []string{"1", "a", "alpha"}
-	property.ParameterDefinitions =	property.ParameterDefinitions.Append(testParameter1)
+	property.ParameterDefinitions = property.ParameterDefinitions.Append(testParameter1)
 	testParameter2 := client.NewJobParameterDefinitionChoice()
 	testParameter2.Name = "choic 2"
 	testParameter2.Description = "desc"
 	*testParameter2.Choices.Items.Items = []string{"2", "b", "beta"}
-	property.ParameterDefinitions =	property.ParameterDefinitions.Append(testParameter2)
+	property.ParameterDefinitions = property.ParameterDefinitions.Append(testParameter2)
 	return property
 }
 
@@ -104,8 +104,8 @@ terraform import jenkins_job_parameter_definition_choice.parameter_1_1 "%v"
 
 terraform import jenkins_job_parameter_definition_choice.parameter_1_2 "%v"
 `, provider.ResourceJobPropertyId(job.Name, property.Id),
-provider.ResourceJobParameterDefinitionId(job.Name, property.Id, "c1"),
-provider.ResourceJobParameterDefinitionId(job.Name, property.Id, "c2"))
+		provider.ResourceJobParameterDefinitionId(job.Name, property.Id, "c1"),
+		provider.ResourceJobParameterDefinitionId(job.Name, property.Id, "c2"))
 
 	if result != expected {
 		dmp := diffmatchpatch.New()

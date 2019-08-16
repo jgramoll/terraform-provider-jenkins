@@ -8,8 +8,7 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-type jobGerritTriggerOnEventsCodeFunc func(
-	int, int, client.JobGerritTriggerOnEvent) string
+type jobGerritTriggerOnEventsCodeFunc func(string, client.JobGerritTriggerOnEvent) string
 type jobGerritTriggerOnEventsImportScriptFunc func(
 	string, string, string, client.JobGerritTriggerOnEvent) string
 
@@ -37,13 +36,13 @@ func ensureJobGerritTriggerOnEvents(events *client.JobGerritTriggerOnEvents) err
 }
 
 func jobGerritTriggerOnEventsCode(
-	propertyIndex int, triggerIndex int, events *client.JobGerritTriggerOnEvents,
+	triggerIndex string, events *client.JobGerritTriggerOnEvents,
 ) string {
 	code := ""
 	for _, item := range *events.Items {
 		reflectType := reflect.TypeOf(item).String()
 		if codeFunc, ok := jobGerritTriggerOnEventsCodeFuncs[reflectType]; ok {
-			code += codeFunc(propertyIndex, triggerIndex, item)
+			code += codeFunc(triggerIndex, item)
 		} else {
 			log.Println("[WARNING] Unknown gerrit trigger on event type:", reflectType)
 		}

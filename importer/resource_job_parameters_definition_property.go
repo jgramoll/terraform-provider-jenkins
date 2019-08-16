@@ -29,7 +29,7 @@ func ensureJobParametersDefinitionProperty(propertyInterface client.JobProperty)
 	return nil
 }
 
-func jobParametersDefinitionPropertyCode(propertyIndex int, propertyInterface client.JobProperty) string {
+func jobParametersDefinitionPropertyCode(propertyIndex string, propertyInterface client.JobProperty) string {
 	property := propertyInterface.(*client.JobParametersDefinitionProperty)
 	return fmt.Sprintf(`
 resource "jenkins_job_parameters_definition_property" "property_%v" {
@@ -39,12 +39,12 @@ resource "jenkins_job_parameters_definition_property" "property_%v" {
 }
 
 func jobParametersDefinitionPropertyImportScript(
-	propertyIndex int, jobName string, propertyInterface client.JobProperty,
+	propertyIndex string, jobName string, propertyInterface client.JobProperty,
 ) string {
 	property := propertyInterface.(*client.JobParametersDefinitionProperty)
 	propertyId := propertyInterface.GetId()
 	return fmt.Sprintf(`
 terraform import jenkins_job_parameters_definition_property.property_%v "%v"
 `, propertyIndex, provider.ResourceJobPropertyId(jobName, propertyId)) +
-	jobParameterDefinitionsImportScript(propertyIndex, jobName, propertyId, property.ParameterDefinitions)
+		jobParameterDefinitionsImportScript(propertyIndex, jobName, propertyId, property.ParameterDefinitions)
 }

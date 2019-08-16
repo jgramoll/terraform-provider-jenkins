@@ -24,32 +24,34 @@ func ensureJobGerritTriggerBranches(branches *client.JobGerritTriggerBranches) e
 	return nil
 }
 
-func jobGerritTriggerBranchesCode(projectIndex int, branches *client.JobGerritTriggerBranches) string {
+func jobGerritTriggerBranchesCode(projectIndex string, branches *client.JobGerritTriggerBranches) string {
 	code := ""
 	for i, item := range *branches.Items {
+		branchIndex := fmt.Sprintf("%v_%v", projectIndex, i+1)
 		code += fmt.Sprintf(`
-resource "jenkins_job_gerrit_branch" "branch_%v_%v" {
+resource "jenkins_job_gerrit_branch" "branch_%v" {
 	project = "${jenkins_job_gerrit_project.project_%v.id}"
 
 	compare_type = "%v"
 	pattern      = "%v"
 }
-`, projectIndex, i+1, projectIndex, item.CompareType, item.Pattern)
+`, branchIndex, projectIndex, item.CompareType, item.Pattern)
 	}
 	return code
 }
 
 func jobGerritTriggerBranchesImportScript(
-	projectIndex int, jobName string, propertyId string, triggerId string,
+	projectIndex string, jobName string, propertyId string, triggerId string,
 	projectId string, branches *client.JobGerritTriggerBranches,
 ) string {
 	code := ""
 	for i, item := range *branches.Items {
+		branchIndex := fmt.Sprintf("%v_%v", projectIndex, i+1)
 		id := provider.ResourceJobGerritBranchId(
 			jobName, propertyId, triggerId, projectId, item.Id)
 		code += fmt.Sprintf(`
-terraform import jenkins_job_gerrit_branch.branch_%v_%v "%v"
-`, projectIndex, i+1, id)
+terraform import jenkins_job_gerrit_branch.branch_%v "%v"
+`, branchIndex, id)
 	}
 	return code
 }

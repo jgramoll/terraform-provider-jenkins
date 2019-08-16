@@ -13,12 +13,12 @@ func init() {
 }
 
 func jobGerritTriggerPluginPatchsetCreatedEventCode(
-	propertyIndex int, triggerIndex int, eventInterface client.JobGerritTriggerOnEvent,
+	triggerIndex string, eventInterface client.JobGerritTriggerOnEvent,
 ) string {
 	event := eventInterface.(*client.JobGerritTriggerPluginPatchsetCreatedEvent)
 	return fmt.Sprintf(`
 resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.trigger_%v_%v.id}"
+	trigger = "${jenkins_job_gerrit_trigger.trigger_%v.id}"
 
 	exclude_drafts         = %v
 	exclude_trivial_rebase = %v
@@ -26,7 +26,7 @@ resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
 	exclude_private_state  = %v
 	exclude_wip_state      = %v
 }
-`, propertyIndex, triggerIndex,
+`, triggerIndex,
 		event.ExcludeDrafts, event.ExcludeTrivialRebase, event.ExcludeNoCodeChange,
 		event.ExcludePrivateState, event.ExcludeWipState)
 }

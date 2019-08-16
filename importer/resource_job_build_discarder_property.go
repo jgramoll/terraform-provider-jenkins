@@ -12,7 +12,7 @@ func init() {
 	jobPropertyImportScriptFuncs["*client.JobBuildDiscarderProperty"] = jobBuildDiscarderPropertyImportScript
 }
 
-func jobBuildDiscarderPropertyCode(propertyIndex int, propertyInterface client.JobProperty) string {
+func jobBuildDiscarderPropertyCode(propertyIndex string, propertyInterface client.JobProperty) string {
 	property := propertyInterface.(*client.JobBuildDiscarderProperty)
 	return fmt.Sprintf(`
 resource "jenkins_job_build_discarder_property" "property_%v" {
@@ -21,7 +21,7 @@ resource "jenkins_job_build_discarder_property" "property_%v" {
 `, propertyIndex) + jobBuildDiscarderPropertyStrategyCode(propertyIndex, property.Strategy.Item)
 }
 
-func jobBuildDiscarderPropertyImportScript(propertyIndex int, jobName string, propertyInterface client.JobProperty) string {
+func jobBuildDiscarderPropertyImportScript(propertyIndex string, jobName string, propertyInterface client.JobProperty) string {
 	property := propertyInterface.(*client.JobBuildDiscarderProperty)
 	return fmt.Sprintf(`
 terraform import jenkins_job_build_discarder_property.property_%v "%v"

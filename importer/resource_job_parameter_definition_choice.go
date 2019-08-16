@@ -14,7 +14,7 @@ func init() {
 }
 
 func jobParameterDefinitionChoiceCode(
-	propertyIndex int, parameterIndex int, propertyInterface client.JobParameterDefinition,
+	propertyIndex string, parameterIndex string, propertyInterface client.JobParameterDefinition,
 ) string {
 	definition := propertyInterface.(*client.JobParameterDefinitionChoice)
 
@@ -24,24 +24,23 @@ func jobParameterDefinitionChoiceCode(
 	}
 	choicesString := fmt.Sprintf("[%v]", strings.Join(choices, ", "))
 	return fmt.Sprintf(`
-resource "jenkins_job_parameter_definition_choice" "parameter_%v_%v" {
+resource "jenkins_job_parameter_definition_choice" "parameter_%v" {
 	property = "${jenkins_job_parameters_definition_property.property_%v.id}"
 
 	name        = "%v"
 	description = "%v"
 	choices     = %v
 }
-`, propertyIndex, parameterIndex, propertyIndex,
+`, parameterIndex, propertyIndex,
 		definition.Name, definition.Description, choicesString)
 }
 
 func jobParameterDefinitionChoiceImportScript(
-	propertyIndex int, parameterIndex int,
-	jobName string, propertyId string,
+	parameterIndex string, jobName string, propertyId string,
 	definition client.JobParameterDefinition,
 ) string {
 	return fmt.Sprintf(`
-terraform import jenkins_job_parameter_definition_choice.parameter_%v_%v "%v"
-`, propertyIndex, parameterIndex,
+terraform import jenkins_job_parameter_definition_choice.parameter_%v "%v"
+`, parameterIndex,
 		provider.ResourceJobParameterDefinitionId(jobName, propertyId, definition.GetId()))
 }

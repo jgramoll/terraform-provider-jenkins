@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 
@@ -8,20 +9,21 @@ import (
 )
 
 type ensureJobParameterDefinitionFunc func(client.JobParameterDefinition) error
-type jobParameterDefinitionCodeFunc func(int, int, client.JobParameterDefinition) string
-type jobParameterDefinitionImportScriptFunc func(int, int, string, string, client.JobParameterDefinition) string
+type jobParameterDefinitionCodeFunc func(string, string, client.JobParameterDefinition) string
+type jobParameterDefinitionImportScriptFunc func(string, string, string, client.JobParameterDefinition) string
 
 var ensureJobParameterDefinitionFuncs = map[string]ensureJobParameterDefinitionFunc{}
 var jobParameterDefinitionCodeFuncs = map[string]jobParameterDefinitionCodeFunc{}
 var jobParameterDefinitionImportScriptFuncs = map[string]jobParameterDefinitionImportScriptFunc{}
 
-func jobParameterDefinitionsCode(propertyIndex int, definitions *client.JobParameterDefinitions) string {
+func jobParameterDefinitionsCode(propertyIndex string, definitions *client.JobParameterDefinitions) string {
 	code := ""
 
 	for i, item := range *definitions.Items {
 		reflectType := reflect.TypeOf(item).String()
 		if codeFunc, ok := jobParameterDefinitionCodeFuncs[reflectType]; ok {
-			code += codeFunc(propertyIndex, i+1, item)
+			definitionIndex := fmt.Sprintf("%v_%v", propertyIndex, i+1)
+			code += codeFunc(propertyIndex, definitionIndex, item)
 		} else {
 			log.Println("[WARNING] Unknown parameter definition type:", reflectType)
 		}
@@ -30,13 +32,14 @@ func jobParameterDefinitionsCode(propertyIndex int, definitions *client.JobParam
 	return code
 }
 
-func jobParameterDefinitionsImportScript(propertyIndex int, jobName string, propertyId string, definitions *client.JobParameterDefinitions) string {
+func jobParameterDefinitionsImportScript(propertyIndex string, jobName string, propertyId string, definitions *client.JobParameterDefinitions) string {
 	code := ""
 
 	for i, item := range *definitions.Items {
 		reflectType := reflect.TypeOf(item).String()
 		if codeFunc, ok := jobParameterDefinitionImportScriptFuncs[reflectType]; ok {
-			code += codeFunc(propertyIndex, i+1, jobName, propertyId, item)
+			definitionIndex := fmt.Sprintf("%v_%v", propertyIndex, i+1)
+			code += codeFunc(definitionIndex, jobName, propertyId, item)
 		} else {
 			log.Println("[WARNING] Unknown parameter definition type:", reflectType)
 		}
