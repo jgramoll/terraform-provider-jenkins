@@ -37,21 +37,25 @@ func ensureJobDefinition(definition client.JobDefinition) error {
 }
 
 func jobDefinitionCode(definition client.JobDefinition) string {
-	reflectType := reflect.TypeOf(definition).String()
-	if codeFunc, ok := definitionCodeFuncs[reflectType]; ok {
-		return codeFunc(definition)
-	} else {
-		log.Println("[WARNING] Unkown Job Definition:", reflectType)
+	if definition != nil {
+		reflectType := reflect.TypeOf(definition).String()
+		if codeFunc, ok := definitionCodeFuncs[reflectType]; ok {
+			return codeFunc(definition)
+		} else {
+			log.Println("[WARNING] Unkown Job Definition:", reflectType)
+		}
 	}
 	return ""
 }
 
 func jobDefinitionsImportScript(jobName string, definition client.JobDefinition) string {
-	reflectType := reflect.TypeOf(definition).String()
-	if codeFunc, ok := definitionImportScriptFuncs[reflectType]; ok {
-		return codeFunc(jobName, definition)
-	} else {
-		log.Println("[WARNING] Unkown Job Definition:", reflectType)
+	if definition != nil {
+		reflectType := reflect.TypeOf(definition).String()
+		if codeFunc, ok := definitionImportScriptFuncs[reflectType]; ok {
+			return codeFunc(jobName, definition)
+		} else {
+			log.Println("[WARNING] Unkown Job Definition:", reflectType)
+		}
 	}
 	return ""
 }
