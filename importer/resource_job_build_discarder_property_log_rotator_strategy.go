@@ -12,7 +12,7 @@ func init() {
 	jobBuildDiscarderPropertyStrategyImportScriptFuncs["*client.JobBuildDiscarderPropertyStrategyLogRotator"] = jobBuildDiscarderPropertyLogRotatorStrategyImportScript
 }
 
-func jobBuildDiscarderPropertyLogRotatorStrategyCode(propertyIndex int, strategyInterface client.JobBuildDiscarderPropertyStrategy) string {
+func jobBuildDiscarderPropertyLogRotatorStrategyCode(propertyIndex string, strategyInterface client.JobBuildDiscarderPropertyStrategy) string {
 	strategy := strategyInterface.(*client.JobBuildDiscarderPropertyStrategyLogRotator)
 	return fmt.Sprintf(`
 resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
@@ -24,8 +24,8 @@ resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
 	artifact_num_to_keep  = "%v"
 }
 `, propertyIndex,
-	strategy.DaysToKeep, strategy.NumToKeep,
-	strategy.ArtifactDaysToKeep, strategy.ArtifactNumToKeep)
+		strategy.DaysToKeep, strategy.NumToKeep,
+		strategy.ArtifactDaysToKeep, strategy.ArtifactNumToKeep)
 }
 
 func jobBuildDiscarderPropertyLogRotatorStrategyImportScript(

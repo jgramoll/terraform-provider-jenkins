@@ -179,6 +179,18 @@ resource "jenkins_job_jira_project_property" "main" {
   plugin = "jiraPlugin"
 }
 
+resource "jenkins_job_parameters_definition_property" "parameters" {
+	job = "${jenkins_job.main.name}"
+}
+
+resource "jenkins_job_parameter_definition_choice" "env" {
+	property = "${jenkins_job_parameters_definition_property.parameters.id}"
+
+	name = "env"
+	description = "which env to target"
+	choices = ["1", "3", "4"]
+}
+
 ```
 
 ## Development ##

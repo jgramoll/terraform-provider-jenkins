@@ -36,24 +36,31 @@ func TestGetJobDetails(t *testing.T) {
 		t.Fatalf("Job description should be %v, was %v", "", job.Description)
 	}
 	properties := *job.Properties.Items
-	if len(properties) != 4 {
+	if len(properties) != 5 {
 		t.Fatalf("Job should have %v properties, was %v", 4, len(properties))
 	}
 	pipelineTriggersProperty, ok := properties[0].(*JobPipelineTriggersProperty)
 	if !ok {
 		t.Fatalf("Invalid pipeline triggers property, got %s", reflect.TypeOf(properties[0]).String())
 	}
-	_, ok = properties[1].(*JobJiraProjectProperty)
+	parametersDefinitionProperty, ok := properties[1].(*JobParametersDefinitionProperty)
+	if !ok {
+		t.Fatalf("Invalid parameters definition project property, got %s", reflect.TypeOf(properties[1]).String())
+	}
+	if len(*parametersDefinitionProperty.ParameterDefinitions.Items) != 4 {
+		t.Fatalf("Expected %v parameters, got %v", 4, len(*parametersDefinitionProperty.ParameterDefinitions.Items))
+	}
+	_, ok = properties[2].(*JobJiraProjectProperty)
 	if !ok {
 		t.Fatalf("Invalid jira project property, got %s", reflect.TypeOf(properties[1]).String())
 	}
-	_, ok = properties[2].(*JobDatadogJobProperty)
+	_, ok = properties[3].(*JobDatadogJobProperty)
 	if !ok {
 		t.Fatalf("Invalid datadog property, got %s", reflect.TypeOf(properties[2]).String())
 	}
-	pipelineDiscarderProperty, ok := properties[3].(*JobBuildDiscarderProperty)
+	pipelineDiscarderProperty, ok := properties[4].(*JobBuildDiscarderProperty)
 	if !ok {
-		t.Fatalf("Invalid build discarder property, got %s", reflect.TypeOf(properties[3]).String())
+		t.Fatalf("Invalid build discarder property1, got %s", reflect.TypeOf(properties[3]).String())
 	}
 	if pipelineDiscarderProperty.Strategy.Item == nil {
 		t.Fatalf("Job missing discarder strategy")
