@@ -191,6 +191,10 @@ resource "jenkins_job_parameter_definition_choice" "env" {
 	choices = ["1", "3", "4"]
 }
 
+resource "jenkins_job_disable_concurrent_builds_property" "main" {
+	job = "${jenkins_job.main.name}"
+}
+
 ```
 
 ## Development ##

@@ -76,6 +76,8 @@ func Provider() terraform.ResourceProvider {
 
 			"jenkins_job_parameters_definition_property": jobParametersDefinitionPropertyResource(),
 			"jenkins_job_parameter_definition_choice":    jobParameterDefinitionChoiceResource(),
+
+			"jenkins_job_disable_concurrent_builds_property": jobDisableConcurrentBuildsJobPropertyResource(),
 		},
 
 		ConfigureFunc: providerConfigure,
