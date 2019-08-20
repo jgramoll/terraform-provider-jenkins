@@ -1,5 +1,12 @@
 # terraform-provider-jenkins
 
+## 0.3.0
+
+- `3188a76` add disable_concurrent_builds_job_property (#5)
+- `dd3345e` Parameters (#4)
+- `c8e7408` fix importer with multiple triggers (#3)
+- `a4579f0` clean up CHANGELOG
+
 ## 0.2.0
 
 - `e62a9a3` File path (#2)
