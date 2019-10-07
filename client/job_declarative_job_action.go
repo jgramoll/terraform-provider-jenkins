@@ -24,6 +24,10 @@ func (a *JobDeclarativeJobAction) SetId(id string) {
 	a.Id = id
 }
 
+func (*JobDeclarativeJobAction) GetType() JobActionType {
+	return DeclarativeJobAction
+}
+
 func unmarshalDeclarativeJobAction(d *xml.Decoder, start xml.StartElement) (JobAction, error) {
 	action := NewJobDeclarativeJobAction()
 	err := d.DecodeElement(action, &start)

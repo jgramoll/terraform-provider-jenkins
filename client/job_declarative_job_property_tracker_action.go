@@ -29,6 +29,10 @@ func (a *JobDeclarativeJobPropertyTrackerAction) SetId(id string) {
 	a.Id = id
 }
 
+func (*JobDeclarativeJobPropertyTrackerAction) GetType() JobActionType {
+	return DeclarativeJobPropertyTrackerAction
+}
+
 func unmarshalDeclarativeJobPropertyTrackerAction(d *xml.Decoder, start xml.StartElement) (JobAction, error) {
 	action := NewJobDeclarativeJobPropertyTrackerAction()
 	err := d.DecodeElement(action, &start)

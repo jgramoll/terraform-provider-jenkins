@@ -43,6 +43,23 @@ func jobResource() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 			},
+			"action": &schema.Schema{
+				Type:        schema.TypeList,
+				Description: "Name and id of the plugin",
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": &schema.Schema{
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"plugin": &schema.Schema{
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -75,7 +92,11 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 	jobId := id.String()
 
 	jobService := m.(*Services).JobService
-	err = jobService.CreateJob(j.toClientJob(jobId))
+	clientJob, err := j.toClientJob(jobId)
+	if err != nil {
+		return err
+	}
+	err = jobService.CreateJob(clientJob)
 	if err != nil {
 		return err
 	}
@@ -98,8 +119,13 @@ func resourceJobRead(d *schema.ResourceData, m interface{}) error {
 		return nil
 	}
 
+	clientJob, err := JobfromClientJob(j)
+	if err != nil {
+		log.Println("[WARN] Invalid Job:", d.Id())
+		return nil
+	}
 	log.Printf("[INFO] Got job %s", j.Name)
-	return JobfromClientJob(j).setResourceData(d)
+	return clientJob.setResourceData(d)
 }
 
 func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
@@ -110,8 +136,12 @@ func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	jobService := m.(*Services).JobService
+	clientJob, err := j.toClientJob(d.Id())
+	if err != nil {
+		return err
+	}
 	jobLock.Lock(j.Name)
-	err := jobService.UpdateJob(j.toClientJob(d.Id()))
+	err = jobService.UpdateJob(clientJob)
 	jobLock.Unlock(j.Name)
 	if err != nil {
 		return err

@@ -45,11 +45,11 @@ resource "jenkins_job" "main" {
   name     = "Premerge checks"
   plugin   = "workflow-job@2.33"
   disabled = false
-}
 
-resource "jenkins_job_declarative_job_action" "main" {
-  job    = "${jenkins_job.main.name}"
-  plugin = "pipeline-model-definition@1.3.9"
+  action {
+    type = "DeclarativeJobAction"
+    plugin = "pipeline-model-definition@1.3.9"
+  }
 }
 
 resource "jenkins_job_declarative_job_property_tracker_action" "main" {
@@ -180,19 +180,19 @@ resource "jenkins_job_jira_project_property" "main" {
 }
 
 resource "jenkins_job_parameters_definition_property" "parameters" {
-	job = "${jenkins_job.main.name}"
+  job = "${jenkins_job.main.name}"
 }
 
 resource "jenkins_job_parameter_definition_choice" "env" {
-	property = "${jenkins_job_parameters_definition_property.parameters.id}"
+  property = "${jenkins_job_parameters_definition_property.parameters.id}"
 
-	name = "env"
-	description = "which env to target"
-	choices = ["1", "3", "4"]
+  name = "env"
+  description = "which env to target"
+  choices = ["1", "3", "4"]
 }
 
 resource "jenkins_job_disable_concurrent_builds_property" "main" {
-	job = "${jenkins_job.main.name}"
+  job = "${jenkins_job.main.name}"
 }
 
 ```

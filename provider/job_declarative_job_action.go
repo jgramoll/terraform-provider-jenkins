@@ -8,11 +8,15 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
+func init() {
+	jobActionInitFunc[client.DeclarativeJobAction] = newJobDeclarativeJobAction
+}
+
 type jobDeclarativeJobAction struct {
 	Plugin string `mapstructure:"plugin"`
 }
 
-func newJobDeclarativeJobAction() *jobDeclarativeJobAction {
+func newJobDeclarativeJobAction() jobAction {
 	return &jobDeclarativeJobAction{}
 }
 
@@ -22,9 +26,9 @@ func (a *jobDeclarativeJobAction) fromClientAction(clientActionInterface client.
 		return nil, fmt.Errorf("Failed to parse client action, expected *client.JobDeclarativeJobAction, got %s",
 			reflect.TypeOf(clientActionInterface).String())
 	}
-	action := newJobDeclarativeJobAction()
+	action := jobDeclarativeJobAction{}
 	action.Plugin = clientAction.Plugin
-	return action, nil
+	return &action, nil
 }
 
 func (a *jobDeclarativeJobAction) toClientAction(id string) (client.JobAction, error) {
