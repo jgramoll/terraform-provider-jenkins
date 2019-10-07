@@ -4,7 +4,6 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -13,22 +12,6 @@ type jobActionImportScriptFunc func(string, client.JobAction) string
 
 var jobActionCodeFuncs = map[string]jobActionCodeFunc{}
 var jobActionImportScriptFuncs = map[string]jobActionImportScriptFunc{}
-
-func ensureJobActions(actions *client.JobActions) error {
-	if actions == nil || actions.Items == nil {
-		return nil
-	}
-	for _, item := range *actions.Items {
-		if item.GetId() == "" {
-			id, err := uuid.NewRandom()
-			if err != nil {
-				return err
-			}
-			item.SetId(id.String())
-		}
-	}
-	return nil
-}
 
 func jobActionsCode(actions *client.JobActions) string {
 	code := ""

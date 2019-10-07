@@ -16,7 +16,7 @@ var jobActionInitFunc = map[client.JobActionType]jobActionInit{}
 
 type jobAction interface {
 	fromClientAction(client.JobAction) (jobAction, error)
-	toClientAction(id string) (client.JobAction, error)
+	toClientAction() (client.JobAction, error)
 	setResourceData(*schema.ResourceData) error
 }
 
@@ -35,7 +35,7 @@ func (actions *interfaceJobActions) toClientActions() (*client.JobActions, error
 		if err := mapstructure.Decode(mapData, &action); err != nil {
 			return nil, err
 		}
-		clientAction, err := action.toClientAction("id")
+		clientAction, err := action.toClientAction()
 		if err != nil {
 			return nil, err
 		}

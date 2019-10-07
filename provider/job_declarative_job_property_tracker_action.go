@@ -12,7 +12,7 @@ type jobDeclarativeJobPropertyTrackerAction struct {
 	Plugin string `mapstructure:"plugin"`
 }
 
-func newJobDeclarativeJobPropertyTrackerAction() *jobDeclarativeJobPropertyTrackerAction {
+func newJobDeclarativeJobPropertyTrackerAction() jobAction {
 	return &jobDeclarativeJobPropertyTrackerAction{}
 }
 
@@ -22,14 +22,13 @@ func (a *jobDeclarativeJobPropertyTrackerAction) fromClientAction(clientActionIn
 		return nil, fmt.Errorf("Failed to parse client action, expected *client.JobDeclarativeJobPropertyTrackerAction, got %s",
 			reflect.TypeOf(clientActionInterface).String())
 	}
-	action := newJobDeclarativeJobPropertyTrackerAction()
+	action := jobDeclarativeJobPropertyTrackerAction{}
 	action.Plugin = clientAction.Plugin
-	return action, nil
+	return &action, nil
 }
 
-func (a *jobDeclarativeJobPropertyTrackerAction) toClientAction(id string) (client.JobAction, error) {
+func (a *jobDeclarativeJobPropertyTrackerAction) toClientAction() (client.JobAction, error) {
 	clientAction := client.NewJobDeclarativeJobPropertyTrackerAction()
-	clientAction.Id = id
 	clientAction.Plugin = a.Plugin
 	return clientAction, nil
 }

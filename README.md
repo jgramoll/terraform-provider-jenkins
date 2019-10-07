@@ -50,11 +50,11 @@ resource "jenkins_job" "main" {
     type = "DeclarativeJobAction"
     plugin = "pipeline-model-definition@1.3.9"
   }
-}
 
-resource "jenkins_job_declarative_job_property_tracker_action" "main" {
-  job    = "${jenkins_job.main.name}"
-  plugin = "pipeline-model-definition@1.3.9"
+  action {
+    type = "DeclarativeJobPropertyTrackerAction"
+    plugin = "pipeline-model-definition@1.3.9"
+  }
 }
 
 resource "jenkins_job_git_scm" "main" {

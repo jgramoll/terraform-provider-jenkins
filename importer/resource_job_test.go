@@ -14,11 +14,9 @@ func testNewJob() *client.Job {
 	job.Plugin = "flow-plugin"
 	job.Description = "my-desc"
 	declarativeJobAction := client.NewJobDeclarativeJobAction()
-	declarativeJobAction.Id = "declarativeJobActionId"
 	declarativeJobAction.Plugin = "DeclarativeJobPlugin"
 	job.Actions = job.Actions.Append(declarativeJobAction)
 	declarativeJobPropertyTrackerAction := client.NewJobDeclarativeJobPropertyTrackerAction()
-	declarativeJobPropertyTrackerAction.Id = "declarativeJobPropertyTrackerActionId"
 	declarativeJobPropertyTrackerAction.Plugin = "DeclarativeJobTrackerPlugin"
 	job.Actions = job.Actions.Append(declarativeJobPropertyTrackerAction)
 

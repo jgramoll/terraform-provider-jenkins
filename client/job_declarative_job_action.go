@@ -8,20 +8,11 @@ func init() {
 
 type JobDeclarativeJobAction struct {
 	XMLName xml.Name `xml:"org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction"`
-	Id      string   `xml:"id,attr,omitempty"`
 	Plugin  string   `xml:"plugin,attr,omitempty"`
 }
 
 func NewJobDeclarativeJobAction() *JobDeclarativeJobAction {
 	return &JobDeclarativeJobAction{}
-}
-
-func (action *JobDeclarativeJobAction) GetId() string {
-	return action.Id
-}
-
-func (a *JobDeclarativeJobAction) SetId(id string) {
-	a.Id = id
 }
 
 func (*JobDeclarativeJobAction) GetType() JobActionType {

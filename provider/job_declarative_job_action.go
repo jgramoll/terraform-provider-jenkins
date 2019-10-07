@@ -31,9 +31,8 @@ func (a *jobDeclarativeJobAction) fromClientAction(clientActionInterface client.
 	return &action, nil
 }
 
-func (a *jobDeclarativeJobAction) toClientAction(id string) (client.JobAction, error) {
+func (a *jobDeclarativeJobAction) toClientAction() (client.JobAction, error) {
 	clientAction := client.NewJobDeclarativeJobAction()
-	clientAction.Id = id
 	clientAction.Plugin = a.Plugin
 	return clientAction, nil
 }

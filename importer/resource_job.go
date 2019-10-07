@@ -16,9 +16,6 @@ func ensureJob(job *client.Job) error {
 		}
 		job.Id = id.String()
 	}
-	if err := ensureJobActions(job.Actions); err != nil {
-		return err
-	}
 	if err := ensureJobProperties(job.Properties); err != nil {
 		return err
 	}
