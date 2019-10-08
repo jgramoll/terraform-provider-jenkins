@@ -3,7 +3,6 @@ package provider
 import (
 	"errors"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 	"github.com/mitchellh/mapstructure"
 )
@@ -17,7 +16,6 @@ var jobActionInitFunc = map[client.JobActionType]jobActionInit{}
 type jobAction interface {
 	fromClientAction(client.JobAction) (jobAction, error)
 	toClientAction() (client.JobAction, error)
-	setResourceData(*schema.ResourceData) error
 }
 
 func (actions *interfaceJobActions) toClientActions() (*client.JobActions, error) {
@@ -25,7 +23,7 @@ func (actions *interfaceJobActions) toClientActions() (*client.JobActions, error
 	for _, mapData := range *actions {
 		actionTypeString, ok := mapData["type"].(string)
 		if !ok {
-			return nil, errors.New("Failed to deserialize client action, missing type")
+			return nil, errors.New("Failed to deserialize job action, missing type")
 		}
 		actionType, err := client.ParseJobActionType(actionTypeString)
 		if err != nil {
@@ -58,7 +56,6 @@ func (*interfaceJobActions) fromClientActions(clientActions *client.JobActions) 
 			if err := mapstructure.Decode(action, &mapData); err != nil {
 				return nil, err
 			}
-			mapData["type"] = actionType
 			actions = append(actions, mapData)
 		}
 	}

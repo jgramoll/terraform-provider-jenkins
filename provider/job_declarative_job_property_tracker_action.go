@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
 type jobDeclarativeJobPropertyTrackerAction struct {
+	Type   string `mapstructure:"type"`
 	Plugin string `mapstructure:"plugin"`
 }
 
 func newJobDeclarativeJobPropertyTrackerAction() jobAction {
-	return &jobDeclarativeJobPropertyTrackerAction{}
+	return &jobDeclarativeJobPropertyTrackerAction{
+		Type: string(client.DeclarativeJobPropertyTrackerActionType),
+	}
 }
 
 func (a *jobDeclarativeJobPropertyTrackerAction) fromClientAction(clientActionInterface client.JobAction) (jobAction, error) {
@@ -31,8 +33,4 @@ func (a *jobDeclarativeJobPropertyTrackerAction) toClientAction() (client.JobAct
 	clientAction := client.NewJobDeclarativeJobPropertyTrackerAction()
 	clientAction.Plugin = a.Plugin
 	return clientAction, nil
-}
-
-func (a *jobDeclarativeJobPropertyTrackerAction) setResourceData(d *schema.ResourceData) error {
-	return d.Set("plugin", a.Plugin)
 }

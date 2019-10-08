@@ -55,35 +55,34 @@ resource "jenkins_job" "main" {
     type = "DeclarativeJobPropertyTrackerAction"
     plugin = "pipeline-model-definition@1.3.9"
   }
-}
 
-resource "jenkins_job_git_scm" "main" {
-  job = "${jenkins_job.main.name}"
+	definition {
+		type   = "CpsScmFlowDefinition"
+		plugin = "workflow-cps@2.70"
 
-  plugin     = "workflow-cps@2.70"
-  git_plugin = "git@3.10.0"
+    scm {
+      type = "GitSCM"
+      plugin = "git@3.10.0"
 
-  config_version = "2"
-  script_path    = "Jenkinsfile.api"
-  lightweight    = false
-}
+      config_version = "2"
+      script_path    = "Jenkinsfile.api"
+      lightweight    = false
 
-resource "jenkins_job_git_scm_user_remote_config" "config_1" {
-  scm = "${jenkins_job_git_scm.main.id}"
+      user_remote_config {
+        refspec        = "$${GERRIT_REFSPEC}"
+        url            = "ssh://git.server/git-repo.git"
+        credentials_id = "123-abc"
+      }
 
-  refspec        = "$${GERRIT_REFSPEC}"
-  url            = "ssh://git.server/git-repo.git"
-  credentials_id = "123-abc"
-}
+      branch {
+        name = "FETCH_HEAD"
+      }
 
-resource "jenkins_job_git_scm_branch" "branch_1" {
-  scm = "${jenkins_job_git_scm.main.id}"
-
-  name = "FETCH_HEAD"
-}
-
-resource "jenkins_job_git_scm_clean_before_checkout_extension" "main" {
-  scm = "${jenkins_job_git_scm.main.id}"
+      extension {
+        type = "CleanBeforeCheckout"
+      }
+    }
+  }
 }
 
 resource "jenkins_job_pipeline_triggers_property" "main" {

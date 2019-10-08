@@ -4,12 +4,12 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func jobGitScmExtensionResource() *schema.Resource {
+func jobScmBranchResource() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"type": &schema.Schema{
+			"name": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Type of Extension",
+				Description: "Name of the scm branch",
 				Required:    true,
 			},
 		},

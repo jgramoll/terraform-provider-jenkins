@@ -21,7 +21,7 @@ func NewJobDeclarativeJobPropertyTrackerAction() *JobDeclarativeJobPropertyTrack
 }
 
 func (*JobDeclarativeJobPropertyTrackerAction) GetType() JobActionType {
-	return DeclarativeJobPropertyTrackerAction
+	return DeclarativeJobPropertyTrackerActionType
 }
 
 func unmarshalDeclarativeJobPropertyTrackerAction(d *xml.Decoder, start xml.StartElement) (JobAction, error) {

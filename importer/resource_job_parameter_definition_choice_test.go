@@ -24,26 +24,6 @@ func testParametersDefinitionProperty() *client.JobParametersDefinitionProperty 
 	return property
 }
 
-func TestEnsureJobParametersDefinitionProperty(t *testing.T) {
-	job := client.NewJob()
-	property := testParametersDefinitionProperty()
-	job.Properties = job.Properties.Append(property)
-
-	if err := ensureJob(job); err != nil {
-		t.Fatal(err)
-	}
-	if property.Id == "" {
-		t.Fatalf("Did not set Parameters Definition Property Id")
-	}
-	definitions := *property.ParameterDefinitions.Items
-	if definitions[0].GetId() == "" {
-		t.Fatalf("Did not set Parameter Definition 1 Id")
-	}
-	if definitions[1].GetId() == "" {
-		t.Fatalf("Did not set Parameter Definition 2 Id")
-	}
-}
-
 func TestJobParametersDefinitionPropertyCode(t *testing.T) {
 	job := client.NewJob()
 	property := testParametersDefinitionProperty()

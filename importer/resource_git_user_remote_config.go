@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/jgramoll/terraform-provider-jenkins/provider"
 )
 
 func ensureGitUserRemoteConfigs(configs *client.GitUserRemoteConfigs) error {
@@ -39,18 +38,6 @@ resource "jenkins_job_git_scm_user_remote_config" "config_%v" {
 	credentials_id = "%v"
 }
 `, i+1, refspec, item.Url, item.CredentialsId)
-	}
-	return code
-}
-
-func jobGitScmUserRemoteConfigsImportScript(
-	jobName string, definitionId string, configs *client.GitUserRemoteConfigs,
-) string {
-	code := ""
-	for i, item := range *configs.Items {
-		code += fmt.Sprintf(`
-terraform import jenkins_job_git_scm_user_remote_config.config_%v "%v"
-`, i+1, provider.ResourceJobGitScmUserRemoteConfigId(jobName, definitionId, item.Id))
 	}
 	return code
 }

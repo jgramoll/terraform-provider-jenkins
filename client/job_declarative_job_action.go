@@ -16,7 +16,7 @@ func NewJobDeclarativeJobAction() *JobDeclarativeJobAction {
 }
 
 func (*JobDeclarativeJobAction) GetType() JobActionType {
-	return DeclarativeJobAction
+	return DeclarativeJobActionType
 }
 
 func unmarshalDeclarativeJobAction(d *xml.Decoder, start xml.StartElement) (JobAction, error) {

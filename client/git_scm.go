@@ -72,38 +72,6 @@ func (scm *GitSCM) DeleteBranch(branchId string) error {
 	return ErrGitScmBranchNotFound
 }
 
-func (scm *GitSCM) GetExtension(extensionId string) (GitScmExtension, error) {
-	for _, extension := range *scm.Extensions.Items {
-		if extension.GetId() == extensionId {
-			return extension, nil
-		}
-	}
-	return nil, ErrGitScmExtensionNotFound
-}
-
-func (scm *GitSCM) UpdateExtension(extension GitScmExtension) error {
-	extensions := *scm.Extensions.Items
-	extensionId := extension.GetId()
-	for i, e := range extensions {
-		if e.GetId() == extensionId {
-			extensions[i] = extension
-			return nil
-		}
-	}
-	return ErrGitScmExtensionNotFound
-}
-
-func (scm *GitSCM) DeleteExtension(extensionId string) error {
-	extensions := *scm.Extensions.Items
-	for i, e := range extensions {
-		if e.GetId() == extensionId {
-			*scm.Extensions.Items = append(extensions[:i], extensions[i+1:]...)
-			return nil
-		}
-	}
-	return ErrGitScmExtensionNotFound
-}
-
 func (scm *GitSCM) GetUserRemoteConfig(configId string) (*GitUserRemoteConfig, error) {
 	if scm.UserRemoteConfigs == nil || scm.UserRemoteConfigs.Items == nil {
 		return nil, ErrGitScmUserRemoteConfigNotFound

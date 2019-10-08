@@ -16,15 +16,10 @@ func NewJobImportService(jenkinsClient *client.Client) *JobImportService {
 	}
 }
 
-func (s *JobImportService) Import(jobName string, skipEnsure bool, outputDir string) error {
+func (s *JobImportService) Import(jobName string, outputDir string) error {
 	job, err := s.jobService.GetJob(jobName)
 	if err != nil {
 		return err
-	}
-	if !skipEnsure {
-		if err := NewEnsureJobResourceService(s.jobService).EnsureResourceIds(job); err != nil {
-			return err
-		}
 	}
 
 	if err := ensureOutputDir(outputDir); err != nil {

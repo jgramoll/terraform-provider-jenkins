@@ -14,19 +14,6 @@ func testDisableConcurrentBuildsJobProperty() *client.JobDisableConcurrentBuilds
 	return property
 }
 
-func TestEnsureJobDisableConcurrentBuildsJobProperty(t *testing.T) {
-	job := client.NewJob()
-	property := testDisableConcurrentBuildsJobProperty()
-	job.Properties = job.Properties.Append(property)
-
-	if err := ensureJob(job); err != nil {
-		t.Fatal(err)
-	}
-	if property.Id == "" {
-		t.Fatalf("Did not set Disable Concurrent Builds Property Id")
-	}
-}
-
 func TestJobDisableConcurrentBuildsJobPropertyCode(t *testing.T) {
 	job := client.NewJob()
 	property := testDisableConcurrentBuildsJobProperty()

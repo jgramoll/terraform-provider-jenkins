@@ -44,21 +44,15 @@ func jobResource() *schema.Resource {
 				Default:     false,
 			},
 			"action": &schema.Schema{
-				Type:        schema.TypeList,
-				Description: "Name and id of the plugin",
-				Optional:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": &schema.Schema{
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"plugin": &schema.Schema{
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     jobActionResource(),
+			},
+			"definition": &schema.Schema{
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Elem:     jobDefinitionResource(),
 			},
 		},
 	}

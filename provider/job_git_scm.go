@@ -1,72 +1,48 @@
 package provider
 
 import (
-	"fmt"
-	"reflect"
-
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
 type jobGitScm struct {
-	Plugin        string `mapstructure:"plugin"`
-	GitPlugin     string `mapstructure:"git_plugin"`
-	ConfigVersion string `mapstructure:"config_version"`
-	ScriptPath    string `mapstructure:"script_path"`
-	Lightweight   bool   `mapstructure:"lightweight"`
+	Type              string                      `mapstructure:"type"`
+	Plugin            string                      `mapstructure:"plugin"`
+	ConfigVersion     string                      `mapstructure:"config_version"`
+	Branches          *jobGitScmBranches          `mapstructure:"branch"`
+	Extensions        *jobGitScmExtensions        `mapstructure:"extension"`
+	UserRemoteConfigs *jobGitScmUserRemoteConfigs `mapstructure:"user_remote_config"`
 }
 
 func newJobGitScm() *jobGitScm {
 	return &jobGitScm{
-		Lightweight: false,
+		Type: "GitSCM",
 	}
 }
 
-func (scm *jobGitScm) fromClientJobDefintion(clientDefinitionInterface client.JobDefinition) (jobDefinition, error) {
-	clientScmDefinition, ok := clientDefinitionInterface.(*client.CpsScmFlowDefinition)
-	if !ok {
-		return nil, fmt.Errorf("Strategy is not of expected type, expected *client.CpsScmFlowDefinition, actually %s",
-			reflect.TypeOf(clientDefinitionInterface).String())
-	}
-
-	definition := newJobGitScm()
-	definition.Plugin = clientScmDefinition.Plugin
-	definition.GitPlugin = clientScmDefinition.SCM.Plugin
-	definition.ConfigVersion = clientScmDefinition.SCM.ConfigVersion
-	definition.ScriptPath = clientScmDefinition.ScriptPath
-	definition.Lightweight = clientScmDefinition.Lightweight
-	return definition, nil
-}
-
-func (scm *jobGitScm) toClientDefinition(definitionId string) client.JobDefinition {
-	definition := client.NewCpsScmFlowDefinition()
-	definition.Id = definitionId
-	definition.Plugin = scm.Plugin
-	definition.SCM = scm.toClientSCM()
-	definition.ScriptPath = scm.ScriptPath
-	definition.Lightweight = scm.Lightweight
-	return definition
-}
-
-func (scm *jobGitScm) toClientSCM() *client.GitSCM {
+func (scm *jobGitScm) toClientSCM() (*client.GitSCM, error) {
 	clientScm := client.NewGitScm()
-	clientScm.Plugin = scm.GitPlugin
+	clientScm.Plugin = scm.Plugin
 	clientScm.ConfigVersion = scm.ConfigVersion
-	return clientScm
+	clientScm.Branches = scm.Branches.toClientBranches()
+	extensions, err := scm.Extensions.toClientExtensions()
+	if err != nil {
+		return nil, err
+	}
+	clientScm.Extensions = extensions
+	clientScm.UserRemoteConfigs = scm.UserRemoteConfigs.toClientConfigs()
+	return clientScm, nil
 }
 
-func (scm *jobGitScm) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("plugin", scm.Plugin); err != nil {
-		return err
+func (*jobGitScm) fromClientSCM(clientSCM *client.GitSCM) (*jobGitScm, error) {
+	scm := newJobGitScm()
+	scm.Plugin = clientSCM.Plugin
+	scm.ConfigVersion = clientSCM.ConfigVersion
+	scm.Branches = scm.Branches.fromClientBranches(clientSCM.Branches)
+	extensions, err := scm.Extensions.fromClientExtensions(clientSCM.Extensions)
+	if err != nil {
+		return nil, err
 	}
-	if err := d.Set("git_plugin", scm.GitPlugin); err != nil {
-		return err
-	}
-	if err := d.Set("config_version", scm.ConfigVersion); err != nil {
-		return err
-	}
-	if err := d.Set("script_path", scm.ScriptPath); err != nil {
-		return err
-	}
-	return d.Set("lightweight", scm.Lightweight)
+	scm.Extensions = extensions
+	scm.UserRemoteConfigs = scm.UserRemoteConfigs.fromClientConfigs(clientSCM.UserRemoteConfigs)
+	return scm, nil
 }

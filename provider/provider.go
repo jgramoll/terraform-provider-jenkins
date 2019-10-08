@@ -51,11 +51,6 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"jenkins_job": jobResource(),
 
-			"jenkins_job_git_scm":                                 jobGitScmResource(),
-			"jenkins_job_git_scm_user_remote_config":              jobGitScmUserRemoteConfigResource(),
-			"jenkins_job_git_scm_branch":                          jobGitScmBranchResource(),
-			"jenkins_job_git_scm_clean_before_checkout_extension": jobGitScmCleanBeforeCheckoutExtensionResource(),
-
 			"jenkins_job_build_discarder_property":                      jobBuildDiscarderPropertyResource(),
 			"jenkins_job_build_discarder_property_log_rotator_strategy": jobBuildDiscarderPropertyStrategyLogRotatorResource(),
 

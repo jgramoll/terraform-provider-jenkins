@@ -42,16 +42,6 @@ func testJobPipelineTriggersProperties() *[]client.JobProperty {
 	return &[]client.JobProperty{triggerJobProperty, triggerJobProperty2}
 }
 
-func TestEnsureJobGerritTrigger(t *testing.T) {
-	job := client.NewJob()
-	job.Properties.Items = testJobPipelineTriggersProperties()
-
-	if err := ensureJob(job); err != nil {
-		t.Fatal(err)
-	}
-	// TODO
-}
-
 func TestJobGerritTriggerCode(t *testing.T) {
 	job := client.NewJob()
 	job.Properties.Items = testJobPipelineTriggersProperties()

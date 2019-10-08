@@ -11,7 +11,8 @@ type job struct {
 	Plugin   string `mapstructure:"plugin"`
 	Disabled bool   `mapstructure:"disabled"`
 
-	Actions interfaceJobActions `mapstructure:"action"`
+	Actions    *interfaceJobActions    `mapstructure:"action"`
+	Definition *interfaceJobDefinition `mapstructure:"definition"`
 }
 
 func newJob() *job {
@@ -30,6 +31,11 @@ func (j *job) toClientJob(jobId string) (*client.Job, error) {
 		return nil, err
 	}
 	job.Actions = actions
+	definition, err := j.Definition.toClientDefinition()
+	if err != nil {
+		return nil, err
+	}
+	job.Definition = definition
 	return job, nil
 }
 
@@ -38,11 +44,17 @@ func JobfromClientJob(clientJob *client.Job) (*job, error) {
 	j.Plugin = clientJob.Plugin
 	j.Name = clientJob.Name
 	j.Disabled = clientJob.Disabled
+
 	actions, err := j.Actions.fromClientActions(clientJob.Actions)
 	if err != nil {
 		return nil, err
 	}
-	j.Actions = *actions
+	j.Actions = actions
+	definition, err := j.Definition.fromClientDefinition(clientJob.Definition)
+	if err != nil {
+		return nil, err
+	}
+	j.Definition = definition
 	return &j, nil
 }
 
@@ -57,6 +69,9 @@ func (j *job) setResourceData(d *schema.ResourceData) error {
 		return err
 	}
 	if err := d.Set("action", j.Actions); err != nil {
+		return err
+	}
+	if err := d.Set("definition", j.Definition); err != nil {
 		return err
 	}
 	return nil

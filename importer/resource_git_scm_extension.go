@@ -4,7 +4,6 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -13,22 +12,6 @@ type jobGitScmExtensionImportScriptFunc func(string, string, client.GitScmExtens
 
 var jobGitScmExtensionCodeFuncs = map[string]jobGitScmExtensionCodeFunc{}
 var jobGitScmExtensionImportScriptFuncs = map[string]jobGitScmExtensionImportScriptFunc{}
-
-func ensureGitScmExtensions(extensions *client.GitScmExtensions) error {
-	if extensions == nil || extensions.Items == nil {
-		return nil
-	}
-	for _, item := range *extensions.Items {
-		if item.GetId() == "" {
-			id, err := uuid.NewRandom()
-			if err != nil {
-				return err
-			}
-			item.SetId(id.String())
-		}
-	}
-	return nil
-}
 
 func jobGitScmExtensionsCode(extensions *client.GitScmExtensions) string {
 	code := ""

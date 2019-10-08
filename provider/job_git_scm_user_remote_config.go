@@ -23,9 +23,8 @@ func newJobGitScmUserRemoteConfigFromClient(clientConfig *client.GitUserRemoteCo
 	return config
 }
 
-func (config *jobGitScmUserRemoteConfig) toClientConfig(configId string) *client.GitUserRemoteConfig {
+func (config *jobGitScmUserRemoteConfig) toClientConfig() *client.GitUserRemoteConfig {
 	clientConfig := client.NewGitUserRemoteConfig()
-	clientConfig.Id = configId
 	clientConfig.Refspec = config.Refspec
 	clientConfig.Url = config.Url
 	clientConfig.CredentialsId = config.CredentialsId

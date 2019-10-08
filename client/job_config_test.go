@@ -25,12 +25,10 @@ func TestJobConfigSerialize(t *testing.T) {
 	definition.SCM.UserRemoteConfigs = definition.SCM.UserRemoteConfigs.Append(remoteConfig)
 
 	scmExtension := NewGitScmCleanBeforeCheckoutExtension()
-	scmExtension.Id = "extension-id"
 	definition.SCM.Extensions = definition.SCM.Extensions.Append(scmExtension)
 
 	branchSpec := NewGitScmBranchSpec()
 	branchSpec.Name = "branchspec"
-	definition.Id = "definition-id"
 	definition.SCM.Branches = definition.SCM.Branches.Append(branchSpec)
 	job.Definition = definition
 
@@ -167,7 +165,7 @@ func TestJobConfigSerialize(t *testing.T) {
 			</strategy>
 		</jenkins.model.BuildDiscarderProperty>
 	</properties>
-	<definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" id="definition-id">
+	<definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition">
 		<scm class="hudson.plugins.git.GitSCM">
 			<configVersion>my-version</configVersion>
 			<userRemoteConfigs>
@@ -184,7 +182,7 @@ func TestJobConfigSerialize(t *testing.T) {
 			</branches>
 			<doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
 			<extensions>
-				<hudson.plugins.git.extensions.impl.CleanBeforeCheckout id="extension-id"></hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
+				<hudson.plugins.git.extensions.impl.CleanBeforeCheckout></hudson.plugins.git.extensions.impl.CleanBeforeCheckout>
 			</extensions>
 		</scm>
 		<scriptPath></scriptPath>

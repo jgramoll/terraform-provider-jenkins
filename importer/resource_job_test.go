@@ -21,7 +21,6 @@ func testNewJob() *client.Job {
 	job.Actions = job.Actions.Append(declarativeJobPropertyTrackerAction)
 
 	definition := client.NewCpsScmFlowDefinition()
-	definition.Id = "definitionId"
 	definition.Plugin = "gitPlugin"
 	definition.ScriptPath = "my-Jenkinsfile"
 	definition.SCM = client.NewGitScm()
@@ -36,8 +35,6 @@ func testNewJob() *client.Job {
 	definition.SCM.UserRemoteConfigs = definition.SCM.UserRemoteConfigs.Append(remoteConfig)
 
 	scmExtension := client.NewGitScmCleanBeforeCheckoutExtension()
-	scmExtension.Id = "scmExtensionId"
-	scmExtension.Id = "extension-id"
 	definition.SCM.Extensions = definition.SCM.Extensions.Append(scmExtension)
 
 	branchSpec := client.NewGitScmBranchSpec()

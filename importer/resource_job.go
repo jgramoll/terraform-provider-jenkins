@@ -4,23 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func ensureJob(job *client.Job) error {
-	if job.Id == "" {
-		id, err := uuid.NewRandom()
-		if err != nil {
-			return err
-		}
-		job.Id = id.String()
-	}
-	if err := ensureJobProperties(job.Properties); err != nil {
-		return err
-	}
-	return ensureJobDefinition(job.Definition)
-}
 
 func jobCode(job *client.Job) string {
 	return strings.TrimSpace(fmt.Sprintf(`
