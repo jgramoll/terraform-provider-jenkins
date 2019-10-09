@@ -10,5 +10,5 @@ func providerCode(jenkinsAddress string) string {
 provider "jenkins" {
   address = "%s"
 }
-`, jenkinsAddress))
+`, jenkinsAddress)) + "\n"
 }
