@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/jgramoll/terraform-provider-jenkins/client"
@@ -47,125 +46,101 @@ func TestJobGerritTriggerCode(t *testing.T) {
 
 	result := jobCode(job)
 	expected := `resource "jenkins_job" "main" {
-	name     = ""
-	plugin   = ""
-	disabled = false
-}
+  name     = ""
+  plugin   = ""
+  disabled = false
 
-resource "jenkins_job_pipeline_triggers_property" "property_1" {
-	job = "${jenkins_job.main.name}"
-}
+  property {
+    type = "PipelineTriggersJobProperty"
 
-resource "jenkins_job_gerrit_trigger" "trigger_1_1" {
-	property = "${jenkins_job_pipeline_triggers_property.property_1.id}"
+    trigger {
+      type   = "GerritTrigger"
+      plugin = "gerrit-trigger@2.29.0"
 
-	plugin            = "gerrit-trigger@2.29.0"
-	server_name       = "__ANY__"
-	silent_mode       = false
-	silent_start_mode = false
-	escape_quotes     = true
+      server_name       = "__ANY__"
+      silent_mode       = false
+      silent_start_mode = false
+      escape_quotes     = true
 
-	name_and_email_parameter_mode = "PLAIN"
-	commit_message_parameter_mode = "BASE64"
-	change_subject_parameter_mode = "PLAIN"
-	comment_text_parameter_mode   = "BASE64"
-	dynamic_trigger_configuration = false
+      name_and_email_parameter_mode = "PLAIN"
+      commit_message_parameter_mode = "BASE64"
+      change_subject_parameter_mode = "PLAIN"
+      comment_text_parameter_mode   = "BASE64"
+      dynamic_trigger_configuration = false
 
-	skip_vote = {
-		on_successful = false
-		on_failed     = false
-		on_unstable   = false
-		on_not_built  = false
-	}
-}
+      skip_vote {
+        on_successful = false
+        on_failed     = false
+        on_unstable   = false
+        on_not_built  = false
+      }
 
-resource "jenkins_job_gerrit_trigger_change_merged_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.trigger_1_1.id}"
-}
+      trigger_on_event {
+        type = "PluginChangeMergedEvent"
+      }
 
-resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.trigger_1_1.id}"
+      trigger_on_event {
+        type = "PluginPatchsetCreatedEvent"
 
-	exclude_drafts         = false
-	exclude_trivial_rebase = false
-	exclude_no_code_change = false
-	exclude_private_state  = false
-	exclude_wip_state      = false
-}
+        exclude_drafts         = false
+        exclude_trivial_rebase = false
+        exclude_no_code_change = false
+        exclude_private_state  = false
+        exclude_wip_state      = false
+      }
 
-resource "jenkins_job_gerrit_trigger_draft_published_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.trigger_1_1.id}"
-}
+      trigger_on_event {
+        type = "PluginDraftPublishedEvent"
+      }
 
-resource "jenkins_job_gerrit_project" "project_1_1_1" {
-	trigger = "${jenkins_job_gerrit_trigger.trigger_1_1.id}"
+      gerrit_project {
+        compare_type = "PLAIN"
+        pattern      = "my-project"
 
-	compare_type = "PLAIN"
-	pattern      = "my-project"
-}
+        branch {
+          compare_type = "REG_EXP"
+          pattern      = "my-branch"
+        }
 
-resource "jenkins_job_gerrit_branch" "branch_1_1_1_1" {
-	project = "${jenkins_job_gerrit_project.project_1_1_1.id}"
+        file_path {
+          compare_type = "REG_EXP"
+          pattern      = "my-file-path"
+        }
+      }
+    }
+  }
 
-	compare_type = "REG_EXP"
-	pattern      = "my-branch"
-}
+  property {
+    type = "PipelineTriggersJobProperty"
 
-resource "jenkins_job_gerrit_file_path" "file_path_1_1_1_1" {
-	project = "${jenkins_job_gerrit_project.project_1_1_1.id}"
+    trigger {
+      type   = "GerritTrigger"
+      plugin = ""
 
-	compare_type = "REG_EXP"
-	pattern      = "my-file-path"
-}
+      server_name       = "__ANY__"
+      silent_mode       = false
+      silent_start_mode = false
+      escape_quotes     = true
 
-resource "jenkins_job_pipeline_triggers_property" "property_2" {
-	job = "${jenkins_job.main.name}"
-}
+      name_and_email_parameter_mode = "PLAIN"
+      commit_message_parameter_mode = "BASE64"
+      change_subject_parameter_mode = "PLAIN"
+      comment_text_parameter_mode   = "BASE64"
+      dynamic_trigger_configuration = false
 
-resource "jenkins_job_gerrit_trigger" "trigger_2_1" {
-	property = "${jenkins_job_pipeline_triggers_property.property_2.id}"
-
-	plugin            = ""
-	server_name       = "__ANY__"
-	silent_mode       = false
-	silent_start_mode = false
-	escape_quotes     = true
-
-	name_and_email_parameter_mode = "PLAIN"
-	commit_message_parameter_mode = "BASE64"
-	change_subject_parameter_mode = "PLAIN"
-	comment_text_parameter_mode   = "BASE64"
-	dynamic_trigger_configuration = false
-
-	skip_vote = {
-		on_successful = false
-		on_failed     = false
-		on_unstable   = false
-		on_not_built  = false
-	}
+      skip_vote {
+        on_successful = false
+        on_failed     = false
+        on_unstable   = false
+        on_not_built  = false
+      }
+    }
+  }
 }
 `
 	if result != expected {
 		dmp := diffmatchpatch.New()
 		diffs := dmp.DiffMain(expected, result, false)
 		t.Fatalf("job terraform code not as expected: %s", dmp.DiffPrettyText(diffs))
-	}
-}
-
-func TestJobGerritTriggerImportScript(t *testing.T) {
-	job := client.NewJob()
-	job.Name = "name"
-	properties := testJobPipelineTriggersProperties()
-	job.Properties.Items = properties
-
-	result := jobImportScript(job)
-	expected := fmt.Sprintf(`terraform init
-
-terraform import jenkins_job.main "%v"
-`, job.Name)
-	if result != expected {
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(expected, result, false)
-		t.Fatalf("job terraform import script not as expected: %s", dmp.DiffPrettyText(diffs))
 	}
 }

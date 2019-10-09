@@ -64,71 +64,72 @@ func TestJobCode(t *testing.T) {
 
 	result := jobCode(job)
 	expected := `resource "jenkins_job" "main" {
-	name     = "Premerge checks"
-	plugin   = "flow-plugin"
-	disabled = false
-}
+  name     = "Premerge checks"
+  plugin   = "flow-plugin"
+  disabled = false
 
-resource "jenkins_job_declarative_job_action" "main" {
-	job = "${jenkins_job.main.name}"
-	plugin = "DeclarativeJobPlugin"
-}
+  action {
+    type = "DeclarativeJobAction"
+    plugin = "DeclarativeJobPlugin"
+  }
 
-resource "jenkins_job_declarative_job_property_tracker_action" "main" {
-	job = "${jenkins_job.main.name}"
-	plugin = "DeclarativeJobTrackerPlugin"
-}
+  action {
+    type = "DeclarativeJobPropertyTrackerAction"
+    plugin = "DeclarativeJobTrackerPlugin"
+  }
 
-resource "jenkins_job_git_scm" "main" {
-	job = "${jenkins_job.main.name}"
+  definition {
+    type   = "CpsScmFlowDefinition"
+    plugin = "gitPlugin"
 
-	plugin     = "gitPlugin"
-	git_plugin = "gitScmPlugin"
+    scm {
+      type = "GitSCM"
+      plugin = "gitScmPlugin"
 
-	config_version = "my-version"
-	script_path    = "my-Jenkinsfile"
-	lightweight    = false
-}
+      config_version = "my-version"
+      script_path    = "my-Jenkinsfile"
+      lightweight    = false
 
-resource "jenkins_job_git_scm_user_remote_config" "config_1" {
-	scm = "${jenkins_job_git_scm.main.id}"
+      user_remote_config {
+        refspec        = "$${GERRIT_REFSPEC}"
+        url            = "url.to.server"
+        credentials_id = "creds"
+      }
 
-	refspec        = "$${GERRIT_REFSPEC}"
-	url            = "url.to.server"
-	credentials_id = "creds"
-}
+      branch {
+        name = "branchspec"
+      }
 
-resource "jenkins_job_git_scm_branch" "branch_1" {
-	scm = "${jenkins_job_git_scm.main.id}"
+      extension {
+        type = "CleanBeforeCheckout"
+      }
+    }
+  }
 
-	name = "branchspec"
-}
+  property {
+    type = "BuildDiscarderProperty"
 
-resource "jenkins_job_git_scm_clean_before_checkout_extension" "main" {
-	scm = "${jenkins_job_git_scm.main.id}"
-}
+    strategy {
+      type  = "LogRotator"
 
-resource "jenkins_job_build_discarder_property" "property_1" {
-	job = "${jenkins_job.main.name}"
-}
+      days_to_keep          = "1"
+      num_to_keep           = "2"
+      artifact_days_to_keep = "3"
+      artifact_num_to_keep  = "4"
+    }
+  }
 
-resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
-	property = "${jenkins_job_build_discarder_property.property_1.id}"
+  property {
+    type = "DatadogJobProperty"
+    plugin="datadog@0.7.1"
 
-	days_to_keep          = "1"
-	num_to_keep           = "2"
-	artifact_days_to_keep = "3"
-	artifact_num_to_keep  = "4"
-}
+    emit_on_checkout = false
+  }
 
-resource "jenkins_job_datadog_job_property" "property_2" {
-	job = "${jenkins_job.main.name}"
-}
-
-resource "jenkins_job_jira_project_property" "property_3" {
-	job = "${jenkins_job.main.name}"
-
-	plugin = "jiraPlugin"
+  property {
+    type = "JiraProjectProperty"
+    plugin="jiraPlugin"
+  }
 }
 `
 	if result != expected {
@@ -142,7 +143,8 @@ func TestJobImportScript(t *testing.T) {
 	job := testNewJob()
 
 	result := jobImportScript(job)
-	expected := `terraform init
+	expected := `
+terraform init
 
 terraform import jenkins_job.main "Premerge checks"
 `

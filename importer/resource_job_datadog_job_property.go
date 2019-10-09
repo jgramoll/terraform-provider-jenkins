@@ -10,10 +10,14 @@ func init() {
 	jobPropertyCodeFuncs["*client.JobDatadogJobProperty"] = jobDatadogJobPropertyCode
 }
 
-func jobDatadogJobPropertyCode(propertyIndex string, property client.JobProperty) string {
+func jobDatadogJobPropertyCode(propertyInterface client.JobProperty) string {
+	property := propertyInterface.(*client.JobDatadogJobProperty)
 	return fmt.Sprintf(`
-resource "jenkins_job_datadog_job_property" "property_%v" {
-	job = "${jenkins_job.main.name}"
-}
-`, propertyIndex)
+  property {
+    type = "DatadogJobProperty"
+    plugin="%s"
+
+    emit_on_checkout = %v
+  }
+`, property.Plugin, property.EmitOnCheckout)
 }

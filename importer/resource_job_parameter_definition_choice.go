@@ -11,9 +11,7 @@ func init() {
 	jobParameterDefinitionCodeFuncs["*client.JobParameterDefinitionChoice"] = jobParameterDefinitionChoiceCode
 }
 
-func jobParameterDefinitionChoiceCode(
-	propertyIndex string, parameterIndex string, propertyInterface client.JobParameterDefinition,
-) string {
+func jobParameterDefinitionChoiceCode(propertyInterface client.JobParameterDefinition) string {
 	definition := propertyInterface.(*client.JobParameterDefinitionChoice)
 
 	choices := *definition.Choices.Items.Items
@@ -22,13 +20,11 @@ func jobParameterDefinitionChoiceCode(
 	}
 	choicesString := fmt.Sprintf("[%v]", strings.Join(choices, ", "))
 	return fmt.Sprintf(`
-resource "jenkins_job_parameter_definition_choice" "parameter_%v" {
-	property = "${jenkins_job_parameters_definition_property.property_%v.id}"
-
-	name        = "%v"
-	description = "%v"
-	choices     = %v
-}
-`, parameterIndex, propertyIndex,
-		definition.Name, definition.Description, choicesString)
+    parameter {
+      type = "ChoiceParameterDefinition"
+      name = "%s"
+      description = "%s"
+      choices = %s
+    }
+`, definition.Name, definition.Description, choicesString)
 }

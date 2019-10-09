@@ -29,7 +29,9 @@ func (s *JobImportService) Import(jobName string, outputDir string) error {
 	if err := NewGenerateTerraformCodeService(s.jobService).GenerateCode(job, outputDir); err != nil {
 		return err
 	}
-	return NewGenerateTerraformImportService(s.jobService).GenerateScript(job, outputDir)
+	println("Now import the state:")
+	println(jobImportScript(job))
+	return nil
 }
 
 func ensureOutputDir(outputDir string) error {

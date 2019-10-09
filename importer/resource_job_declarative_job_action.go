@@ -13,9 +13,9 @@ func init() {
 func jobDeclarativeJobActionCode(actionInterface client.JobAction) string {
 	action := actionInterface.(*client.JobDeclarativeJobAction)
 	return fmt.Sprintf(`
-resource "jenkins_job_declarative_job_action" "main" {
-	job = "${jenkins_job.main.name}"
-	plugin = "%v"
-}
+  action {
+    type = "DeclarativeJobAction"
+    plugin = "%s"
+  }
 `, action.Plugin)
 }

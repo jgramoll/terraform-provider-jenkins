@@ -29,29 +29,27 @@ func TestJobParametersDefinitionPropertyCode(t *testing.T) {
 
 	result := jobCode(job)
 	expected := `resource "jenkins_job" "main" {
-	name     = ""
-	plugin   = ""
-	disabled = false
-}
+  name     = ""
+  plugin   = ""
+  disabled = false
 
-resource "jenkins_job_parameters_definition_property" "property_1" {
-	job = "${jenkins_job.main.name}"
-}
+  property {
+    type = "ParametersDefinitionProperty"
 
-resource "jenkins_job_parameter_definition_choice" "parameter_1_1" {
-	property = "${jenkins_job_parameters_definition_property.property_1.id}"
+    parameter {
+      type = "ChoiceParameterDefinition"
+      name = "choic 1"
+      description = "desc"
+      choices = ["1", "a", "alpha"]
+    }
 
-	name        = "choic 1"
-	description = "desc"
-	choices     = ["1", "a", "alpha"]
-}
-
-resource "jenkins_job_parameter_definition_choice" "parameter_1_2" {
-	property = "${jenkins_job_parameters_definition_property.property_1.id}"
-
-	name        = "choic 2"
-	description = "desc"
-	choices     = ["2", "b", "beta"]
+    parameter {
+      type = "ChoiceParameterDefinition"
+      name = "choic 2"
+      description = "desc"
+      choices = ["2", "b", "beta"]
+    }
+  }
 }
 `
 	if result != expected {

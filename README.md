@@ -30,9 +30,8 @@ go get github.com/jgramoll/terraform-provider-jenkins/importer
 importer --job "Name of your Job" --output my_tf_dir
 ```
 
-1. Ensures each resource has a valid id
 1. Outputs terraform code to match the job
-1. Outputs script that will import the resources to tf state
+1. Prints script that will import the resources to tf state
 
 ### Resources ###
 

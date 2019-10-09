@@ -13,18 +13,21 @@ func init() {
 func cpsScmFlowDefinitionCode(definitionInterface client.JobDefinition) string {
 	definition := definitionInterface.(*client.CpsScmFlowDefinition)
 	return fmt.Sprintf(`
-resource "jenkins_job_git_scm" "main" {
-	job = "${jenkins_job.main.name}"
+  definition {
+    type   = "CpsScmFlowDefinition"
+    plugin = "%s"
 
-	plugin     = "%v"
-	git_plugin = "%v"
+    scm {
+      type = "GitSCM"
+      plugin = "%s"
 
-	config_version = "%v"
-	script_path    = "%v"
-	lightweight    = %v
-}
-`, definition.Plugin, definition.SCM.Plugin, definition.SCM.ConfigVersion, definition.ScriptPath, definition.Lightweight) +
-		jobGitScmUserRemoteConfigsCode(definition.SCM.UserRemoteConfigs) +
-		jobGitScmBranchesCode(definition.SCM.Branches) +
-		jobGitScmExtensionsCode(definition.SCM.Extensions)
+      config_version = "%s"
+      script_path    = "%s"
+      lightweight    = %v
+%s%s%s    }
+  }
+`, definition.Plugin, definition.SCM.Plugin, definition.SCM.ConfigVersion, definition.ScriptPath, definition.Lightweight,
+		jobGitScmUserRemoteConfigsCode(definition.SCM.UserRemoteConfigs),
+		jobGitScmBranchesCode(definition.SCM.Branches),
+		jobGitScmExtensionsCode(definition.SCM.Extensions))
 }

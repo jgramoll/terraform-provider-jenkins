@@ -19,13 +19,13 @@ func TestJobDisableConcurrentBuildsJobPropertyCode(t *testing.T) {
 
 	result := jobCode(job)
 	expected := `resource "jenkins_job" "main" {
-	name     = ""
-	plugin   = ""
-	disabled = false
-}
+  name     = ""
+  plugin   = ""
+  disabled = false
 
-resource "jenkins_job_disable_concurrent_builds_property" "property_1" {
-	job = "${jenkins_job.main.name}"
+  property {
+    type = "DisableConcurrentBuildsJobProperty"
+  }
 }
 `
 	if result != expected {
