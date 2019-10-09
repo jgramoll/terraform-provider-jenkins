@@ -1,15 +1,8 @@
 package client
 
 import (
-	"errors"
 	"strings"
 )
-
-// ErrJobPropertyNotFound job property not found
-var ErrJobPropertyNotFound = errors.New("Could not find job property")
-
-// ErrJobActionNotFound job action not found
-var ErrJobActionNotFound = errors.New("Could not find job action")
 
 // Job
 type Job struct {

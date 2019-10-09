@@ -2,18 +2,11 @@ package client
 
 import (
 	"encoding/xml"
-	"errors"
 )
 
 func init() {
 	jobTriggerUnmarshalFunc["com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger"] = unmarshalJobGerritTrigger
 }
-
-// ErrJobGerritTriggerProjectNotFound job gerrit trigger project not found
-var ErrJobGerritTriggerProjectNotFound = errors.New("Could not find job gerrit trigger project")
-
-// ErrJobGerritTriggerEventNotFound job gerrit trigger event not found
-var ErrJobGerritTriggerEventNotFound = errors.New("Could not find job gerrit trigger event")
 
 type JobGerritTrigger struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger"`

@@ -2,15 +2,11 @@ package client
 
 import (
 	"encoding/xml"
-	"errors"
 )
 
 func init() {
 	propertyUnmarshalFunc["hudson.model.ParametersDefinitionProperty"] = unmarshalJobParametersDefinitionProperty
 }
-
-// ErrJobParameterDefinitionNotFound job parameter definition not found
-var ErrJobParameterDefinitionNotFound = errors.New("Could not find job parameter definition")
 
 type JobParametersDefinitionProperty struct {
 	XMLName xml.Name `xml:"hudson.model.ParametersDefinitionProperty"`

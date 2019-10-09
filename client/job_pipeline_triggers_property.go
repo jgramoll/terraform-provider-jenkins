@@ -2,15 +2,11 @@ package client
 
 import (
 	"encoding/xml"
-	"errors"
 )
 
 func init() {
 	propertyUnmarshalFunc["org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty"] = unmarshalPipelineTriggersProperty
 }
-
-// ErrJobTriggerNotFound job property not found
-var ErrJobTriggerNotFound = errors.New("Could not find job pipeline trigger")
 
 type JobPipelineTriggersProperty struct {
 	XMLName  xml.Name     `xml:"org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty"`

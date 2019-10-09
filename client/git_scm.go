@@ -2,17 +2,7 @@ package client
 
 import (
 	"encoding/xml"
-	"errors"
 )
-
-// ErrGitScmBranchNotFound git scm branch not found
-var ErrGitScmBranchNotFound = errors.New("Could not find git scm branch")
-
-// ErrGitScmExtensionNotFound git scm extension not found
-var ErrGitScmExtensionNotFound = errors.New("Could not find git scm extension")
-
-// ErrGitScmUserRemoteConfigNotFound git scm user remote config not found
-var ErrGitScmUserRemoteConfigNotFound = errors.New("Could not find git scm scm user remote config")
 
 type GitSCM struct {
 	XMLName xml.Name `xml:"scm"`
