@@ -2,21 +2,17 @@ package provider
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
 func TestAccJobGerritBranchBasic(t *testing.T) {
 	var jobRef client.Job
-	var branches []*client.JobGerritTriggerBranch
 	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	jobResourceName := "jenkins_job.main"
-	branchResourceName := "jenkins_job_gerrit_branch.main"
 	compareType := "PLAIN"
 	newCompareType := "REG_EXP"
 
@@ -27,48 +23,17 @@ func TestAccJobGerritBranchBasic(t *testing.T) {
 			{
 				Config: testAccJobGerritBranchConfigBasic(jobName, compareType),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(branchResourceName, "compare_type", compareType),
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGerritBranches(&jobRef, []string{
-						branchResourceName,
-					}, &branches),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.gerrit_project.0.branch.0.compare_type", compareType),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.gerrit_project.0.branch.0.pattern", "branch_pattern"),
 				),
 			},
 			{
 				Config: testAccJobGerritBranchConfigBasic(jobName, newCompareType),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(branchResourceName, "compare_type", newCompareType),
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGerritBranches(&jobRef, []string{
-						branchResourceName,
-					}, &branches),
-				),
-			},
-			{
-				ResourceName:  branchResourceName,
-				ImportStateId: "invalid",
-				ImportState:   true,
-				ExpectError:   regexp.MustCompile("Invalid gerrit branch id"),
-			},
-			{
-				ResourceName: branchResourceName,
-				ImportState:  true,
-				ImportStateIdFunc: func(*terraform.State) (string, error) {
-					if len(branches) == 0 {
-						return "", fmt.Errorf("no branches to import")
-					}
-					property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
-					trigger := (*property.Triggers.Items)[0].(*client.JobGerritTrigger)
-					project := (*trigger.Projects.Items)[0]
-					return ResourceJobGerritBranchId(jobName, property.GetId(), trigger.GetId(), project.Id, branches[0].Id), nil
-				},
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccJobGerritProjectConfigBasic(jobName),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGerritBranches(&jobRef, []string{}, &branches),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.gerrit_project.0.branch.0.compare_type", newCompareType),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.gerrit_project.0.branch.0.pattern", "branch_pattern"),
 				),
 			},
 		},
@@ -76,65 +41,29 @@ func TestAccJobGerritBranchBasic(t *testing.T) {
 }
 
 func testAccJobGerritBranchConfigBasic(jobName string, compareType string) string {
-	return testAccJobGerritProjectConfigBasic(jobName) + fmt.Sprintf(`
-resource "jenkins_job_gerrit_branch" "main" {
-  project = "${jenkins_job_gerrit_project.main.id}"
+	return fmt.Sprintf(`
+resource "jenkins_job" "main" {
+	name     = "%s"
+	plugin   = "workflow-job@2.33"
 
-  compare_type = "%v"
-  pattern      = "^(?!refs/meta/config).*$"
-}
-`, compareType)
-}
+	property {
+		type = "PipelineTriggersJobProperty"
 
-func testAccCheckJobGerritBranches(jobRef *client.Job, expectedBranchResourceNames []string, returnBranches *[]*client.JobGerritTriggerBranch) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
+		trigger {
+			type   = "GerritTrigger"
+			plugin = "gerrit-trigger@2.29.0"
+			skip_vote {}
 
-		property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
-		trigger := (*property.Triggers.Items)[0].(*client.JobGerritTrigger)
-		project := (*trigger.Projects.Items)[0]
+			gerrit_project {
+				compare_type = "REG_EXP"
+				pattern      = "gerrit_project"
 
-		if project.Branches.Items == nil && len(expectedBranchResourceNames) > 0 {
-			return fmt.Errorf("Expected %v branches, found 0", len(expectedBranchResourceNames))
-		}
-		if project.Branches.Items != nil && len(*project.Branches.Items) != len(expectedBranchResourceNames) {
-			return fmt.Errorf("Expected %v branches, found %v", len(expectedBranchResourceNames), len(*jobRef.Properties.Items))
-		}
-		for _, resourceName := range expectedBranchResourceNames {
-			branchResource, ok := s.RootModule().Resources[resourceName]
-			if !ok {
-				return fmt.Errorf("Job Gerrit Branch Resource not found: %s", resourceName)
+				branch {
+					compare_type = "%s"
+					pattern      = "branch_pattern"
+				}
 			}
-
-			branch, err := ensureBranch(project, branchResource)
-			if err != nil {
-				return err
-			}
-			*returnBranches = append(*returnBranches, branch)
 		}
-
-		return nil
 	}
-}
-
-func ensureBranch(project *client.JobGerritTriggerProject, resource *terraform.ResourceState) (*client.JobGerritTriggerBranch, error) {
-	_, _, _, _, branchId, err := resourceJobGerritBranchParseId(resource.Primary.Attributes["id"])
-	if err != nil {
-		return nil, err
-	}
-
-	branch, err := project.GetBranch(branchId)
-	if err != nil {
-		return nil, err
-	}
-
-	if branch.CompareType.String() != resource.Primary.Attributes["compare_type"] {
-		return nil, fmt.Errorf("expected compare_type %s, got %s",
-			resource.Primary.Attributes["compare_type"], branch.CompareType)
-	}
-	if branch.Pattern != resource.Primary.Attributes["pattern"] {
-		return nil, fmt.Errorf("expected pattern %s, got %s",
-			resource.Primary.Attributes["pattern"], branch.Pattern)
-	}
-
-	return branch, nil
+}`, jobName, compareType)
 }

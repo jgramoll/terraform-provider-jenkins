@@ -4,7 +4,6 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -14,26 +13,6 @@ type jobGerritTriggerOnEventsImportScriptFunc func(
 
 var jobGerritTriggerOnEventsCodeFuncs = map[string]jobGerritTriggerOnEventsCodeFunc{}
 var jobGerritTriggerOnEventsImportScriptFuncs = map[string]jobGerritTriggerOnEventsImportScriptFunc{}
-
-func init() {
-	ensureJobTriggerFuncs["*client.JobGerritTrigger"] = ensureJobGerritTrigger
-}
-
-func ensureJobGerritTriggerOnEvents(events *client.JobGerritTriggerOnEvents) error {
-	if events == nil || events.Items == nil {
-		return nil
-	}
-	for _, item := range *events.Items {
-		if item.GetId() == "" {
-			id, err := uuid.NewRandom()
-			if err != nil {
-				return err
-			}
-			item.SetId(id.String())
-		}
-	}
-	return nil
-}
 
 func jobGerritTriggerOnEventsCode(
 	triggerIndex string, events *client.JobGerritTriggerOnEvents,

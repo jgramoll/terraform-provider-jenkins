@@ -4,18 +4,26 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
+func init() {
+	jobTriggerEventInitFunc[client.PluginChangeMergedEventType] = func() jobGerritTriggerEvent {
+		return newJobGerritTriggerChangeMergedEvent()
+	}
+}
+
 type jobGerritTriggerChangeMergedEvent struct {
+	Type client.JobGerritTriggerOnEventType `mapstructure:"type"`
 }
 
 func newJobGerritTriggerChangeMergedEvent() *jobGerritTriggerChangeMergedEvent {
-	return &jobGerritTriggerChangeMergedEvent{}
+	return &jobGerritTriggerChangeMergedEvent{
+		Type: client.PluginChangeMergedEventType,
+	}
 }
 
-func (e *jobGerritTriggerChangeMergedEvent) fromClientJobTriggerEvent(clientEventInterface client.JobGerritTriggerOnEvent) (jobGerritTriggerEvent, error) {
+func (e *jobGerritTriggerChangeMergedEvent) fromClientTriggerEvent(clientEventInterface client.JobGerritTriggerOnEvent) (jobGerritTriggerEvent, error) {
 	_, ok := clientEventInterface.(*client.JobGerritTriggerPluginChangeMergedEvent)
 	if !ok {
 		return nil, fmt.Errorf("Unexpected event type got %s, expected *client.JobGerritTriggerPluginChangeMergedEvent",
@@ -25,12 +33,7 @@ func (e *jobGerritTriggerChangeMergedEvent) fromClientJobTriggerEvent(clientEven
 	return event, nil
 }
 
-func (event *jobGerritTriggerChangeMergedEvent) toClientJobTriggerEvent(eventId string) (client.JobGerritTriggerOnEvent, error) {
+func (event *jobGerritTriggerChangeMergedEvent) toClientTriggerEvent() (client.JobGerritTriggerOnEvent, error) {
 	clientEvent := client.NewJobGerritTriggerPluginChangeMergedEvent()
-	clientEvent.Id = eventId
 	return clientEvent, nil
-}
-
-func (event *jobGerritTriggerChangeMergedEvent) setResourceData(d *schema.ResourceData) error {
-	return nil
 }

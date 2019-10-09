@@ -3,33 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/jgramoll/terraform-provider-jenkins/provider"
 )
 
 func init() {
-	ensureJobTriggerFuncs["*client.JobGerritTrigger"] = ensureJobGerritTrigger
 	jobTriggerCodeFuncs["*client.JobGerritTrigger"] = jobGerritTriggerCode
-	jobTriggerImportScriptFuncs["*client.JobGerritTrigger"] = jobGerritTriggerImportScript
-}
-
-func ensureJobGerritTrigger(triggerInterface client.JobTrigger) error {
-	trigger := triggerInterface.(*client.JobGerritTrigger)
-	if trigger.Id == "" {
-		id, err := uuid.NewRandom()
-		if err != nil {
-			return err
-		}
-		trigger.Id = id.String()
-	}
-	if err := ensureJobDynamicGerritProjects(trigger.DynamicGerritProjects); err != nil {
-		return err
-	}
-	if err := ensureJobGerritTriggerProjects(trigger.Projects); err != nil {
-		return err
-	}
-	return ensureJobGerritTriggerOnEvents(trigger.TriggerOnEvents)
 }
 
 func jobGerritTriggerCode(propertyIndex string, triggerIndex string, triggerInterface client.JobTrigger) string {
@@ -68,20 +46,4 @@ resource "jenkins_job_gerrit_trigger" "trigger_%v" {
 		trigger.SkipVote.OnSuccessful, trigger.SkipVote.OnFailed,
 		trigger.SkipVote.OnUnstable, trigger.SkipVote.OnNotBuilt) +
 		triggerOnEvents + triggerProjects + dynamicGerritProjects
-}
-
-func jobGerritTriggerImportScript(
-	triggerIndex string,
-	jobName string,
-	propertyId string,
-	triggerInterface client.JobTrigger,
-) string {
-	trigger := triggerInterface.(*client.JobGerritTrigger)
-
-	return fmt.Sprintf(`
-terraform import jenkins_job_gerrit_trigger.trigger_%v "%v"
-`, triggerIndex, provider.ResourceJobTriggerId(jobName, propertyId, trigger.Id)) +
-		jobGerritTriggerOnEventsImportScript(jobName, propertyId, trigger.Id, trigger.TriggerOnEvents) +
-		jobGerritTriggerProjectsImportScript(triggerIndex, jobName, propertyId, trigger.Id, trigger.Projects) +
-		jobDynamicGerritProjectsImportScript(trigger.DynamicGerritProjects)
 }

@@ -21,9 +21,8 @@ func newJobGerritBranchFromClient(clientBranch *client.JobGerritTriggerBranch) *
 	return branch
 }
 
-func (branch *jobGerritBranch) toClientBranch(branchId string) (*client.JobGerritTriggerBranch, error) {
+func (branch *jobGerritBranch) toClientBranch() (*client.JobGerritTriggerBranch, error) {
 	clientBranch := client.NewJobGerritTriggerBranch()
-	clientBranch.Id = branchId
 	compareType, err := client.ParseCompareType(branch.CompareType)
 	if err != nil {
 		return nil, err

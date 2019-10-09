@@ -7,26 +7,32 @@ import (
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
-type jobDeclarativeJobPropertyTrackerAction struct {
-	Type   string `mapstructure:"type"`
-	Plugin string `mapstructure:"plugin"`
-}
-
-func newJobDeclarativeJobPropertyTrackerAction() jobAction {
-	return &jobDeclarativeJobPropertyTrackerAction{
-		Type: string(client.DeclarativeJobPropertyTrackerActionType),
+func init() {
+	jobActionInitFunc[client.DeclarativeJobPropertyTrackerActionType] = func() jobAction {
+		return newJobDeclarativeJobPropertyTrackerAction()
 	}
 }
 
-func (a *jobDeclarativeJobPropertyTrackerAction) fromClientAction(clientActionInterface client.JobAction) (jobAction, error) {
+type jobDeclarativeJobPropertyTrackerAction struct {
+	Type   client.JobActionType `mapstructure:"type"`
+	Plugin string               `mapstructure:"plugin"`
+}
+
+func newJobDeclarativeJobPropertyTrackerAction() *jobDeclarativeJobPropertyTrackerAction {
+	return &jobDeclarativeJobPropertyTrackerAction{
+		Type: client.DeclarativeJobPropertyTrackerActionType,
+	}
+}
+
+func (*jobDeclarativeJobPropertyTrackerAction) fromClientAction(clientActionInterface client.JobAction) (jobAction, error) {
 	clientAction, ok := clientActionInterface.(*client.JobDeclarativeJobPropertyTrackerAction)
 	if !ok {
 		return nil, fmt.Errorf("Failed to parse client action, expected *client.JobDeclarativeJobPropertyTrackerAction, got %s",
 			reflect.TypeOf(clientActionInterface).String())
 	}
-	action := jobDeclarativeJobPropertyTrackerAction{}
+	action := newJobDeclarativeJobPropertyTrackerAction()
 	action.Plugin = clientAction.Plugin
-	return &action, nil
+	return action, nil
 }
 
 func (a *jobDeclarativeJobPropertyTrackerAction) toClientAction() (client.JobAction, error) {

@@ -3,25 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
-
-func ensureGitScmBranches(branches *client.GitScmBranches) error {
-	if branches == nil || branches.Items == nil {
-		return nil
-	}
-	for _, item := range *branches.Items {
-		if item.Id == "" {
-			id, err := uuid.NewRandom()
-			if err != nil {
-				return err
-			}
-			item.Id = id.String()
-		}
-	}
-	return nil
-}
 
 func jobGitScmBranchesCode(branches *client.GitScmBranches) string {
 	code := ""

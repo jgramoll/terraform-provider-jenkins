@@ -4,12 +4,10 @@ import (
 	"fmt"
 
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/jgramoll/terraform-provider-jenkins/provider"
 )
 
 func init() {
 	jobPropertyCodeFuncs["*client.JobJiraProjectProperty"] = jobJiraProjectPropertyCode
-	jobPropertyImportScriptFuncs["*client.JobJiraProjectProperty"] = jobJiraProjectPropertyImportScript
 }
 
 func jobJiraProjectPropertyCode(propertyIndex string, propertyInterface client.JobProperty) string {
@@ -21,10 +19,4 @@ resource "jenkins_job_jira_project_property" "property_%v" {
 	plugin = "%v"
 }
 `, propertyIndex, property.Plugin)
-}
-
-func jobJiraProjectPropertyImportScript(propertyIndex string, jobName string, p client.JobProperty) string {
-	return fmt.Sprintf(`
-terraform import jenkins_job_jira_project_property.property_%v "%v"
-`, propertyIndex, provider.ResourceJobPropertyId(jobName, p.GetId()))
 }

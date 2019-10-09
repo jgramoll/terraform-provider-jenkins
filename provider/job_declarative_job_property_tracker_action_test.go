@@ -19,15 +19,15 @@ func TestAccJobDeclarativeJobPropertyTrackerActionBasic(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccJobDeclarativeJobPropertyTrackerActionConfig(jobName),
+				Config: testAccJobDeclarativeJobPropertyTrackerActionConfig(jobName, "pipeline-model-definition@1.3.7"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					resource.TestCheckResourceAttr(jobResourceName, "action.0.type", "DeclarativeJobPropertyTrackerAction"),
-					resource.TestCheckResourceAttr(jobResourceName, "action.0.plugin", "pipeline-model-definition@1.3.8"),
+					resource.TestCheckResourceAttr(jobResourceName, "action.0.plugin", "pipeline-model-definition@1.3.7"),
 				),
 			},
 			{
-				Config: testAccJobDeclarativeJobPropertyTrackerActionConfig(jobName),
+				Config: testAccJobDeclarativeJobPropertyTrackerActionConfig(jobName, "pipeline-model-definition@1.3.8"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					resource.TestCheckResourceAttr(jobResourceName, "action.0.type", "DeclarativeJobPropertyTrackerAction"),
@@ -38,14 +38,13 @@ func TestAccJobDeclarativeJobPropertyTrackerActionBasic(t *testing.T) {
 	})
 }
 
-func testAccJobDeclarativeJobPropertyTrackerActionConfig(jobName string) string {
-	return testAccJobConfigBasic(jobName) + `
-	resource "jenkins_job" "main" {
-		name   = "%s"
-		action {
-			type = "DeclarativeJobPropertyTrackerAction"
-			plugin = "%s"
-		}
+func testAccJobDeclarativeJobPropertyTrackerActionConfig(jobName string, plugin string) string {
+	return fmt.Sprintf(`
+resource "jenkins_job" "main" {
+	name   = "%s"
+	action {
+		type = "DeclarativeJobPropertyTrackerAction"
+		plugin = "%s"
 	}
-`
+}`, jobName, plugin)
 }

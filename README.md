@@ -56,9 +56,9 @@ resource "jenkins_job" "main" {
     plugin = "pipeline-model-definition@1.3.9"
   }
 
-	definition {
-		type   = "CpsScmFlowDefinition"
-		plugin = "workflow-cps@2.70"
+  definition {
+    type   = "CpsScmFlowDefinition"
+    plugin = "workflow-cps@2.70"
 
     scm {
       type = "GitSCM"
@@ -83,117 +83,122 @@ resource "jenkins_job" "main" {
       }
     }
   }
-}
 
-resource "jenkins_job_pipeline_triggers_property" "main" {
-  job = "${jenkins_job.main.name}"
-}
+  property {
+    type = "PipelineTriggersJobProperty"
 
-resource "jenkins_job_gerrit_trigger" "main" {
-  property = "${jenkins_job_pipeline_triggers_property.main.id}"
+    trigger {
+      type   = "GerritTrigger"
+      plugin = "gerrit-trigger@2.29.0"
 
-  plugin            = "gerrit-trigger@2.29.0"
-  server_name       = "__ANY__"
-  silent_mode       = false
-  silent_start_mode = false
-  escape_quotes     = true
+      server_name       = "__ANY__"
+      silent_mode       = false
+      silent_start_mode = false
+      escape_quotes     = true
 
-  name_and_email_parameter_mode = "PLAIN"
-  commit_message_parameter_mode = "BASE64"
-  change_subject_parameter_mode = "PLAIN"
-  comment_text_parameter_mode   = "BASE64"
-  dynamic_trigger_configuration = false
+      name_and_email_parameter_mode = "PLAIN"
+      commit_message_parameter_mode = "BASE64"
+      change_subject_parameter_mode = "PLAIN"
+      comment_text_parameter_mode   = "BASE64"
+      dynamic_trigger_configuration = false
 
-  skip_vote = {
-    on_successful = false
-    on_failed     = false
-    on_unstable   = false
-    on_not_built  = false
+      skip_vote = {
+        on_successful = false
+        on_failed     = false
+        on_unstable   = false
+        on_not_built  = false
+      }
+
+      trigger_on_event {
+        type = "PluginChangeMergedEvent"
+      }
+
+      trigger_on_event {
+        type = "PluginPatchsetCreatedEvent"
+
+        exclude_drafts         = false
+        exclude_trivial_rebase = false
+        exclude_no_code_change = false
+        exclude_private_state  = false
+        exclude_wip_state      = false
+      }
+
+      trigger_on_event {
+        type = "PluginDraftPublishedEvent"
+      }
+
+      gerrit_project {
+        compare_type = "PLAIN"
+        pattern      = "bridge-skills"
+
+        branch {
+          compare_type = "REG_EXP"
+          pattern      = "^(?!refs/meta/config).*$"
+        }
+
+        file_path {
+          compare_type = "ANT"
+          pattern      = "path/to/file"
+        }
+      }
+    }
+  }
+
+  property {
+    type = "DatadogJobProperty"
+    plugin="datadog@0.7.1"
+
+    emit_on_checkout = false
+  }
+
+  property {
+    type = "BuildDiscarderProperty"
+
+    strategy {
+      type  = "LogRotator"
+
+      days_to_keep          = "30"
+      num_to_keep           = "-1"
+      artifact_days_to_keep = "-1"
+      artifact_num_to_keep  = "-1"
+    }
+  }
+
+  property {
+    type = "JiraProjectProperty"
+    plugin="jira@3.0.8"
+  }
+
+  property {
+    type = "ParametersDefinitionProperty"
+
+    parameter {
+      type = "StringParameterDefinition"
+      name = "env"
+      description = "which env to target"
+      default_value = "false"
+      trim = false
+    }
+
+    parameter {
+      type = "ChoiceParameterDefinition"
+      name = "env"
+      description = "which env to target"
+      choices = ["1", "3", "4"]
+    }
+
+    parameter {
+      type = "BooleanParameterDefinition"
+      name = "env"
+      description = "which env to target"
+      default_value = ture
+    }
+  }
+
+  property {
+    type = "DisableConcurrentBuildsJobProperty"
   }
 }
-
-resource "jenkins_job_gerrit_trigger_change_merged_event" "main" {
-  trigger = "${jenkins_job_gerrit_trigger.main.id}"
-}
-
-resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
-  trigger = "${jenkins_job_gerrit_trigger.main.id}"
-
-  exclude_drafts         = false
-  exclude_trivial_rebase = false
-  exclude_no_code_change = false
-  exclude_private_state  = false
-  exclude_wip_state      = false
-}
-
-resource "jenkins_job_gerrit_trigger_draft_published_event" "main" {
-  trigger = "${jenkins_job_gerrit_trigger.main.id}"
-}
-
-resource "jenkins_job_gerrit_project" "project_1" {
-  trigger = "${jenkins_job_gerrit_trigger.main.id}"
-
-  compare_type = "PLAIN"
-  pattern      = "bridge-skills"
-}
-
-resource "jenkins_job_gerrit_branch" "branch_1" {
-  project = "${jenkins_job_gerrit_project.project_1.id}"
-
-  compare_type = "REG_EXP"
-  pattern      = "^(?!refs/meta/config).*$"
-}
-
-resource "jenkins_job_gerrit_file_path" "file_path_1" {
-  project = "${jenkins_job_gerrit_project.project_1.id}"
-
-  compare_type = "ANT"
-  pattern      = "path/to/file"
-}
-
-resource "jenkins_job_datadog_job_property" "main" {
-  job = "${jenkins_job.main.name}"
-}
-
-resource "jenkins_job_build_discarder_property" "main" {
-  job = "${jenkins_job.main.name}"
-}
-
-resource "jenkins_job_build_discarder_property_log_rotator_strategy" "main" {
-  property = "${jenkins_job_build_discarder_property.main.id}"
-
-  days_to_keep          = "30"
-  num_to_keep           = "-1"
-  artifact_days_to_keep = "-1"
-  artifact_num_to_keep  = "-1"
-}
-
-resource "jenkins_job_datadog_job_property" "main" {
-  job = "${jenkins_job.main.name}"
-}
-
-resource "jenkins_job_jira_project_property" "main" {
-  job = "${jenkins_job.main.name}"
-
-  plugin = "jiraPlugin"
-}
-
-resource "jenkins_job_parameters_definition_property" "parameters" {
-  job = "${jenkins_job.main.name}"
-}
-
-resource "jenkins_job_parameter_definition_choice" "env" {
-  property = "${jenkins_job_parameters_definition_property.parameters.id}"
-
-  name = "env"
-  description = "which env to target"
-  choices = ["1", "3", "4"]
-}
-
-resource "jenkins_job_disable_concurrent_builds_property" "main" {
-  job = "${jenkins_job.main.name}"
-}
-
 ```
 
 ## Development ##

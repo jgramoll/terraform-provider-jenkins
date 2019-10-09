@@ -10,7 +10,6 @@ func init() {
 
 type JobJiraProjectProperty struct {
 	XMLName xml.Name `xml:"hudson.plugins.jira.JiraProjectProperty"`
-	Id      string   `xml:"id,attr,omitempty"`
 	Plugin  string   `xml:"plugin,attr,omitempty"`
 }
 
@@ -18,12 +17,8 @@ func NewJobJiraProjectProperty() *JobJiraProjectProperty {
 	return &JobJiraProjectProperty{}
 }
 
-func (property *JobJiraProjectProperty) GetId() string {
-	return property.Id
-}
-
-func (p *JobJiraProjectProperty) SetId(id string) {
-	p.Id = id
+func (property *JobJiraProjectProperty) GetType() JobPropertyType {
+	return JiraProjectPropertyType
 }
 
 func unmarshalJobJiraProjectProperty(d *xml.Decoder, start xml.StartElement) (JobProperty, error) {

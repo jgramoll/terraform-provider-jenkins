@@ -10,7 +10,6 @@ func init() {
 
 type JobDatadogJobProperty struct {
 	XMLName xml.Name `xml:"org.datadog.jenkins.plugins.datadog.DatadogJobProperty"`
-	Id      string   `xml:"id,attr,omitempty"`
 	Plugin  string   `xml:"plugin,attr,omitempty"`
 
 	EmitOnCheckout bool `xml:"emitOnCheckout"`
@@ -22,12 +21,8 @@ func NewJobDatadogJobProperty() *JobDatadogJobProperty {
 	}
 }
 
-func (property *JobDatadogJobProperty) GetId() string {
-	return property.Id
-}
-
-func (p *JobDatadogJobProperty) SetId(id string) {
-	p.Id = id
+func (property *JobDatadogJobProperty) GetType() JobPropertyType {
+	return DatadogJobPropertyType
 }
 
 func unmarshalJobDatadogJobProperty(d *xml.Decoder, start xml.StartElement) (JobProperty, error) {

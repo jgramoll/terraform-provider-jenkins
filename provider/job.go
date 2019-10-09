@@ -13,15 +13,15 @@ type job struct {
 
 	Actions    *interfaceJobActions    `mapstructure:"action"`
 	Definition *interfaceJobDefinition `mapstructure:"definition"`
+	Properties *interfaceJobProperties `mapstructure:"property"`
 }
 
 func newJob() *job {
 	return &job{}
 }
 
-func (j *job) toClientJob(jobId string) (*client.Job, error) {
+func (j *job) toClientJob() (*client.Job, error) {
 	job := client.NewJob()
-	job.Id = jobId
 	job.Plugin = j.Plugin
 	job.Name = j.Name
 	job.Disabled = j.Disabled
@@ -31,16 +31,24 @@ func (j *job) toClientJob(jobId string) (*client.Job, error) {
 		return nil, err
 	}
 	job.Actions = actions
+
 	definition, err := j.Definition.toClientDefinition()
 	if err != nil {
 		return nil, err
 	}
 	job.Definition = definition
+
+	properties, err := j.Properties.toClientProperties()
+	if err != nil {
+		return nil, err
+	}
+	job.Properties = properties
+
 	return job, nil
 }
 
 func JobfromClientJob(clientJob *client.Job) (*job, error) {
-	j := job{}
+	j := newJob()
 	j.Plugin = clientJob.Plugin
 	j.Name = clientJob.Name
 	j.Disabled = clientJob.Disabled
@@ -50,12 +58,20 @@ func JobfromClientJob(clientJob *client.Job) (*job, error) {
 		return nil, err
 	}
 	j.Actions = actions
+
 	definition, err := j.Definition.fromClientDefinition(clientJob.Definition)
 	if err != nil {
 		return nil, err
 	}
 	j.Definition = definition
-	return &j, nil
+
+	properties, err := j.Properties.fromClientProperties(clientJob.Properties)
+	if err != nil {
+		return nil, err
+	}
+	j.Properties = properties
+
+	return j, nil
 }
 
 func (j *job) setResourceData(d *schema.ResourceData) error {
@@ -72,6 +88,9 @@ func (j *job) setResourceData(d *schema.ResourceData) error {
 		return err
 	}
 	if err := d.Set("definition", j.Definition); err != nil {
+		return err
+	}
+	if err := d.Set("property", j.Properties); err != nil {
 		return err
 	}
 	return nil

@@ -34,6 +34,9 @@ func (scm *jobGitScm) toClientSCM() (*client.GitSCM, error) {
 }
 
 func (*jobGitScm) fromClientSCM(clientSCM *client.GitSCM) (*jobGitScm, error) {
+	if clientSCM == nil {
+		return nil, nil
+	}
 	scm := newJobGitScm()
 	scm.Plugin = clientSCM.Plugin
 	scm.ConfigVersion = clientSCM.ConfigVersion

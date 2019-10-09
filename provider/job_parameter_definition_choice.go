@@ -4,32 +4,38 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
+func init() {
+	jobParameterInitFunc[client.ChoiceParameterDefinitionType] = func() jobParameterDefinition {
+		return newJobParameterDefinitionChoice()
+	}
+}
+
 type jobParameterDefinitionChoice struct {
-	Name        string    `mapstructure:"name"`
-	Description string    `mapstructure:"description"`
-	Choices     *[]string `mapstructure:"choices"`
+	Type        client.JobParameterDefinitionType `mapstructure:"type"`
+	Name        string                            `mapstructure:"name"`
+	Description string                            `mapstructure:"description"`
+	Choices     *[]string                         `mapstructure:"choices"`
 }
 
 func newJobParameterDefinitionChoice() *jobParameterDefinitionChoice {
 	return &jobParameterDefinitionChoice{
+		Type:    client.ChoiceParameterDefinitionType,
 		Choices: &[]string{},
 	}
 }
 
-func (c *jobParameterDefinitionChoice) toClientJobParameterDefinition(id string) client.JobParameterDefinition {
+func (c *jobParameterDefinitionChoice) toClientJobParameterDefinition() (client.JobParameterDefinition, error) {
 	clientDefinition := client.NewJobParameterDefinitionChoice()
-	clientDefinition.Id = id
 	clientDefinition.Name = c.Name
 	clientDefinition.Description = c.Description
 	*clientDefinition.Choices.Items.Items = *c.Choices
-	return clientDefinition
+	return clientDefinition, nil
 }
 
-func (c *jobParameterDefinitionChoice) fromClientJobParameterDefintion(
+func (c *jobParameterDefinitionChoice) fromClientJobParameterDefinition(
 	clientDefinitionInterface client.JobParameterDefinition,
 ) (jobParameterDefinition, error) {
 
@@ -43,14 +49,4 @@ func (c *jobParameterDefinitionChoice) fromClientJobParameterDefintion(
 	newChoice.Description = clientDefinition.Description
 	*newChoice.Choices = *clientDefinition.Choices.Items.Items
 	return newChoice, nil
-}
-
-func (c *jobParameterDefinitionChoice) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("name", c.Name); err != nil {
-		return err
-	}
-	if err := d.Set("description", c.Description); err != nil {
-		return err
-	}
-	return d.Set("choices", c.Choices)
 }

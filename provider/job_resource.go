@@ -4,13 +4,9 @@ import (
 	"errors"
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jgramoll/terraform-provider-jenkins/multilock"
 	"github.com/mitchellh/mapstructure"
 )
-
-var jobLock = multilock.NewBasicMultiLock()
 
 // ErrMissingJobName missing job name
 var ErrMissingJobName = errors.New("job name must be provided")
@@ -22,7 +18,7 @@ func jobResource() *schema.Resource {
 		Update: resourceJobUpdate,
 		Delete: resourceJobDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceJobImporter,
+			State: schema.ImportStatePassthrough,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -54,22 +50,13 @@ func jobResource() *schema.Resource {
 				Optional: true,
 				Elem:     jobDefinitionResource(),
 			},
+			"property": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     jobPropertyResource(),
+			},
 		},
 	}
-}
-
-func resourceJobImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	jobName := d.Id()
-	if err := d.Set("name", jobName); err != nil {
-		return nil, err
-	}
-	jobService := m.(*Services).JobService
-	j, err := jobService.GetJob(jobName)
-	if err != nil {
-		return nil, err
-	}
-	d.SetId(j.Id)
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
@@ -79,14 +66,8 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	id, err := uuid.NewRandom()
-	if err != nil {
-		return err
-	}
-	jobId := id.String()
-
 	jobService := m.(*Services).JobService
-	clientJob, err := j.toClientJob(jobId)
+	clientJob, err := j.toClientJob()
 	if err != nil {
 		return err
 	}
@@ -95,7 +76,7 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	d.SetId(jobId)
+	d.SetId(j.Name)
 	log.Println("[DEBUG] Creating job:", j.Name)
 	return resourceJobRead(d, m)
 }
@@ -104,9 +85,7 @@ func resourceJobRead(d *schema.ResourceData, m interface{}) error {
 	jobName := d.Get("name").(string)
 
 	jobService := m.(*Services).JobService
-	jobLock.RLock(jobName)
 	j, err := jobService.GetJob(jobName)
-	jobLock.RUnlock(jobName)
 	if err != nil {
 		log.Println("[WARN] No Job found:", d.Id())
 		d.SetId("")
@@ -130,13 +109,11 @@ func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	jobService := m.(*Services).JobService
-	clientJob, err := j.toClientJob(d.Id())
+	clientJob, err := j.toClientJob()
 	if err != nil {
 		return err
 	}
-	jobLock.Lock(j.Name)
 	err = jobService.UpdateJob(clientJob)
-	jobLock.Unlock(j.Name)
 	if err != nil {
 		return err
 	}
@@ -149,9 +126,7 @@ func resourceJobDelete(d *schema.ResourceData, m interface{}) error {
 	jobName := d.Get("name").(string)
 
 	jobService := m.(*Services).JobService
-	jobLock.Lock(jobName)
 	err := jobService.DeleteJob(jobName)
-	jobLock.Unlock(jobName)
 
 	log.Println("[DEBUG] Deleted job:", d.Id())
 	d.SetId("")

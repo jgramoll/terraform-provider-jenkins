@@ -14,13 +14,13 @@ func init() {
 }
 
 type jobDeclarativeJobAction struct {
-	Type   string `mapstructure:"type"`
-	Plugin string `mapstructure:"plugin"`
+	Type   client.JobActionType `mapstructure:"type"`
+	Plugin string               `mapstructure:"plugin"`
 }
 
 func newJobDeclarativeJobAction() *jobDeclarativeJobAction {
 	return &jobDeclarativeJobAction{
-		Type: string(client.DeclarativeJobActionType),
+		Type: client.DeclarativeJobActionType,
 	}
 }
 

@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"strconv"
 
-	"github.com/google/uuid"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -16,28 +15,6 @@ type jobPropertyImportScriptFunc func(string, string, client.JobProperty) string
 var ensureJobPropertyFuncs = map[string]ensureJobPropertyFunc{}
 var jobPropertyCodeFuncs = map[string]jobPropertyCodeFunc{}
 var jobPropertyImportScriptFuncs = map[string]jobPropertyImportScriptFunc{}
-
-func ensureJobProperties(properties *client.JobProperties) error {
-	if properties == nil || properties.Items == nil {
-		return nil
-	}
-	for _, item := range *properties.Items {
-		if item.GetId() == "" {
-			id, err := uuid.NewRandom()
-			if err != nil {
-				return err
-			}
-			item.SetId(id.String())
-		}
-		reflectType := reflect.TypeOf(item).String()
-		if ensureFunc, ok := ensureJobPropertyFuncs[reflectType]; ok {
-			if err := ensureFunc(item); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
 
 func jobPropertiesCode(properties *client.JobProperties) string {
 	code := ""

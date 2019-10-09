@@ -5,12 +5,10 @@ import (
 	"strings"
 
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/jgramoll/terraform-provider-jenkins/provider"
 )
 
 func init() {
 	jobParameterDefinitionCodeFuncs["*client.JobParameterDefinitionChoice"] = jobParameterDefinitionChoiceCode
-	jobParameterDefinitionImportScriptFuncs["*client.JobParameterDefinitionChoice"] = jobParameterDefinitionChoiceImportScript
 }
 
 func jobParameterDefinitionChoiceCode(
@@ -33,14 +31,4 @@ resource "jenkins_job_parameter_definition_choice" "parameter_%v" {
 }
 `, parameterIndex, propertyIndex,
 		definition.Name, definition.Description, choicesString)
-}
-
-func jobParameterDefinitionChoiceImportScript(
-	parameterIndex string, jobName string, propertyId string,
-	definition client.JobParameterDefinition,
-) string {
-	return fmt.Sprintf(`
-terraform import jenkins_job_parameter_definition_choice.parameter_%v "%v"
-`, parameterIndex,
-		provider.ResourceJobParameterDefinitionId(jobName, propertyId, definition.GetId()))
 }

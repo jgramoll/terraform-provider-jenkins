@@ -57,7 +57,6 @@ func TestJobConfigSerialize(t *testing.T) {
 	gerritTriggerDraftEvent := NewJobGerritTriggerPluginDraftPublishedEvent()
 	gerritTrigger.TriggerOnEvents = gerritTrigger.TriggerOnEvents.Append(gerritTriggerDraftEvent)
 	triggerJobProperty := NewJobPipelineTriggersProperty()
-	triggerJobProperty.Id = "trigger-id"
 	triggerJobProperty.Triggers = triggerJobProperty.Triggers.Append(gerritTrigger)
 	job.Properties = job.Properties.Append(triggerJobProperty)
 
@@ -67,7 +66,6 @@ func TestJobConfigSerialize(t *testing.T) {
 	discardPropertyStrategy.ArtifactDaysToKeep = 3
 	discardPropertyStrategy.ArtifactNumToKeep = 4
 	discardProperty := NewJobBuildDiscarderProperty()
-	discardProperty.Id = "discard-id"
 	discardProperty.Strategy.Item = discardPropertyStrategy
 	job.Properties = job.Properties.Append(discardProperty)
 
@@ -93,7 +91,7 @@ func TestJobConfigSerialize(t *testing.T) {
 		<org.datadog.jenkins.plugins.datadog.DatadogJobProperty plugin="datadog@0.7.1">
 			<emitOnCheckout>false</emitOnCheckout>
 		</org.datadog.jenkins.plugins.datadog.DatadogJobProperty>
-		<org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty id="trigger-id">
+		<org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
 			<triggers>
 				<com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger plugin="gerrit-trigger@2.29.0">
 					<spec></spec>
@@ -156,7 +154,7 @@ func TestJobConfigSerialize(t *testing.T) {
 				</com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.GerritTrigger>
 			</triggers>
 		</org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
-		<jenkins.model.BuildDiscarderProperty id="discard-id">
+		<jenkins.model.BuildDiscarderProperty>
 			<strategy class="hudson.tasks.LogRotator">
 				<daysToKeep>1</daysToKeep>
 				<numToKeep>2</numToKeep>

@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/jgramoll/terraform-provider-jenkins/provider"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
@@ -60,36 +58,5 @@ resource "jenkins_job_parameter_definition_choice" "parameter_1_2" {
 		dmp := diffmatchpatch.New()
 		diffs := dmp.DiffMain(expected, result, false)
 		t.Fatalf("job terraform code not as expected: %s", dmp.DiffPrettyText(diffs))
-	}
-}
-
-func TestJobParametersDefinitionPropertyImportScript(t *testing.T) {
-	job := client.NewJob()
-	job.Id = "id"
-	job.Name = "name"
-	property := testParametersDefinitionProperty()
-	property.Id = "paramPropertyId"
-	(*property.ParameterDefinitions.Items)[0].SetId("c1")
-	(*property.ParameterDefinitions.Items)[1].SetId("c2")
-	job.Properties = job.Properties.Append(property)
-
-	result := jobImportScript(job)
-	expected := fmt.Sprintf(`terraform init
-
-terraform import jenkins_job.main "name"
-
-terraform import jenkins_job_parameters_definition_property.property_1 "%v"
-
-terraform import jenkins_job_parameter_definition_choice.parameter_1_1 "%v"
-
-terraform import jenkins_job_parameter_definition_choice.parameter_1_2 "%v"
-`, provider.ResourceJobPropertyId(job.Name, property.Id),
-		provider.ResourceJobParameterDefinitionId(job.Name, property.Id, "c1"),
-		provider.ResourceJobParameterDefinitionId(job.Name, property.Id, "c2"))
-
-	if result != expected {
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(expected, result, false)
-		t.Fatalf("job terraform import script not as expected: %s", dmp.DiffPrettyText(diffs))
 	}
 }

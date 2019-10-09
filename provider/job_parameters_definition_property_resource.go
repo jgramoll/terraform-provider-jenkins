@@ -4,30 +4,42 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-func jobParametersDefinitionPropertyResource() *schema.Resource {
-	newPropertyInterface := func() jobProperty {
-		return newJobParametersDefinitionProperty()
-	}
+func jobParametersDefinitionParameterResource() *schema.Resource {
 	return &schema.Resource{
-		Create: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobPropertyCreate(d, m, newPropertyInterface)
-		},
-		Read: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobPropertyRead(d, m, newPropertyInterface)
-		},
-		Delete: func(d *schema.ResourceData, m interface{}) error {
-			return resourceJobPropertyDelete(d, m, newPropertyInterface)
-		},
-		Importer: &schema.ResourceImporter{
-			State: resourceJobPropertyImporter,
-		},
-
 		Schema: map[string]*schema.Schema{
-			"job": &schema.Schema{
+			"type": &schema.Schema{
 				Type:        schema.TypeString,
-				Description: "Name of the job",
+				Description: "Type of trigger",
 				Required:    true,
 				ForceNew:    true,
+			},
+			"name": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Name of the parameter",
+				Required:    true,
+			},
+			"description": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "description of the parameter",
+				Optional:    true,
+			},
+			"default_value": &schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "default value of the parameter",
+				Optional:    true,
+			},
+			"trim": &schema.Schema{
+				Type:        schema.TypeBool,
+				Description: "trim value of the parameter",
+				Optional:    true,
+			},
+			"choices": &schema.Schema{
+				Type:        schema.TypeList,
+				Description: "[ChoiceParameterDefinition] List of choices",
+				Required:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}

@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/jgramoll/terraform-provider-jenkins/provider"
 
 	// "github.com/jgramoll/terraform-provider-jenkins/provider"
 	"github.com/sergi/go-diff/diffmatchpatch"
@@ -155,60 +154,15 @@ resource "jenkins_job_gerrit_trigger" "trigger_2_1" {
 
 func TestJobGerritTriggerImportScript(t *testing.T) {
 	job := client.NewJob()
-	job.Id = "id"
 	job.Name = "name"
 	properties := testJobPipelineTriggersProperties()
 	job.Properties.Items = properties
-
-	property := (*properties)[0].(*client.JobPipelineTriggersProperty)
-	property.Id = "triggerPropertyId"
-	triggers1 := *property.Triggers.Items
-	gerritTrigger1 := triggers1[0].(*client.JobGerritTrigger)
-	events1 := *gerritTrigger1.TriggerOnEvents.Items
-	projects1 := *gerritTrigger1.Projects.Items
-	branches1 := *projects1[0].Branches.Items
-	filePaths1 := *projects1[0].FilePaths.Items
-
-	property2 := (*properties)[1].(*client.JobPipelineTriggersProperty)
-	triggers2 := *property2.Triggers.Items
-	gerritTrigger2 := triggers2[0].(*client.JobGerritTrigger)
 
 	result := jobImportScript(job)
 	expected := fmt.Sprintf(`terraform init
 
 terraform import jenkins_job.main "%v"
-
-terraform import jenkins_job_pipeline_triggers_property.property_1 "%v"
-
-terraform import jenkins_job_gerrit_trigger.trigger_1_1 "%v"
-
-terraform import jenkins_job_gerrit_trigger_change_merged_event.main "%v"
-
-terraform import jenkins_job_gerrit_trigger_patchset_created_event.main "%v"
-
-terraform import jenkins_job_gerrit_trigger_draft_published_event.main "%v"
-
-terraform import jenkins_job_gerrit_project.project_1_1_1 "%v"
-
-terraform import jenkins_job_gerrit_branch.branch_1_1_1_1 "%v"
-
-terraform import jenkins_job_gerrit_file_path.file_path_1_1_1_1 "%v"
-
-terraform import jenkins_job_pipeline_triggers_property.property_2 "%v"
-
-terraform import jenkins_job_gerrit_trigger.trigger_2_1 "%v"
-`, job.Name,
-		provider.ResourceJobPropertyId(job.Name, property.GetId()),
-		provider.ResourceJobTriggerId(job.Name, property.GetId(), triggers1[0].GetId()),
-		provider.ResourceJobGerritTriggerEventId(job.Name, property.GetId(), triggers1[0].GetId(), events1[0].GetId()),
-		provider.ResourceJobGerritTriggerEventId(job.Name, property.GetId(), triggers1[0].GetId(), events1[1].GetId()),
-		provider.ResourceJobGerritTriggerEventId(job.Name, property.GetId(), triggers1[0].GetId(), events1[2].GetId()),
-		provider.ResourceJobGerritProjectId(job.Name, property.GetId(), triggers1[0].GetId(), projects1[0].Id),
-		provider.ResourceJobGerritBranchId(job.Name, property.GetId(), triggers1[0].GetId(), projects1[0].Id, branches1[0].Id),
-		provider.ResourceJobGerritFilePathId(job.Name, property.GetId(), triggers1[0].GetId(), projects1[0].Id, filePaths1[0].Id),
-		provider.ResourceJobPropertyId(job.Name, property2.GetId()),
-		provider.ResourceJobTriggerId(job.Name, property2.GetId(), gerritTrigger2.Id))
-
+`, job.Name)
 	if result != expected {
 		dmp := diffmatchpatch.New()
 		diffs := dmp.DiffMain(expected, result, false)

@@ -14,10 +14,12 @@ func (scmArray *jobGitScmArray) toClientSCM() (*client.GitSCM, error) {
 }
 
 func (*jobGitScmArray) fromClientSCM(clientSCM *client.GitSCM) (*jobGitScmArray, error) {
-	scm := newJobGitScm()
-	clientScm, err := scm.fromClientSCM(clientSCM)
+	if clientSCM == nil {
+		return nil, nil
+	}
+	scm, err := newJobGitScm().fromClientSCM(clientSCM)
 	if err != nil {
 		return nil, err
 	}
-	return &jobGitScmArray{clientScm}, nil
+	return &jobGitScmArray{scm}, nil
 }

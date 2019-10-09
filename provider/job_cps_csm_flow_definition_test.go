@@ -36,7 +36,7 @@ func TestAccJobCpsCsmFlowDefinitionBasic(t *testing.T) {
 					testAccCheckJobExists(jobResourceName, &jobRef),
 					resource.TestCheckResourceAttr(jobResourceName, "definition.0.type", "CpsScmFlowDefinition"),
 					resource.TestCheckResourceAttr(jobResourceName, "definition.0.plugin", "workflow-cps@2.70"),
-					resource.TestCheckResourceAttr(jobResourceName, "definition.0.script_path", scriptPath),
+					resource.TestCheckResourceAttr(jobResourceName, "definition.0.script_path", newScriptPath),
 					resource.TestCheckResourceAttr(jobResourceName, "definition.0.lightweight", "false"),
 				),
 			},

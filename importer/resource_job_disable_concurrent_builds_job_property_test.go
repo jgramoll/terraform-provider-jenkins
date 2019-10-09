@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/jgramoll/terraform-provider-jenkins/provider"
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
@@ -34,28 +32,5 @@ resource "jenkins_job_disable_concurrent_builds_property" "property_1" {
 		dmp := diffmatchpatch.New()
 		diffs := dmp.DiffMain(expected, result, false)
 		t.Fatalf("job terraform code not as expected: %s", dmp.DiffPrettyText(diffs))
-	}
-}
-
-func TestJobDisableConcurrentBuildsJobPropertyImportScript(t *testing.T) {
-	job := client.NewJob()
-	job.Id = "id"
-	job.Name = "name"
-	property := testDisableConcurrentBuildsJobProperty()
-	property.Id = "paramPropertyId"
-	job.Properties = job.Properties.Append(property)
-
-	result := jobImportScript(job)
-	expected := fmt.Sprintf(`terraform init
-
-terraform import jenkins_job.main "name"
-
-terraform import jenkins_job_disable_concurrent_builds_property.property_1 "%v"
-`, provider.ResourceJobPropertyId(job.Name, property.Id))
-
-	if result != expected {
-		dmp := diffmatchpatch.New()
-		diffs := dmp.DiffMain(expected, result, false)
-		t.Fatalf("job terraform import script not as expected: %s", dmp.DiffPrettyText(diffs))
 	}
 }
