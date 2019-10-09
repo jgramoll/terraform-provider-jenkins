@@ -82,13 +82,14 @@ func TestJobCode(t *testing.T) {
     type   = "CpsScmFlowDefinition"
     plugin = "gitPlugin"
 
+    script_path = "my-Jenkinsfile"
+    lightweight = false
+
     scm {
-      type = "GitSCM"
+      type   = "GitSCM"
       plugin = "gitScmPlugin"
 
       config_version = "my-version"
-      script_path    = "my-Jenkinsfile"
-      lightweight    = false
 
       user_remote_config {
         refspec        = "$${GERRIT_REFSPEC}"

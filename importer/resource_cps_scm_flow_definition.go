@@ -17,16 +17,17 @@ func cpsScmFlowDefinitionCode(definitionInterface client.JobDefinition) string {
     type   = "CpsScmFlowDefinition"
     plugin = "%s"
 
+    script_path = "%s"
+    lightweight = %v
+
     scm {
-      type = "GitSCM"
+      type   = "GitSCM"
       plugin = "%s"
 
       config_version = "%s"
-      script_path    = "%s"
-      lightweight    = %v
 %s%s%s    }
   }
-`, definition.Plugin, definition.SCM.Plugin, definition.SCM.ConfigVersion, definition.ScriptPath, definition.Lightweight,
+`, definition.Plugin, definition.ScriptPath, definition.Lightweight, definition.SCM.Plugin, definition.SCM.ConfigVersion,
 		jobGitScmUserRemoteConfigsCode(definition.SCM.UserRemoteConfigs),
 		jobGitScmBranchesCode(definition.SCM.Branches),
 		jobGitScmExtensionsCode(definition.SCM.Extensions))
