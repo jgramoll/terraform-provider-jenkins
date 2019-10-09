@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -127,48 +126,5 @@ func (t *jobGerritTrigger) parseParameterMode(clientTrigger *client.JobGerritTri
 		return err
 	}
 	clientTrigger.CommentTextParameterMode = mode
-	return nil
-}
-
-func (t *jobGerritTrigger) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("plugin", t.Plugin); err != nil {
-		return err
-	}
-	if err := d.Set("server_name", t.ServerName); err != nil {
-		return err
-	}
-	if err := d.Set("silent_mode", t.SilentMode); err != nil {
-		return err
-	}
-	if err := d.Set("silent_start_mode", t.SilentStartMode); err != nil {
-		return err
-	}
-	if err := d.Set("escape_quotes", t.EscapeQuotes); err != nil {
-		return err
-	}
-	if err := d.Set("name_and_email_parameter_mode", t.NameAndEmailParameterMode); err != nil {
-		return err
-	}
-	if err := d.Set("commit_message_parameter_mode", t.CommitMessageParameterMode); err != nil {
-		return err
-	}
-	if err := d.Set("change_subject_parameter_mode", t.ChangeSubjectParameterMode); err != nil {
-		return err
-	}
-	if err := d.Set("comment_text_parameter_mode", t.CommentTextParameterMode); err != nil {
-		return err
-	}
-	if err := d.Set("dynamic_trigger_configuration", t.DynamicTriggerConfiguration); err != nil {
-		return err
-	}
-	if err := d.Set("skip_vote", t.SkipVote); err != nil {
-		return err
-	}
-	if err := d.Set("gerrit_project", t.GerritProjects); err != nil {
-		return err
-	}
-	if err := d.Set("trigger_on_event", t.TriggerOnEvents); err != nil {
-		return err
-	}
 	return nil
 }

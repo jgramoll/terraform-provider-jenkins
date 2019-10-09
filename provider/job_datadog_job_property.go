@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -43,14 +42,4 @@ func (*jobDatadogJobProperty) fromClientProperty(clientPropertyInterface client.
 	property.Plugin = clientProperty.Plugin
 	property.EmitOnCheckout = clientProperty.EmitOnCheckout
 	return property, nil
-}
-
-func (p *jobDatadogJobProperty) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("plugin", p.Plugin); err != nil {
-		return err
-	}
-	if err := d.Set("emit_on_checkout", p.EmitOnCheckout); err != nil {
-		return err
-	}
-	return nil
 }

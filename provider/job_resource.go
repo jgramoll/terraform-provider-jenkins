@@ -1,15 +1,11 @@
 package provider
 
 import (
-	"errors"
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/mitchellh/mapstructure"
 )
-
-// ErrMissingJobName missing job name
-var ErrMissingJobName = errors.New("job name must be provided")
 
 func jobResource() *schema.Resource {
 	return &schema.Resource{
@@ -66,11 +62,12 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	jobService := m.(*Services).JobService
 	clientJob, err := j.toClientJob()
 	if err != nil {
 		return err
 	}
+
+	jobService := m.(*Services).JobService
 	err = jobService.CreateJob(clientJob)
 	if err != nil {
 		return err
@@ -82,23 +79,25 @@ func resourceJobCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobRead(d *schema.ResourceData, m interface{}) error {
-	jobName := d.Get("name").(string)
+	jobName := d.Id()
 
 	jobService := m.(*Services).JobService
-	j, err := jobService.GetJob(jobName)
+	clientJob, err := jobService.GetJob(jobName)
 	if err != nil {
+		println("WHAT!", err.Error())
 		log.Println("[WARN] No Job found:", d.Id())
 		d.SetId("")
 		return nil
 	}
 
-	clientJob, err := JobfromClientJob(j)
+	j, err := JobfromClientJob(clientJob)
 	if err != nil {
+		println("WHAT2!")
 		log.Println("[WARN] Invalid Job:", d.Id())
 		return nil
 	}
 	log.Printf("[INFO] Got job %s", j.Name)
-	return clientJob.setResourceData(d)
+	return j.setResourceData(d)
 }
 
 func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
@@ -108,11 +107,12 @@ func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
-	jobService := m.(*Services).JobService
 	clientJob, err := j.toClientJob()
 	if err != nil {
 		return err
 	}
+
+	jobService := m.(*Services).JobService
 	err = jobService.UpdateJob(clientJob)
 	if err != nil {
 		return err
@@ -123,8 +123,7 @@ func resourceJobUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceJobDelete(d *schema.ResourceData, m interface{}) error {
-	jobName := d.Get("name").(string)
-
+	jobName := d.Id()
 	jobService := m.(*Services).JobService
 	err := jobService.DeleteJob(jobName)
 

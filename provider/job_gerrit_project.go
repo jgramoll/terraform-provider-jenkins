@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -47,20 +46,4 @@ func (project *jobGerritProject) toClientProject() (*client.JobGerritTriggerProj
 	clientProject.FilePaths = filePaths
 
 	return clientProject, nil
-}
-
-func (project *jobGerritProject) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("compare_type", project.CompareType); err != nil {
-		return err
-	}
-	if err := d.Set("pattern", project.CompareType); err != nil {
-		return err
-	}
-	if err := d.Set("branch", project.Branches); err != nil {
-		return err
-	}
-	if err := d.Set("file_path", project.FilePaths); err != nil {
-		return err
-	}
-	return nil
 }

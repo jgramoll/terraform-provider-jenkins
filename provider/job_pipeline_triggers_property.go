@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -52,8 +51,4 @@ func (p *jobPipelineTriggersProperty) fromClientProperty(clientPropertyInterface
 	property.Triggers = triggers
 
 	return property, nil
-}
-
-func (p *jobPipelineTriggersProperty) setResourceData(d *schema.ResourceData) error {
-	return nil
 }

@@ -75,10 +75,10 @@ func JobfromClientJob(clientJob *client.Job) (*job, error) {
 }
 
 func (j *job) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("plugin", j.Plugin); err != nil {
+	if err := d.Set("name", j.Name); err != nil {
 		return err
 	}
-	if err := d.Set("name", j.Name); err != nil {
+	if err := d.Set("plugin", j.Plugin); err != nil {
 		return err
 	}
 	if err := d.Set("disabled", j.Disabled); err != nil {

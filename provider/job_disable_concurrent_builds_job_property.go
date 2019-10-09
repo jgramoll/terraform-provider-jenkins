@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -37,8 +36,4 @@ func (p *jobDisableConcurrentBuildsJobProperty) fromClientProperty(clientPropert
 	}
 	property := newJobDisableConcurrentBuildsJobProperty()
 	return property, nil
-}
-
-func (p *jobDisableConcurrentBuildsJobProperty) setResourceData(d *schema.ResourceData) error {
-	return nil
 }
