@@ -8,19 +8,14 @@ func init() {
 
 type JobGerritTriggerPluginDraftPublishedEvent struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginDraftPublishedEvent"`
-	Id      string   `xml:"id,attr,omitempty"`
 }
 
 func NewJobGerritTriggerPluginDraftPublishedEvent() *JobGerritTriggerPluginDraftPublishedEvent {
 	return &JobGerritTriggerPluginDraftPublishedEvent{}
 }
 
-func (event *JobGerritTriggerPluginDraftPublishedEvent) GetId() string {
-	return event.Id
-}
-
-func (e *JobGerritTriggerPluginDraftPublishedEvent) SetId(id string) {
-	e.Id = id
+func (event *JobGerritTriggerPluginDraftPublishedEvent) GetType() JobGerritTriggerOnEventType {
+	return PluginDraftPublishedEventType
 }
 
 func unmarshalJobGerritTriggerPluginDraftPublishedEvent(d *xml.Decoder, start xml.StartElement) (JobGerritTriggerOnEvent, error) {

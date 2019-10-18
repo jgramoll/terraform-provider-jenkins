@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -19,13 +18,8 @@ func newGitScmBranchFromClient(clientBranch *client.GitScmBranchSpec) *jobGitScm
 	return branch
 }
 
-func (branch *jobGitScmBranch) toClientBranch(branchId string) *client.GitScmBranchSpec {
+func (branch *jobGitScmBranch) toClientBranch() *client.GitScmBranchSpec {
 	clientBranch := client.NewGitScmBranchSpec()
-	clientBranch.Id = branchId
 	clientBranch.Name = branch.Name
 	return clientBranch
-}
-
-func (branch *jobGitScmBranch) setResourceData(d *schema.ResourceData) error {
-	return d.Set("name", branch.Name)
 }

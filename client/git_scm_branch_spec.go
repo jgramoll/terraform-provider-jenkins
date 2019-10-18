@@ -1,8 +1,6 @@
 package client
 
 type GitScmBranchSpec struct {
-	Id string `xml:"id,attr,omitempty"`
-
 	Name string `xml:"name"`
 }
 

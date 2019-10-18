@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -23,9 +22,8 @@ func newJobGerritFilePathFromClient(
 	return filePath
 }
 
-func (filePath *jobGerritFilePath) toClientFilePath(filePathId string) (*client.JobGerritTriggerFilePath, error) {
+func (filePath *jobGerritFilePath) toClientFilePath() (*client.JobGerritTriggerFilePath, error) {
 	clientFilePath := client.NewJobGerritTriggerFilePath()
-	clientFilePath.Id = filePathId
 	compareType, err := client.ParseCompareType(filePath.CompareType)
 	if err != nil {
 		return nil, err
@@ -33,11 +31,4 @@ func (filePath *jobGerritFilePath) toClientFilePath(filePathId string) (*client.
 	clientFilePath.CompareType = compareType
 	clientFilePath.Pattern = filePath.Pattern
 	return clientFilePath, nil
-}
-
-func (filePath *jobGerritFilePath) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("compare_type", filePath.CompareType); err != nil {
-		return err
-	}
-	return d.Set("pattern", filePath.Pattern)
 }

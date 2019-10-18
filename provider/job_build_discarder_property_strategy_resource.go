@@ -1,194 +1,38 @@
 package provider
 
 import (
-	"errors"
-	"log"
-	"strings"
-
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/mitchellh/mapstructure"
 )
 
-// ErrInvalidPropertyId
-var ErrInvalidDiscarderPropertyStrategyId = errors.New("Invalid discarder property strategy id, must be jobName_propertyId_strategyId")
-
-func resourceJobDiscarderPropertyStrategyParseId(input string) (jobName string, propertyId string, strategyId string, err error) {
-	parts := strings.Split(input, IdDelimiter)
-	if len(parts) != 3 {
-		err = ErrInvalidDiscarderPropertyStrategyId
-		return
+func jobBuildDiscarderPropertyStrategyResource() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"type": &schema.Schema{
+				Type:        schema.TypeString,
+				Description: "Type of Build Discarder Property",
+				Required:    true,
+				ForceNew:    true,
+			},
+			"days_to_keep": &schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "[LogRotator]",
+				Optional:    true,
+			},
+			"num_to_keep": &schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "[LogRotator]",
+				Optional:    true,
+			},
+			"artifact_days_to_keep": &schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "[LogRotator]",
+				Optional:    true,
+			},
+			"artifact_num_to_keep": &schema.Schema{
+				Type:        schema.TypeInt,
+				Description: "[LogRotator]",
+				Optional:    true,
+			},
+		},
 	}
-	jobName = parts[0]
-	propertyId = parts[1]
-	strategyId = parts[2]
-	return
-}
-
-func ResourceJobDiscarderPropertyStrategyId(jobName string, propertyId string, strategyId string) string {
-	return joinWithIdDelimiter(jobName, propertyId, strategyId)
-}
-
-func resourceJobPropertyStrategyImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	jobName, propertyId, _, err := resourceJobDiscarderPropertyStrategyParseId(d.Id())
-	if err != nil {
-		return nil, err
-	}
-	err = d.Set("property", ResourceJobPropertyId(jobName, propertyId))
-	if err != nil {
-		return nil, err
-	}
-	return []*schema.ResourceData{d}, nil
-}
-
-func resourceJobPropertyStrategyCreate(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
-	jobName, propertyId, err := resourceJobPropertyParseId(d.Get("property").(string))
-	if err != nil {
-		return err
-	}
-
-	strategy := createJobBuildDiscarderPropertyStrategy()
-	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &strategy); err != nil {
-		return err
-	}
-
-	id, err := uuid.NewRandom()
-	if err != nil {
-		return err
-	}
-	strategyId := id.String()
-
-	jobService := m.(*Services).JobService
-	jobLock.Lock(jobName)
-	j, err := jobService.GetJob(jobName)
-	if err != nil {
-		jobLock.Unlock(jobName)
-		return err
-	}
-
-	property, err := j.GetProperty(propertyId)
-	if err != nil {
-		jobLock.Unlock(jobName)
-		return err
-	}
-	discardProperty := property.(*client.JobBuildDiscarderProperty)
-	discardProperty.Strategy.Item = strategy.toClientStrategy(strategyId)
-	err = jobService.UpdateJob(j)
-	jobLock.Unlock(jobName)
-	if err != nil {
-		return err
-	}
-
-	d.SetId(ResourceJobDiscarderPropertyStrategyId(jobName, propertyId, strategyId))
-	log.Println("[DEBUG] Creating build discarder propety strategy", d.Id())
-	return resourceJobPropertyStrategyRead(d, m, createJobBuildDiscarderPropertyStrategy)
-}
-
-func resourceJobPropertyStrategyRead(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
-	jobService := m.(*Services).JobService
-	jobName, propertyId, err := resourceJobPropertyParseId(d.Get("property").(string))
-	if err != nil {
-		return err
-	}
-	jobLock.RLock(jobName)
-	j, err := jobService.GetJob(jobName)
-	jobLock.RUnlock(jobName)
-	if err != nil {
-		log.Println("[WARN] No Job found:", err)
-		d.SetId("")
-		return nil
-	}
-
-	property, err := j.GetProperty(propertyId)
-	if err != nil {
-		log.Println("[WARN] No Job Property found:", err)
-		d.SetId("")
-		return nil
-	}
-	discardProperty := property.(*client.JobBuildDiscarderProperty)
-	if discardProperty.Strategy.Item == nil {
-		log.Println("[WARN] No Build Discarder Property Strategy found:", err)
-		d.SetId("")
-		return nil
-	}
-	strategy, err := createJobBuildDiscarderPropertyStrategy().fromClientStrategy(discardProperty.Strategy.Item)
-	if err != nil {
-		return err
-	}
-	log.Println("[INFO] Reading build discarder propety strategy", d.Id())
-	return strategy.setResourceData(d)
-}
-
-func resourceJobPropertyStrategyUpdate(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
-	jobName, propertyId, strategyId, err := resourceJobDiscarderPropertyStrategyParseId(d.Id())
-	if err != nil {
-		return err
-	}
-
-	strategy := createJobBuildDiscarderPropertyStrategy()
-	configRaw := d.Get("").(map[string]interface{})
-	if err := mapstructure.Decode(configRaw, &strategy); err != nil {
-		return err
-	}
-
-	jobService := m.(*Services).JobService
-	jobLock.Lock(jobName)
-	j, err := jobService.GetJob(jobName)
-	if err != nil {
-		jobLock.Unlock(jobName)
-		return err
-	}
-
-	property, err := j.GetProperty(propertyId)
-	if err != nil {
-		jobLock.Unlock(jobName)
-		return err
-	}
-	discardProperty := property.(*client.JobBuildDiscarderProperty)
-
-	discardProperty.Strategy.Item = strategy.toClientStrategy(strategyId)
-	err = jobService.UpdateJob(j)
-	jobLock.Unlock(jobName)
-	if err != nil {
-		return err
-	}
-
-	log.Println("[DEBUG] Updating build discarder propety strategy", d.Id())
-	return resourceJobPropertyStrategyRead(d, m, createJobBuildDiscarderPropertyStrategy)
-}
-
-func resourceJobPropertyStrategyDelete(d *schema.ResourceData, m interface{}, createJobBuildDiscarderPropertyStrategy func() jobBuildDiscarderPropertyStrategy) error {
-	jobName, propertyId, err := resourceJobPropertyParseId(d.Get("property").(string))
-	if err != nil {
-		return err
-	}
-	jobService := m.(*Services).JobService
-	jobLock.Lock(jobName)
-	j, err := jobService.GetJob(jobName)
-	if err != nil {
-		jobLock.Unlock(jobName)
-		log.Println("[WARN] Could not delete property:", err)
-		d.SetId("")
-		return nil
-	}
-
-	property, err := j.GetProperty(propertyId)
-	if err != nil {
-		jobLock.Unlock(jobName)
-		log.Println("[WARN] Could not delete property:", err)
-		d.SetId("")
-		return nil
-	}
-	discardProperty := property.(*client.JobBuildDiscarderProperty)
-	discardProperty.Strategy.Item = nil
-	err = jobService.UpdateJob(j)
-	jobLock.Unlock(jobName)
-	if err != nil {
-		return err
-	}
-
-	d.SetId("")
-	return nil
 }

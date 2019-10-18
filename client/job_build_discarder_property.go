@@ -8,7 +8,6 @@ func init() {
 
 type JobBuildDiscarderProperty struct {
 	XMLName xml.Name `xml:"jenkins.model.BuildDiscarderProperty"`
-	Id      string   `xml:"id,attr"`
 
 	Strategy *JobBuildDiscarderPropertyStrategyXml `xml:"strategy"`
 }
@@ -19,12 +18,8 @@ func NewJobBuildDiscarderProperty() *JobBuildDiscarderProperty {
 	}
 }
 
-func (p *JobBuildDiscarderProperty) GetId() string {
-	return p.Id
-}
-
-func (p *JobBuildDiscarderProperty) SetId(id string) {
-	p.Id = id
+func (p *JobBuildDiscarderProperty) GetType() JobPropertyType {
+	return BuildDiscarderPropertyType
 }
 
 func unmarshalBuildDiscarderProperty(d *xml.Decoder, start xml.StartElement) (JobProperty, error) {

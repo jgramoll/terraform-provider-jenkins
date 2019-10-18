@@ -1,19 +1,11 @@
 package client
 
 import (
-	"errors"
 	"strings"
 )
 
-// ErrJobPropertyNotFound job property not found
-var ErrJobPropertyNotFound = errors.New("Could not find job property")
-
-// ErrJobActionNotFound job action not found
-var ErrJobActionNotFound = errors.New("Could not find job action")
-
 // Job
 type Job struct {
-	Id               string
 	Plugin           string
 	Name             string
 	Disabled         bool
@@ -52,7 +44,6 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 	}
 
 	if config != nil {
-		job.Id = config.Id
 		job.Plugin = config.Plugin
 		job.Actions = config.Actions
 		job.Disabled = config.Disabled
@@ -63,68 +54,4 @@ func newJobFromConfigAndDetails(config *jobConfig, details *jobDetails) *Job {
 	}
 
 	return job
-}
-
-func (job *Job) GetProperty(propertyId string) (JobProperty, error) {
-	for _, property := range *job.Properties.Items {
-		if property.GetId() == propertyId {
-			return property, nil
-		}
-	}
-	return nil, ErrJobPropertyNotFound
-}
-
-func (job *Job) UpdateProperty(property JobProperty) error {
-	properties := *job.Properties.Items
-	propertyId := property.GetId()
-	for i, oldProp := range properties {
-		if oldProp.GetId() == propertyId {
-			properties[i] = property
-			return nil
-		}
-	}
-	return ErrJobPropertyNotFound
-}
-
-func (job *Job) DeleteProperty(propertyId string) error {
-	properties := *job.Properties.Items
-	for i, property := range properties {
-		if property.GetId() == propertyId {
-			*job.Properties.Items = append(properties[:i], properties[i+1:]...)
-			return nil
-		}
-	}
-	return ErrJobPropertyNotFound
-}
-
-func (job *Job) GetAction(actionId string) (JobAction, error) {
-	for _, action := range *job.Actions.Items {
-		if action.GetId() == actionId {
-			return action, nil
-		}
-	}
-	return nil, ErrJobActionNotFound
-}
-
-func (job *Job) UpdateAction(action JobAction) error {
-	actions := *job.Actions.Items
-	actionId := action.GetId()
-	for i, oldAction := range actions {
-		if oldAction.GetId() == actionId {
-			actions[i] = action
-			return nil
-		}
-	}
-	return ErrJobActionNotFound
-}
-
-func (job *Job) DeleteAction(actionId string) error {
-	actions := *job.Actions.Items
-	for i, action := range actions {
-		if action.GetId() == actionId {
-			*job.Actions.Items = append(actions[:i], actions[i+1:]...)
-			return nil
-		}
-	}
-	return ErrJobActionNotFound
 }

@@ -7,7 +7,6 @@ func init() {
 }
 
 type JobBuildDiscarderPropertyStrategyLogRotator struct {
-	Id    string `xml:"id,attr,omitempty"`
 	Class string `xml:"class,attr"`
 
 	DaysToKeep         int `xml:"daysToKeep"`
@@ -27,12 +26,8 @@ func NewJobBuildDiscarderPropertyStrategyLogRotator() *JobBuildDiscarderProperty
 	}
 }
 
-func (s *JobBuildDiscarderPropertyStrategyLogRotator) GetId() string {
-	return s.Id
-}
-
-func (s *JobBuildDiscarderPropertyStrategyLogRotator) SetId(id string) {
-	s.Id = id
+func (s *JobBuildDiscarderPropertyStrategyLogRotator) GetType() JobBuildDiscarderPropertyStrategyType {
+	return LogRotatorType
 }
 
 func unmarshalJobBuildDiscarderPropertyStrategyLogRotator(d *xml.Decoder, start xml.StartElement) (JobBuildDiscarderPropertyStrategy, error) {

@@ -8,7 +8,7 @@ import (
 func providerCode(jenkinsAddress string) string {
 	return strings.TrimSpace(fmt.Sprintf(`
 provider "jenkins" {
-	address = "%s"
+  address = "%s"
 }
-`, jenkinsAddress))
+`, jenkinsAddress)) + "\n"
 }

@@ -10,7 +10,6 @@ import (
 
 func main() {
 	jobName := flag.String("job", "", "name of job to import")
-	skipEnsure := flag.Bool("skipEnsure", false, "Do not ensure the xml structure")
 	outputDir := flag.String("output", "output", "Directory to output the terraform code")
 	flag.Parse()
 
@@ -20,7 +19,7 @@ func main() {
 		os.Exit(128)
 	}
 	jenkinsClient := initJenkinsClient()
-	err := NewJobImportService(jenkinsClient).Import(*jobName, *skipEnsure, *outputDir)
+	err := NewJobImportService(jenkinsClient).Import(*jobName, *outputDir)
 	if err != nil {
 		log.Println(err.Error())
 		os.Exit(1)

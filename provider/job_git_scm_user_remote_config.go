@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -23,21 +22,10 @@ func newJobGitScmUserRemoteConfigFromClient(clientConfig *client.GitUserRemoteCo
 	return config
 }
 
-func (config *jobGitScmUserRemoteConfig) toClientConfig(configId string) *client.GitUserRemoteConfig {
+func (config *jobGitScmUserRemoteConfig) toClientConfig() *client.GitUserRemoteConfig {
 	clientConfig := client.NewGitUserRemoteConfig()
-	clientConfig.Id = configId
 	clientConfig.Refspec = config.Refspec
 	clientConfig.Url = config.Url
 	clientConfig.CredentialsId = config.CredentialsId
 	return clientConfig
-}
-
-func (config *jobGitScmUserRemoteConfig) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("refspec", config.Refspec); err != nil {
-		return err
-	}
-	if err := d.Set("url", config.Url); err != nil {
-		return err
-	}
-	return d.Set("credentials_id", config.CredentialsId)
 }

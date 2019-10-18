@@ -4,11 +4,18 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
+func init() {
+	jobTriggerEventInitFunc[client.PluginPatchsetCreatedEventType] = func() jobGerritTriggerEvent {
+		return newJobGerritTriggerPatchsetCreatedEvent()
+	}
+}
+
 type jobGerritTriggerPatchsetCreatedEvent struct {
+	Type client.JobGerritTriggerOnEventType `mapstructure:"type"`
+
 	ExcludeDrafts        bool `mapstructure:"exclude_drafts"`
 	ExcludeTrivialRebase bool `mapstructure:"exclude_trivial_rebase"`
 	ExcludeNoCodeChange  bool `mapstructure:"exclude_no_code_change"`
@@ -17,10 +24,12 @@ type jobGerritTriggerPatchsetCreatedEvent struct {
 }
 
 func newJobGerritTriggerPatchsetCreatedEvent() *jobGerritTriggerPatchsetCreatedEvent {
-	return &jobGerritTriggerPatchsetCreatedEvent{}
+	return &jobGerritTriggerPatchsetCreatedEvent{
+		Type: client.PluginPatchsetCreatedEventType,
+	}
 }
 
-func (e *jobGerritTriggerPatchsetCreatedEvent) fromClientJobTriggerEvent(clientEventInterface client.JobGerritTriggerOnEvent) (jobGerritTriggerEvent, error) {
+func (e *jobGerritTriggerPatchsetCreatedEvent) fromClientTriggerEvent(clientEventInterface client.JobGerritTriggerOnEvent) (jobGerritTriggerEvent, error) {
 	clientEvent, ok := clientEventInterface.(*client.JobGerritTriggerPluginPatchsetCreatedEvent)
 	if !ok {
 		return nil, fmt.Errorf("Unexpected event type got %s, expected *client.JobGerritTriggerPluginPatchsetCreatedEvent",
@@ -35,29 +44,12 @@ func (e *jobGerritTriggerPatchsetCreatedEvent) fromClientJobTriggerEvent(clientE
 	return event, nil
 }
 
-func (event *jobGerritTriggerPatchsetCreatedEvent) toClientJobTriggerEvent(eventId string) (client.JobGerritTriggerOnEvent, error) {
+func (event *jobGerritTriggerPatchsetCreatedEvent) toClientTriggerEvent() (client.JobGerritTriggerOnEvent, error) {
 	clientEvent := client.NewJobGerritTriggerPluginPatchsetCreatedEvent()
-	clientEvent.Id = eventId
 	clientEvent.ExcludeDrafts = event.ExcludeDrafts
 	clientEvent.ExcludeTrivialRebase = event.ExcludeTrivialRebase
 	clientEvent.ExcludeNoCodeChange = event.ExcludeNoCodeChange
 	clientEvent.ExcludePrivateState = event.ExcludePrivateState
 	clientEvent.ExcludeWipState = event.ExcludeWipState
 	return clientEvent, nil
-}
-
-func (event *jobGerritTriggerPatchsetCreatedEvent) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("exclude_drafts", event.ExcludeDrafts); err != nil {
-		return err
-	}
-	if err := d.Set("exclude_trivial_rebase", event.ExcludeTrivialRebase); err != nil {
-		return err
-	}
-	if err := d.Set("exclude_no_code_change", event.ExcludeNoCodeChange); err != nil {
-		return err
-	}
-	if err := d.Set("exclude_private_state", event.ExcludePrivateState); err != nil {
-		return err
-	}
-	return d.Set("exclude_wip_state", event.ExcludeWipState)
 }

@@ -4,26 +4,33 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
+func init() {
+	jobPropertyInitFunc[client.JiraProjectPropertyType] = func() jobProperty {
+		return newJobJiraProjectProperty()
+	}
+}
+
 type jobJiraProjectProperty struct {
-	Plugin string `mapstructure:"plugin"`
+	Type   client.JobPropertyType `mapstructure:"type"`
+	Plugin string                 `mapstructure:"plugin"`
 }
 
 func newJobJiraProjectProperty() *jobJiraProjectProperty {
-	return &jobJiraProjectProperty{}
+	return &jobJiraProjectProperty{
+		Type: client.JiraProjectPropertyType,
+	}
 }
 
-func (p *jobJiraProjectProperty) toClientProperty(id string) client.JobProperty {
+func (p *jobJiraProjectProperty) toClientProperty() (client.JobProperty, error) {
 	clientProperty := client.NewJobJiraProjectProperty()
-	clientProperty.Id = id
 	clientProperty.Plugin = p.Plugin
-	return clientProperty
+	return clientProperty, nil
 }
 
-func (p *jobJiraProjectProperty) fromClientJobProperty(clientPropertyInterface client.JobProperty) (jobProperty, error) {
+func (p *jobJiraProjectProperty) fromClientProperty(clientPropertyInterface client.JobProperty) (jobProperty, error) {
 	clientProperty, ok := clientPropertyInterface.(*client.JobJiraProjectProperty)
 	if !ok {
 		return nil, fmt.Errorf("Property is not of expected type, expected *client.JobJiraProjectProperty, actually %s",
@@ -32,8 +39,4 @@ func (p *jobJiraProjectProperty) fromClientJobProperty(clientPropertyInterface c
 	property := newJobJiraProjectProperty()
 	property.Plugin = clientProperty.Plugin
 	return property, nil
-}
-
-func (p *jobJiraProjectProperty) setResourceData(d *schema.ResourceData) error {
-	return d.Set("plugin", p.Plugin)
 }

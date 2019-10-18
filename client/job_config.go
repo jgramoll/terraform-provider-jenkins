@@ -6,7 +6,6 @@ import (
 
 type jobConfig struct {
 	XMLName xml.Name `xml:"flow-definition"`
-	Id      string   `xml:"id,attr,omitempty"`
 	Plugin  string   `xml:"plugin,attr,omitempty"`
 
 	Actions          *JobActions       `xml:"actions"`
@@ -20,7 +19,6 @@ type jobConfig struct {
 
 func JobConfigFromJob(job *Job) *jobConfig {
 	return &jobConfig{
-		Id:               job.Id,
 		Plugin:           job.Plugin,
 		Actions:          job.Actions,
 		Description:      job.Description,

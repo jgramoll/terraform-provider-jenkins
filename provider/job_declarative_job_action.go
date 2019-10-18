@@ -4,16 +4,24 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
+func init() {
+	jobActionInitFunc[client.DeclarativeJobActionType] = func() jobAction {
+		return newJobDeclarativeJobAction()
+	}
+}
+
 type jobDeclarativeJobAction struct {
-	Plugin string `mapstructure:"plugin"`
+	Type   client.JobActionType `mapstructure:"type"`
+	Plugin string               `mapstructure:"plugin"`
 }
 
 func newJobDeclarativeJobAction() *jobDeclarativeJobAction {
-	return &jobDeclarativeJobAction{}
+	return &jobDeclarativeJobAction{
+		Type: client.DeclarativeJobActionType,
+	}
 }
 
 func (a *jobDeclarativeJobAction) fromClientAction(clientActionInterface client.JobAction) (jobAction, error) {
@@ -27,13 +35,8 @@ func (a *jobDeclarativeJobAction) fromClientAction(clientActionInterface client.
 	return action, nil
 }
 
-func (a *jobDeclarativeJobAction) toClientAction(id string) (client.JobAction, error) {
+func (a *jobDeclarativeJobAction) toClientAction() (client.JobAction, error) {
 	clientAction := client.NewJobDeclarativeJobAction()
-	clientAction.Id = id
 	clientAction.Plugin = a.Plugin
 	return clientAction, nil
-}
-
-func (a *jobDeclarativeJobAction) setResourceData(d *schema.ResourceData) error {
-	return d.Set("plugin", a.Plugin)
 }

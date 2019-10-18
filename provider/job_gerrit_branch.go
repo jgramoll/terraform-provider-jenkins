@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
@@ -21,9 +20,8 @@ func newJobGerritBranchFromClient(clientBranch *client.JobGerritTriggerBranch) *
 	return branch
 }
 
-func (branch *jobGerritBranch) toClientBranch(branchId string) (*client.JobGerritTriggerBranch, error) {
+func (branch *jobGerritBranch) toClientBranch() (*client.JobGerritTriggerBranch, error) {
 	clientBranch := client.NewJobGerritTriggerBranch()
-	clientBranch.Id = branchId
 	compareType, err := client.ParseCompareType(branch.CompareType)
 	if err != nil {
 		return nil, err
@@ -31,11 +29,4 @@ func (branch *jobGerritBranch) toClientBranch(branchId string) (*client.JobGerri
 	clientBranch.CompareType = compareType
 	clientBranch.Pattern = branch.Pattern
 	return clientBranch, nil
-}
-
-func (branch *jobGerritBranch) setResourceData(d *schema.ResourceData) error {
-	if err := d.Set("compare_type", branch.CompareType); err != nil {
-		return err
-	}
-	return d.Set("pattern", branch.Pattern)
 }

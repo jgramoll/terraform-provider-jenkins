@@ -2,21 +2,17 @@ package provider
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
 func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 	var jobRef client.Job
-	var configs []*client.GitUserRemoteConfig
 	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	jobResourceName := "jenkins_job.main"
-	configResourceName := "jenkins_job_git_scm_user_remote_config.main"
 	refspec := "my-refspec"
 	newRefspec := "new-my-refspec"
 
@@ -27,50 +23,19 @@ func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 			{
 				Config: testAccJobGitScmUserRemoteConfigConfigBasic(jobName, refspec),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(configResourceName, "refspec", refspec),
-					resource.TestCheckResourceAttr(configResourceName, "url", "my-test-url"),
-					resource.TestCheckResourceAttr(configResourceName, "credentials_id", "my-test-creds"),
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGitScmUserRemoteConfigs(&jobRef, []string{
-						configResourceName,
-					}, &configs),
+					resource.TestCheckResourceAttr(jobResourceName, "definition.0.scm.0.user_remote_config.0.refspec", refspec),
+					resource.TestCheckResourceAttr(jobResourceName, "definition.0.scm.0.user_remote_config.0.url", "my-test-url"),
+					resource.TestCheckResourceAttr(jobResourceName, "definition.0.scm.0.user_remote_config.0.credentials_id", "my-test-creds"),
 				),
 			},
 			{
 				Config: testAccJobGitScmUserRemoteConfigConfigBasic(jobName, newRefspec),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(configResourceName, "refspec", newRefspec),
-					resource.TestCheckResourceAttr(configResourceName, "url", "my-test-url"),
-					resource.TestCheckResourceAttr(configResourceName, "credentials_id", "my-test-creds"),
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGitScmUserRemoteConfigs(&jobRef, []string{
-						configResourceName,
-					}, &configs),
-				),
-			},
-			{
-				ResourceName:  configResourceName,
-				ImportStateId: "invalid",
-				ImportState:   true,
-				ExpectError:   regexp.MustCompile("Invalid git scm user remote config id"),
-			},
-			{
-				ResourceName: configResourceName,
-				ImportState:  true,
-				ImportStateIdFunc: func(*terraform.State) (string, error) {
-					if len(configs) == 0 {
-						return "", fmt.Errorf("no configs to import")
-					}
-					definitionId := jobRef.Definition.GetId()
-					return ResourceJobGitScmUserRemoteConfigId(jobName, definitionId, configs[0].Id), nil
-				},
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccJobGitScmConfigBasic(jobName),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGitScmUserRemoteConfigs(&jobRef, []string{}, &configs),
+					resource.TestCheckResourceAttr(jobResourceName, "definition.0.scm.0.user_remote_config.0.refspec", newRefspec),
+					resource.TestCheckResourceAttr(jobResourceName, "definition.0.scm.0.user_remote_config.0.url", "my-test-url"),
+					resource.TestCheckResourceAttr(jobResourceName, "definition.0.scm.0.user_remote_config.0.credentials_id", "my-test-creds"),
 				),
 			},
 		},
@@ -78,73 +43,27 @@ func TestAccJobGitScmUserRemoteConfigBasic(t *testing.T) {
 }
 
 func testAccJobGitScmUserRemoteConfigConfigBasic(jobName string, refspec string) string {
-	return testAccJobGitScmConfigBasic(jobName) + fmt.Sprintf(`
-resource "jenkins_job_git_scm_user_remote_config" "main" {
-	scm = "${jenkins_job_git_scm.main.id}"
+	return fmt.Sprintf(`
+resource "jenkins_job" "main" {
+	name   = "%s"
+	plugin = "workflow-job@2.33"
 
-  refspec        = "%s"
-  url            = "my-test-url"
-  credentials_id = "my-test-creds"
-}`, refspec)
-}
+	definition {
+		type   = "CpsScmFlowDefinition"
+		plugin = "workflow-cps@2.70"
 
-func testAccCheckJobGitScmUserRemoteConfigs(
-	jobRef *client.Job,
-	expectedResourceNames []string,
-	returnConfigs *[]*client.GitUserRemoteConfig,
-) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		definition := jobRef.Definition.(*client.CpsScmFlowDefinition)
+		scm {
+			type   = "GitSCM"
+			plugin = "git@3.10.0"
 
-		if len(expectedResourceNames) == 0 && definition.SCM.UserRemoteConfigs.Items == nil {
-			return nil
-		}
-		if definition.SCM.UserRemoteConfigs.Items == nil {
-			return fmt.Errorf("Expected %v git scm user remote configs, found %v",
-				len(expectedResourceNames), 0)
-		}
-		if len(*definition.SCM.UserRemoteConfigs.Items) != len(expectedResourceNames) {
-			return fmt.Errorf("Expected %v git scm user remote configs, found %v",
-				len(expectedResourceNames), len(*definition.SCM.UserRemoteConfigs.Items))
-		}
-		for _, resourceName := range expectedResourceNames {
-			resource, ok := s.RootModule().Resources[resourceName]
-			if !ok {
-				return fmt.Errorf("Job Git Scm User Remote Config Resource not found: %s", resourceName)
+			config_version = "2"
+
+			user_remote_config {
+				refspec        = "%s"
+				url            = "my-test-url"
+				credentials_id = "my-test-creds"
 			}
-
-			_, _, configId, err := resourceJobGitScmUserRemoteConfigParseId(resource.Primary.Attributes["id"])
-			config, err := definition.SCM.GetUserRemoteConfig(configId)
-			if err != nil {
-				return err
-			}
-			err = ensureJobGitScmUserRemoteConfig(config, resource)
-			if err != nil {
-				return err
-			}
-			*returnConfigs = append(*returnConfigs, config)
 		}
-
-		return nil
 	}
-}
-
-func ensureJobGitScmUserRemoteConfig(
-	config *client.GitUserRemoteConfig,
-	resource *terraform.ResourceState,
-) error {
-	if config.Refspec != resource.Primary.Attributes["refspec"] {
-		return fmt.Errorf("expected refspec %s, got %s",
-			resource.Primary.Attributes["refspec"], config.Refspec)
-	}
-	if config.Url != resource.Primary.Attributes["url"] {
-		return fmt.Errorf("expected url %s, got %s",
-			resource.Primary.Attributes["url"], config.Url)
-	}
-	if config.CredentialsId != resource.Primary.Attributes["credentials_id"] {
-		return fmt.Errorf("expected credentials_id %s, got %s",
-			resource.Primary.Attributes["credentials_id"], config.CredentialsId)
-	}
-
-	return nil
+}`, jobName, refspec)
 }

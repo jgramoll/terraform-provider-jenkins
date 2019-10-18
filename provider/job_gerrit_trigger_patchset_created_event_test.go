@@ -2,21 +2,17 @@ package provider
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform/helper/acctest"
 	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
 func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 	var jobRef client.Job
-	var events []client.JobGerritTriggerOnEvent
 	jobName := fmt.Sprintf("%s/tf-acc-test-%s", jenkinsFolder, acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum))
 	jobResourceName := "jenkins_job.main"
-	eventResourceName := "jenkins_job_gerrit_trigger_patchset_created_event.main"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
@@ -25,47 +21,13 @@ func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 			{
 				Config: testAccJobGerritTriggerPatchsetCreatedEventConfigBasic(jobName, "true"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(eventResourceName, "exclude_drafts", "true"),
 					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGerritTriggerEvents(&jobRef, []string{
-						eventResourceName,
-					}, &events, ensureJobGerritTriggerPatchsetCreatedEvent),
-				),
-			},
-			{
-				Config: testAccJobGerritTriggerPatchsetCreatedEventConfigBasic(jobName, "false"),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr(eventResourceName, "exclude_drafts", "false"),
-					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGerritTriggerEvents(&jobRef, []string{
-						eventResourceName,
-					}, &events, ensureJobGerritTriggerPatchsetCreatedEvent),
-				),
-			},
-			{
-				ResourceName:  eventResourceName,
-				ImportStateId: "invalid",
-				ImportState:   true,
-				ExpectError:   regexp.MustCompile("Invalid trigger event id"),
-			},
-			{
-				ResourceName: eventResourceName,
-				ImportState:  true,
-				ImportStateIdFunc: func(*terraform.State) (string, error) {
-					if len(events) == 0 {
-						return "", fmt.Errorf("no events to import")
-					}
-					property := (*jobRef.Properties.Items)[0].(*client.JobPipelineTriggersProperty)
-					trigger := (*property.Triggers.Items)[0].(*client.JobGerritTrigger)
-					return ResourceJobGerritTriggerEventId(jobName, property.Id, trigger.Id, events[0].GetId()), nil
-				},
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccJobGerritTriggerConfigBasic(jobName),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					testAccCheckJobExists(jobResourceName, &jobRef),
-					testAccCheckJobGerritTriggerEvents(&jobRef, []string{}, &events, ensureJobGerritTriggerPatchsetCreatedEvent),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.trigger_on_event.0.type", "PluginPatchsetCreatedEvent"),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.trigger_on_event.0.exclude_drafts", "false"),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.trigger_on_event.0.exclude_trivial_rebase", "false"),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.trigger_on_event.0.exclude_no_code_change", "false"),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.trigger_on_event.0.exclude_private_state", "false"),
+					resource.TestCheckResourceAttr(jobResourceName, "property.0.trigger.0.trigger_on_event.0.exclude_wip_state", "false"),
 				),
 			},
 		},
@@ -73,43 +35,30 @@ func TestAccJobGerritTriggerPatchsetCreatedEventBasic(t *testing.T) {
 }
 
 func testAccJobGerritTriggerPatchsetCreatedEventConfigBasic(jobName string, excludeDrafts string) string {
-	return testAccJobGerritTriggerConfigBasic(jobName) + fmt.Sprintf(`
-resource "jenkins_job_gerrit_trigger_patchset_created_event" "main" {
-	trigger = "${jenkins_job_gerrit_trigger.trigger_1.id}"
-	
-	exclude_drafts = %s
-}`, excludeDrafts)
-}
+	return fmt.Sprintf(`
+resource "jenkins_job" "main" {
+	name     = "%s"
+	plugin   = "workflow-job@2.33"
 
-func ensureJobGerritTriggerPatchsetCreatedEvent(
-	clientEventInterface client.JobGerritTriggerOnEvent,
-	rs *terraform.ResourceState,
-) error {
-	eventInterface, err := newJobGerritTriggerPatchsetCreatedEvent().fromClientJobTriggerEvent(clientEventInterface)
-	if err != nil {
-		return err
-	}
-	event := eventInterface.(*jobGerritTriggerPatchsetCreatedEvent)
-	err = testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeDrafts", rs.Primary.Attributes["exclude_drafts"], event.ExcludeDrafts)
-	if err != nil {
-		return err
-	}
-	err = testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeTrivialRebase", rs.Primary.Attributes["exclude_trivial_rebase"], event.ExcludeTrivialRebase)
-	if err != nil {
-		return err
-	}
-	err = testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeNoCodeChange", rs.Primary.Attributes["exclude_no_code_change"], event.ExcludeNoCodeChange)
-	if err != nil {
-		return err
-	}
-	err = testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludePrivateState", rs.Primary.Attributes["exclude_private_state"], event.ExcludePrivateState)
-	if err != nil {
-		return err
-	}
-	err = testCompareResourceBool("JobGerritTriggerPluginPatchsetCreatedEvent", "ExcludeWipState", rs.Primary.Attributes["exclude_wip_state"], event.ExcludeWipState)
-	if err != nil {
-		return err
-	}
+	property {
+		type = "PipelineTriggersJobProperty"
 
-	return nil
+		trigger {
+			type   = "GerritTrigger"
+			plugin = "gerrit-trigger@2.29.0"
+
+			skip_vote {}
+
+			trigger_on_event {
+				type = "PluginPatchsetCreatedEvent"
+
+				exclude_drafts         = false
+				exclude_trivial_rebase = false
+				exclude_no_code_change = false
+				exclude_private_state  = false
+				exclude_wip_state      = false
+			}
+		}
+	}
+}`, jobName)
 }

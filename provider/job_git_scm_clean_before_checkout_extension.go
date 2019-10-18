@@ -4,16 +4,23 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/jgramoll/terraform-provider-jenkins/client"
 )
 
+func init() {
+	jobGitScmExtensionInitFunc[client.CleanBeforeCheckoutType] = func() jobGitScmExtension {
+		return newJobGitScmCleanBeforeCheckoutExtension()
+	}
+}
+
 type jobGitScmCleanBeforeCheckoutExtension struct {
-	Scm string `mapstructure:"scm"`
+	Type client.GitScmExtensionType `mapstructure:"type"`
 }
 
 func newJobGitScmCleanBeforeCheckoutExtension() *jobGitScmCleanBeforeCheckoutExtension {
-	return &jobGitScmCleanBeforeCheckoutExtension{}
+	return &jobGitScmCleanBeforeCheckoutExtension{
+		Type: client.CleanBeforeCheckoutType,
+	}
 }
 
 func (branch *jobGitScmCleanBeforeCheckoutExtension) fromClientExtension(clientExtensionInterface client.GitScmExtension) (jobGitScmExtension, error) {
@@ -25,12 +32,7 @@ func (branch *jobGitScmCleanBeforeCheckoutExtension) fromClientExtension(clientE
 	return newJobGitScmCleanBeforeCheckoutExtension(), nil
 }
 
-func (branch *jobGitScmCleanBeforeCheckoutExtension) toClientExtension(extensionId string) (client.GitScmExtension, error) {
+func (branch *jobGitScmCleanBeforeCheckoutExtension) toClientExtension() (client.GitScmExtension, error) {
 	clientExtension := client.NewGitScmCleanBeforeCheckoutExtension()
-	clientExtension.Id = extensionId
 	return clientExtension, nil
-}
-
-func (config *jobGitScmCleanBeforeCheckoutExtension) setResourceData(d *schema.ResourceData) error {
-	return nil
 }

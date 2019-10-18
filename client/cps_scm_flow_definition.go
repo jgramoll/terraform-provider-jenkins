@@ -8,7 +8,6 @@ func init() {
 
 type CpsScmFlowDefinition struct {
 	Class  string `xml:"class,attr"`
-	Id     string `xml:"id,attr,omitempty"`
 	Plugin string `xml:"plugin,attr,omitempty"`
 
 	SCM         *GitSCM `xml:"scm"`
@@ -22,12 +21,8 @@ func NewCpsScmFlowDefinition() *CpsScmFlowDefinition {
 	}
 }
 
-func (d *CpsScmFlowDefinition) GetId() string {
-	return d.Id
-}
-
-func (d *CpsScmFlowDefinition) SetId(id string) {
-	d.Id = id
+func (CpsScmFlowDefinition) GetType() JobDefinitionType {
+	return CpsScmFlowDefinitionType
 }
 
 func unmarshalCpsScmFlowDefinition(d *xml.Decoder, start xml.StartElement) (JobDefinition, error) {

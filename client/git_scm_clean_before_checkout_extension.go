@@ -8,19 +8,14 @@ func init() {
 
 type GitScmCleanBeforeCheckoutExtension struct {
 	XMLName xml.Name `xml:"hudson.plugins.git.extensions.impl.CleanBeforeCheckout"`
-	Id      string   `xml:"id,attr,omitempty"`
 }
 
 func NewGitScmCleanBeforeCheckoutExtension() *GitScmCleanBeforeCheckoutExtension {
 	return &GitScmCleanBeforeCheckoutExtension{}
 }
 
-func (e *GitScmCleanBeforeCheckoutExtension) GetId() string {
-	return e.Id
-}
-
-func (e *GitScmCleanBeforeCheckoutExtension) SetId(id string) {
-	e.Id = id
+func (e *GitScmCleanBeforeCheckoutExtension) GetType() GitScmExtensionType {
+	return CleanBeforeCheckoutType
 }
 
 func unmarshalScmExtension(d *xml.Decoder, start xml.StartElement) (GitScmExtension, error) {

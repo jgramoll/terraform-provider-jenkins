@@ -8,7 +8,6 @@ func init() {
 
 type JobGerritTriggerPluginPatchsetCreatedEvent struct {
 	XMLName xml.Name `xml:"com.sonyericsson.hudson.plugins.gerrit.trigger.hudsontrigger.events.PluginPatchsetCreatedEvent"`
-	Id      string   `xml:"id,attr,omitempty"`
 
 	ExcludeDrafts        bool `xml:"excludeDrafts"`
 	ExcludeTrivialRebase bool `xml:"excludeTrivialRebase"`
@@ -27,12 +26,8 @@ func NewJobGerritTriggerPluginPatchsetCreatedEvent() *JobGerritTriggerPluginPatc
 	}
 }
 
-func (event *JobGerritTriggerPluginPatchsetCreatedEvent) GetId() string {
-	return event.Id
-}
-
-func (e *JobGerritTriggerPluginPatchsetCreatedEvent) SetId(id string) {
-	e.Id = id
+func (event *JobGerritTriggerPluginPatchsetCreatedEvent) GetType() JobGerritTriggerOnEventType {
+	return PluginPatchsetCreatedEventType
 }
 
 func unmarshalJobGerritTriggerPluginPatchsetCreatedEvent(d *xml.Decoder, start xml.StartElement) (JobGerritTriggerOnEvent, error) {

@@ -7,7 +7,6 @@ func init() {
 }
 
 type JobParameterDefinitionChoice struct {
-	Id      string   `xml:"id,attr,omitempty"`
 	XMLName xml.Name `xml:"hudson.model.ChoiceParameterDefinition"`
 
 	Name        string `xml:"name"`
@@ -22,12 +21,8 @@ func NewJobParameterDefinitionChoice() *JobParameterDefinitionChoice {
 	}
 }
 
-func (d *JobParameterDefinitionChoice) GetId() string {
-	return d.Id
-}
-
-func (d *JobParameterDefinitionChoice) SetId(id string) {
-	d.Id = id
+func (d *JobParameterDefinitionChoice) GetType() JobParameterDefinitionType {
+	return ChoiceParameterDefinitionType
 }
 
 func unmarshalJobParameterDefinitionChoice(d *xml.Decoder, start xml.StartElement) (JobParameterDefinition, error) {

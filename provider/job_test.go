@@ -50,7 +50,7 @@ func TestAccJobBasic(t *testing.T) {
 func testAccJobConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "jenkins_job" "main" {
-  name   = "%s"
+	name   = "%s"
 }`, name)
 }
 

@@ -4,24 +4,20 @@ import (
 	"fmt"
 
 	"github.com/jgramoll/terraform-provider-jenkins/client"
-	"github.com/jgramoll/terraform-provider-jenkins/provider"
 )
 
 func init() {
 	jobPropertyCodeFuncs["*client.JobDatadogJobProperty"] = jobDatadogJobPropertyCode
-	jobPropertyImportScriptFuncs["*client.JobDatadogJobProperty"] = jobDatadogJobPropertyImportScript
 }
 
-func jobDatadogJobPropertyCode(propertyIndex string, property client.JobProperty) string {
+func jobDatadogJobPropertyCode(propertyInterface client.JobProperty) string {
+	property := propertyInterface.(*client.JobDatadogJobProperty)
 	return fmt.Sprintf(`
-resource "jenkins_job_datadog_job_property" "property_%v" {
-	job = "${jenkins_job.main.name}"
-}
-`, propertyIndex)
-}
+  property {
+    type = "DatadogJobProperty"
+    plugin="%s"
 
-func jobDatadogJobPropertyImportScript(propertyIndex string, jobName string, p client.JobProperty) string {
-	return fmt.Sprintf(`
-terraform import jenkins_job_datadog_job_property.property_%v "%v"
-`, propertyIndex, provider.ResourceJobPropertyId(jobName, p.GetId()))
+    emit_on_checkout = %v
+  }
+`, property.Plugin, property.EmitOnCheckout)
 }
